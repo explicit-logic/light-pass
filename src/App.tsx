@@ -1,11 +1,10 @@
-import "./App.css";
+import './App.css';
 
-import Connect from "./components/organisms/Connect";
+import Connect from './components/organisms/Connect';
 
 function App() {
-
   return (
-    <main className="container">
+    <main className='container'>
       <Connect />
     </main>
   );

@@ -1,6 +1,7 @@
-// Modules
-import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+// Modules
+// import { appWindow } from '@tauri-apps/api/window';
+import { useEffect, useState } from 'react';
 
 // Helpers
 import { PeerConnection } from '../../helpers/peer';
@@ -16,9 +17,12 @@ function Connect() {
     const connect = async () => {
       setLoading(true);
       const id = await PeerConnection.startPeerSession();
+
+      // await appWindow.maximize();
+
       PeerConnection.onIncomingConnection((sender) => {
         const senderId = sender.peer;
-        console.info("Student connected:", senderId);
+        console.info('Student connected:', senderId);
 
         void PeerConnection.sendConnection(senderId, {
           type: 'welcome',
@@ -26,10 +30,10 @@ function Connect() {
         });
 
         PeerConnection.onConnectionDisconnected(senderId, () => {
-          console.info("Student disconnected:", senderId);
+          console.info('Student disconnected:', senderId);
         });
         PeerConnection.onConnectionReceiveData(senderId, (data) => {
-          console.info("Data from student ", data, senderId);
+          console.info('Data from student ', data, senderId);
         });
       });
 
@@ -42,36 +46,31 @@ function Connect() {
   const sendBroadcast = async () => {
     await PeerConnection.sendBroadcast({
       type: 'broadcast',
-      message: 'Hi from teacher: ' + new Date().getTime(),
+      message: `Hi from teacher: ${new Date().getTime()}`,
     });
-  }
+  };
 
   if (loading) {
     return (
       <div>
-        <div>
-          Loading...
-        </div>
+        <div>Loading...</div>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{
-        marginBottom: '20px',
-      }}>
-        <QRCodeSVG
-          size={350}
-          value={connectionUrl}
-        />
+      <div
+        style={{
+          marginBottom: '20px',
+        }}
+      >
+        <QRCodeSVG size={350} value={connectionUrl} />
       </div>
-      <input
-        disabled
-        placeholder=""
-        value={connectionUrl}
-      />
-      <button type="button" onClick={sendBroadcast}>Broadcast</button>
+      <input disabled placeholder='' value={connectionUrl} />
+      <button type='button' onClick={sendBroadcast}>
+        Broadcast
+      </button>
     </div>
   );
 }

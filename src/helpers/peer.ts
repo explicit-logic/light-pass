@@ -1,4 +1,4 @@
-import Peer, { DataConnection } from 'peerjs';
+import Peer, { type DataConnection } from 'peerjs';
 
 let peer: Peer | undefined;
 const connectionMap: Map<string, DataConnection> = new Map<string, DataConnection>();
@@ -10,73 +10,78 @@ export interface Data {
 
 export const PeerConnection = {
   getPeer: () => peer,
-  startPeerSession: () => new Promise<string>((resolve, reject) => {
-    if (peer && peer.id) {
-      return resolve(peer.id);
-    }
-    try {
-      peer = new Peer();
-      peer.on('open', (id) => {
-        console.log('My ID: ' + id);
-        resolve(id);
-      }).on('error', (err) => {
+  startPeerSession: () =>
+    new Promise<string>((resolve, reject) => {
+      if (peer?.id) {
+        return resolve(peer.id);
+      }
+      try {
+        peer = new Peer();
+        peer
+          .on('open', (id) => {
+            console.log(`My ID: ${id}`);
+            resolve(id);
+          })
+          .on('error', (err) => {
+            console.log(err);
+            reject(err);
+          });
+      } catch (err) {
         console.log(err);
         reject(err);
-      });
-    } catch (err) {
-      console.log(err);
-      reject(err);
-    }
-  }),
-  closePeerSession: () => new Promise<void>((resolve, reject) => {
-    try {
-      if (peer) {
-        peer.destroy();
-        peer = undefined;
       }
-      resolve();
-    } catch (err) {
-      console.log(err);
-      reject(err);
-    }
-  }),
+    }),
+  closePeerSession: () =>
+    new Promise<void>((resolve, reject) => {
+      try {
+        if (peer) {
+          peer.destroy();
+          peer = undefined;
+        }
+        resolve();
+      } catch (err) {
+        console.log(err);
+        reject(err);
+      }
+    }),
   onIncomingConnection: (callback: (conn: DataConnection) => void) => {
-    peer?.on('connection', function (conn) {
-      console.log('Incoming connection: ' + conn.peer);
+    peer?.on('connection', (conn) => {
+      console.log(`Incoming connection: ${conn.peer}`);
       connectionMap.set(conn.peer, conn);
       callback(conn);
     });
   },
   onConnectionDisconnected: (id: string, callback: () => void) => {
     if (!peer) {
-      throw new Error('Peer doesn\'t start yet');
+      throw new Error("Peer doesn't start yet");
     }
     if (!connectionMap.has(id)) {
-      throw new Error('Connection didn\'t exist');
+      throw new Error("Connection didn't exist");
     }
     const conn = connectionMap.get(id);
     if (conn) {
-      conn.on('close', function () {
-        console.log('Connection closed: ' + id);
+      conn.on('close', () => {
+        console.log(`Connection closed: ${id}`);
         connectionMap.delete(id);
         callback();
       });
     }
   },
-  sendConnection: (id: string, data: Data): Promise<void> => new Promise((resolve, reject) => {
-    if (!connectionMap.has(id)) {
-      reject(new Error('Connection didn\'t exist'));
-    }
-    try {
-      const conn = connectionMap.get(id);
-      if (conn) {
-        void conn.send(data);
+  sendConnection: (id: string, data: Data): Promise<void> =>
+    new Promise((resolve, reject) => {
+      if (!connectionMap.has(id)) {
+        reject(new Error("Connection didn't exist"));
       }
-    } catch (err) {
-      reject(err);
-    }
-    resolve();
-  }),
+      try {
+        const conn = connectionMap.get(id);
+        if (conn) {
+          void conn.send(data);
+        }
+      } catch (err) {
+        reject(err);
+      }
+      resolve();
+    }),
   sendBroadcast: async (data: Data) => {
     if (!connectionMap.size) {
       console.warn('No connections!');
@@ -89,19 +94,19 @@ export const PeerConnection = {
   },
   onConnectionReceiveData: (id: string, callback: (f: Data) => void) => {
     if (!peer) {
-      throw new Error('Peer doesn\'t start yet');
+      throw new Error("Peer doesn't start yet");
     }
     if (!connectionMap.has(id)) {
-      throw new Error('Connection didn\'t exist');
+      throw new Error("Connection didn't exist");
     }
     const conn = connectionMap.get(id);
     if (conn) {
-      conn.on('data', function (receivedData) {
-        console.log('Receiving data from ' + id);
+      conn.on('data', (receivedData) => {
+        console.log(`Receiving data from ${id}`);
         console.log(receivedData);
         const data = receivedData as Data;
         callback(data);
       });
     }
-  }
+  },
 };
