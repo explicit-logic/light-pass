@@ -1,53 +1,70 @@
-import { QRCodeSVG } from 'qrcode.react';
 // Modules
+import { QRCodeSVG } from 'qrcode.react';
+
 // import { appWindow } from '@tauri-apps/api/window';
 import { useEffect, useState } from 'react';
 
+// Constants
+import { TYPES } from '../../constants/message';
+
 // Helpers
-import { PeerConnection } from '../../helpers/peer';
+import { getLocaleLang } from '../../helpers/getLocaleLang';
+
+// Lib
+import { connect } from '../../lib/peer/connect';
+import { sendToAll } from '../../lib/peer/sendToAll';
+
+// Store
+import { getSender } from '../../lib/peer/store';
 
 const url = 'https://explicit-logic.github.io/quiz-web-3/en';
 
 function Connect() {
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [receiverId, setReceiverId] = useState<string>();
   const connectionUrl = `${url}?r=${receiverId}`;
 
   useEffect(() => {
-    const connect = async () => {
+    const establishConnection = async () => {
       setLoading(true);
-      const id = await PeerConnection.startPeerSession();
 
-      // await appWindow.maximize();
+      const locale = await getLocaleLang();
 
-      PeerConnection.onIncomingConnection((sender) => {
-        const senderId = sender.peer;
-        console.info('Student connected:', senderId);
-
-        void PeerConnection.sendConnection(senderId, {
-          type: 'welcome',
-          message: 'Teacher A',
-        });
-
-        PeerConnection.onConnectionDisconnected(senderId, () => {
-          console.info('Student disconnected:', senderId);
-        });
-        PeerConnection.onConnectionReceiveData(senderId, (data) => {
-          console.info('Data from student ', data, senderId);
-        });
-      });
-
-      setReceiverId(id);
+      const peer = await connect(
+        { locale },
+        {
+          onMessage: (clientId, message) => {
+            console.info('Message', clientId, message);
+          },
+          onClose: (clientId) => {
+            console.info('Student disconnected:', clientId);
+          },
+          onError: (clientId, error) => {
+            console.error(clientId, error);
+          },
+        },
+      );
+      setReceiverId(peer.id);
       setLoading(false);
     };
-    connect();
+    establishConnection();
+
+    return () => {
+      const peer = getSender();
+      if (peer) {
+        peer.disconnect();
+        peer.destroy();
+      }
+    };
   }, []);
 
   const sendBroadcast = async () => {
-    await PeerConnection.sendBroadcast({
-      type: 'broadcast',
-      message: `Hi from teacher: ${new Date().getTime()}`,
-    });
+    if (!receiverId) {
+      return;
+    }
+
+    await sendToAll(TYPES.message, { text: message });
   };
 
   if (loading) {
@@ -68,6 +85,7 @@ function Connect() {
         <QRCodeSVG size={350} value={connectionUrl} />
       </div>
       <input disabled placeholder='' value={connectionUrl} />
+      <input onChange={(e) => setMessage(e.currentTarget.value)} placeholder='' />
       <button type='button' onClick={sendBroadcast}>
         Broadcast
       </button>

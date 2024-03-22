@@ -82,7 +82,7 @@ export const PeerConnection = {
       }
       resolve();
     }),
-  sendBroadcast: async (data: Data) => {
+  sendBroadcast: async (data: Message) => {
     if (!connectionMap.size) {
       console.warn('No connections!');
       return;

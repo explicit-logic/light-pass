@@ -17,7 +17,13 @@
         "writeText": true,
         "readText": false
       },
+      "dialog": {
+        "all": true
+      },
       "notification": {
+        "all": true
+      },
+      "os": {
         "all": true
       },
       "shell": {
@@ -26,14 +32,15 @@
       },
       "window": {
         "maximize": true,
-        "unmaximize": true
+        "unmaximize": true,
+        "close": true
       }
     },
     "windows": [
       {
         "title": "Quiz",
-        "width": 800,
-        "height": 600
+        "width": 1024,
+        "height": 768
       }
     ],
     "security": {
