@@ -20,6 +20,9 @@
       "recommended": true
     }
   },
+  "files": {
+    "ignore": ["flowbite-plugin.js"]
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,

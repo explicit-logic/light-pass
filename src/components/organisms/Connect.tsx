@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 
 // Constants
-import { TYPES } from '../../constants/message';
+import { TYPES } from '@/constants/message';
 
 // Helpers
 import { getLocaleLang } from '../../helpers/getLocaleLang';
@@ -48,7 +48,7 @@ function Connect() {
       setReceiverId(peer.id);
       setLoading(false);
     };
-    establishConnection();
+    // establishConnection();
 
     return () => {
       const peer = getSender();
@@ -86,7 +86,11 @@ function Connect() {
       </div>
       <input disabled placeholder='' value={connectionUrl} />
       <input onChange={(e) => setMessage(e.currentTarget.value)} placeholder='' />
-      <button type='button' onClick={sendBroadcast}>
+      <button
+        className='bg-blue-700 dark:bg-blue-600 enabled:hover:bg-blue-800 enabled:dark:hover:bg-blue-700 focus:ring-blue-300 dark:focus:ring-blue-800 inline-flex justify-center items-center py-3.5 px-5 text-white font-medium rounded-lg text-sm me-2 mb-2 focus:ring-4 focus:outline-none disabled:cursor-not-allowed'
+        type='button'
+        onClick={sendBroadcast}
+      >
         Broadcast
       </button>
     </div>
