@@ -13,18 +13,18 @@ function App() {
   }
 
   return (
-    <main className='container'>
+    <main className="container">
       <p>My Quiz App is here!</p>
 
       <form
-        className='row'
+        className="row"
         onSubmit={(e) => {
           e.preventDefault();
           greet();
         }}
       >
-        <input id='greet-input' onChange={(e) => setName(e.currentTarget.value)} placeholder='Enter a name...' />
-        <button type='submit'>Greet</button>
+        <input id="greet-input" onChange={(e) => setName(e.currentTarget.value)} placeholder="Enter a name..." />
+        <button type="submit">Greet</button>
       </form>
 
       <p>{greetMsg}</p>
