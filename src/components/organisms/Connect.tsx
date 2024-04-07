@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 // Constants
 import { TYPES } from '@/constants/message';
 
+import RespondersButton from '@/components/atoms/RespondersButton';
 // Components
 import ClipBoardField from '@/components/molecules/ClipboardField';
 
@@ -83,8 +84,10 @@ function Connect() {
       <div className="p-3 bg-white rounded-md mb-6">
         <QRCodeSVG size={450} value={connectionUrl} />
       </div>
-      <ClipBoardField value={connectionUrl} />
-
+      <div className="mb-6 w-full">
+        <ClipBoardField value={connectionUrl} />
+      </div>
+      <RespondersButton />
       {/* <input onChange={(e) => setMessage(e.currentTarget.value)} placeholder="" />
       <button
         className="bg-blue-700 dark:bg-blue-600 enabled:hover:bg-blue-800 enabled:dark:hover:bg-blue-700 focus:ring-blue-300 dark:focus:ring-blue-800 inline-flex justify-center items-center py-3.5 px-5 text-white font-medium rounded-lg text-sm me-2 mb-2 focus:ring-4 focus:outline-none disabled:cursor-not-allowed"

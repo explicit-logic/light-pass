@@ -1,13 +1,8 @@
-import { Outlet, useNavigation } from 'react-router-dom';
-
-import Header from '@/components/molecules/Header';
+import { Outlet } from 'react-router-dom';
 
 function Root() {
-  const { state } = useNavigation();
-
   return (
     <>
-      <Header />
       <Outlet />
     </>
   );

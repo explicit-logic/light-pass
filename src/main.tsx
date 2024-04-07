@@ -7,6 +7,7 @@ import Root from '@/components/pages/Root';
 import QuizCreate from '@/components/pages/QuizCreate';
 import QuizJoin from '@/components/pages/QuizJoin';
 import QuizList from '@/components/pages/QuizList';
+import ResponderList from '@/components/pages/ResponderList';
 
 import './styles.css';
 
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: 'quizzes/:quizId/locales/:locale',
         element: <QuizJoin />,
+      },
+      {
+        path: 'quizzes/:quizId/locales/:locale/responders',
+        element: <ResponderList />,
       },
     ],
   },
