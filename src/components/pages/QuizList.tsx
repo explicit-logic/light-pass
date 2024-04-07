@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 function QuizList() {
   return (
     <>
-      <main className="flex min-h-screen flex-col">
+      <main className="flex flex-col">
         <div className="mt-4 px-4">
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -25,9 +25,9 @@ function QuizList() {
                     </Link>
                   </th>
                   <td className="px-6 py-4 text-right">
-                    <a href="/#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                    <Link to="1/locales/en" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
                       Edit
-                    </a>
+                    </Link>
                   </td>
                 </tr>
                 <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">

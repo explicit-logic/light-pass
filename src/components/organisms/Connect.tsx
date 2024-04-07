@@ -79,11 +79,10 @@ function Connect() {
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      <div className="p-3 bg-white rounded-md mb-10">
+    <div className="flex flex-col items-center justify-center pt-6">
+      <div className="p-3 bg-white rounded-md mb-6">
         <QRCodeSVG size={450} value={connectionUrl} />
       </div>
-      {/* <input disabled placeholder="" value={connectionUrl} /> */}
       <ClipBoardField value={connectionUrl} />
 
       {/* <input onChange={(e) => setMessage(e.currentTarget.value)} placeholder="" />
