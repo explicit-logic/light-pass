@@ -1,9 +1,14 @@
 import { Outlet } from 'react-router-dom';
 
+// Providers
+import { ConnectionProvider } from '@/providers/ConnectionProvider';
+
 function Root() {
   return (
     <>
-      <Outlet />
+      <ConnectionProvider>
+        <Outlet />
+      </ConnectionProvider>
     </>
   );
 }

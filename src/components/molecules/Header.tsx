@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import JoinButton from './JoinButton';
 
 function Header(params: { children?: React.ReactNode; left?: React.ReactNode; right?: React.ReactNode }) {
   const { children, left, right } = params;
@@ -25,6 +26,7 @@ function Header(params: { children?: React.ReactNode; left?: React.ReactNode; ri
                 />
               </svg>
             </Link>
+            <JoinButton />
             {left}
           </div>
 
