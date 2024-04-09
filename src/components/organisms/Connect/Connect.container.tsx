@@ -1,6 +1,6 @@
 // Modules
 import { QRCodeSVG } from 'qrcode.react';
-import { useParams } from 'react-router-dom';
+import { useAsyncValue, useParams } from 'react-router-dom';
 
 // import { appWindow } from '@tauri-apps/api/window';
 import { useEffect, useState } from 'react';
@@ -28,12 +28,14 @@ import { getSender } from '@/lib/peer/store';
 
 const url = 'https://explicit-logic.github.io/quiz-web-3/en';
 
-function Connect() {
+function ConnectContainer() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [receiverId, setReceiverId] = useState<string>();
   const { locale, quizId } = useParams();
   const connection = useConnection();
+  const data = useAsyncValue();
+  console.log(data);
   const connectionUrl = `${url}?r=${receiverId}`;
 
   useEffect(() => {
@@ -101,7 +103,7 @@ function Connect() {
       <div className="mb-6 w-full">
         <ClipBoardField value={connectionUrl} />
       </div>
-      <div className="flex flex-col justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+      <div className="flex flex-row justify-center space-y-0 space-x-4 w-full">
         <ConnectionButton />
         <RespondersButton />
       </div>
@@ -117,4 +119,4 @@ function Connect() {
   );
 }
 
-export default Connect;
+export default ConnectContainer;

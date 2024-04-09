@@ -4,8 +4,9 @@ import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom'
 
 import Root from '@/components/pages/Root';
 
+import LocaleList from '@/components/pages/LocaleList';
 import QuizCreate from '@/components/pages/QuizCreate';
-import QuizJoin from '@/components/pages/QuizJoin';
+import QuizJoin, { loader as quizJoinLoader } from '@/components/pages/QuizJoin';
 import QuizList from '@/components/pages/QuizList';
 import ResponderList from '@/components/pages/ResponderList';
 
@@ -34,8 +35,13 @@ const router = createBrowserRouter([
         element: <QuizCreate />,
       },
       {
+        path: 'quizzes/:quizId/locales',
+        element: <LocaleList />,
+      },
+      {
         path: 'quizzes/:quizId/locales/:locale',
         element: <QuizJoin />,
+        loader: quizJoinLoader,
       },
       {
         path: 'quizzes/:quizId/locales/:locale/responders',
