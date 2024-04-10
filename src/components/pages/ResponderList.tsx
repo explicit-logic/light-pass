@@ -10,7 +10,7 @@ function ResponderList() {
 
   return (
     <>
-      <Header right={<HeaderLocale>{locale}</HeaderLocale>}>Next.js Quiz</Header>
+      <Header right={<HeaderLocale>{locale}</HeaderLocale>} title="Next.js Quiz" />
       <main className="flex flex-col">
         <div className="mt-4">
           <ResponderTable />

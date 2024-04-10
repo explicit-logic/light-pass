@@ -3,13 +3,14 @@ import { Await, defer, useLoaderData, useParams } from 'react-router-dom';
 
 import HeaderLocale from '@/components/atoms/HeaderLocale';
 import Header from '@/components/molecules/Header';
-import { ConnectContainer, ConnectSkeleton } from '@/components/organisms/Connect';
+import { ConnectContainer, ConnectError, ConnectSkeleton } from '@/components/organisms/Connect';
 
 async function getData() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve('hello');
-    }, 3_000);
+      reject(new Error('Bug!'));
+      // resolve('hello');
+    }, 1000);
   });
 }
 
@@ -23,10 +24,10 @@ function QuizJoin() {
 
   return (
     <>
-      <Header right={<HeaderLocale>{locale}</HeaderLocale>}>Next.js Quiz</Header>
+      <Header right={<HeaderLocale>{locale}</HeaderLocale>} title="Next.js Quiz" />
       <main className="flex flex-col items-center justify-between">
         <Suspense fallback={<ConnectSkeleton />}>
-          <Await resolve={data} errorElement={<p>Error!</p>}>
+          <Await resolve={data} errorElement={<ConnectError />}>
             <ConnectContainer />
           </Await>
         </Suspense>

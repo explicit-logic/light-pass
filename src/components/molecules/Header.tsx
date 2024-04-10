@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import JoinButton from './JoinButton';
 
-function Header(params: { children?: React.ReactNode; left?: React.ReactNode; right?: React.ReactNode }) {
-  const { children, left, right } = params;
+function Header(params: { left?: React.ReactNode; right?: React.ReactNode; title?: string }) {
+  const { left, right, title } = params;
 
   return (
     <header className="sticky top-0 w-full border-b-2 border-gray-100 dark:border-gray-800">
@@ -30,7 +30,12 @@ function Header(params: { children?: React.ReactNode; left?: React.ReactNode; ri
             {left}
           </div>
 
-          <div className="flex flex-1 justify-center items-center self-center text-xl whitespace-nowrap dark:text-white">{children}</div>
+          <div
+            title={title}
+            className="hidden sm:flex cursor-default select-none items-center self-center text-xl whitespace-nowrap dark:text-white overflow-hidden"
+          >
+            {title}
+          </div>
 
           <div className="flex flex-1 justify-end items-center">{right}</div>
         </div>
