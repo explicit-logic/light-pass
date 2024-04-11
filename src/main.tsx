@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        loader: () => redirect('quizzes/1/locales/en'),
+        loader: () => redirect('quizzes/1/locales/en/responders'),
       },
       {
         path: 'quizzes',

@@ -12,7 +12,7 @@ export async function onCloseRequested() {
       return;
     }
 
-    const confirmed = await confirm('Are you sure?');
+    const confirmed = await confirm('Are you sure want to exit? \n All connections will be lost');
 
     if (confirmed) {
       peer.disconnect();

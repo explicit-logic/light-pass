@@ -1,9 +1,6 @@
 function ResponderTable() {
   return (
     <>
-      <div className="mb-4 px-4">
-        <h2 className="text-2xl leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">Responders</h2>
-      </div>
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
@@ -11,7 +8,10 @@ function ResponderTable() {
               Name
             </th>
             <th scope="col" className="px-6 py-3">
-              Device
+              Progress
+            </th>
+            <th scope="col" className="px-6 py-3">
+              Time
             </th>
             <th scope="col" className="px-6 py-3">
               Status
@@ -30,7 +30,8 @@ function ResponderTable() {
                 <div className="font-normal text-gray-500">neil.sims@flowbite.com</div>
               </div>
             </th>
-            <td className="px-6 py-4">React Developer</td>
+            <td className="px-6 py-4">8 / 10</td>
+            <td className="px-6 py-4">0:10</td>
             <td className="px-6 py-4">
               <div className="flex items-center">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2" /> Online
@@ -50,7 +51,8 @@ function ResponderTable() {
                 <div className="font-normal text-gray-500">bonnie@flowbite.com</div>
               </div>
             </th>
-            <td className="px-6 py-4">Designer</td>
+            <td className="px-6 py-4">2 / 10</td>
+            <td className="px-6 py-4">0:15</td>
             <td className="px-6 py-4">
               <div className="flex items-center">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2" /> Online
@@ -70,7 +72,8 @@ function ResponderTable() {
                 <div className="font-normal text-gray-500">jese@flowbite.com</div>
               </div>
             </th>
-            <td className="px-6 py-4">Vue JS Developer</td>
+            <td className="px-6 py-4">9 / 10</td>
+            <td className="px-6 py-4">1:10</td>
             <td className="px-6 py-4">
               <div className="flex items-center">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2" /> Online
@@ -90,7 +93,8 @@ function ResponderTable() {
                 <div className="font-normal text-gray-500">thomes@flowbite.com</div>
               </div>
             </th>
-            <td className="px-6 py-4">UI/UX Engineer</td>
+            <td className="px-6 py-4">Completed</td>
+            <td className="px-6 py-4">0:11</td>
             <td className="px-6 py-4">
               <div className="flex items-center">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2" /> Online
@@ -110,7 +114,8 @@ function ResponderTable() {
                 <div className="font-normal text-gray-500">leslie@flowbite.com</div>
               </div>
             </th>
-            <td className="px-6 py-4">SEO Specialist</td>
+            <td className="px-6 py-4">Started</td>
+            <td className="px-6 py-4">3:20</td>
             <td className="px-6 py-4">
               <div className="flex items-center">
                 <div className="h-2.5 w-2.5 rounded-full bg-red-500 me-2" /> Offline

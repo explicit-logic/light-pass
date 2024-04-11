@@ -1,5 +1,8 @@
 import Peer, { type DataConnection } from 'peerjs';
 
+// Helpers
+import { getLocaleLang } from '@/helpers/getLocaleLang';
+
 // Constants
 import { TYPES } from '../../constants/message';
 
@@ -19,15 +22,13 @@ import {
 
 const TIMEOUT = 60_000;
 
-type Params = { locale: string };
-
 type Callbacks = {
   onMessage?: (clientId: Client['id'], message: Message) => void;
   onClose?: (clientId: Client['id']) => void;
   onError?: (clientId: Client['id'], error: Error) => void;
 };
 
-export async function connect({ locale }: Params, callbacks?: Callbacks) {
+export async function connect(callbacks?: Callbacks) {
   const cachedSender = getSender();
   if (cachedSender) return cachedSender;
 
@@ -46,7 +47,7 @@ export async function connect({ locale }: Params, callbacks?: Callbacks) {
     .on('disconnected', close)
     .on('error', errorHandler)
 
-    .on('connection', (connection) => establishConnection({ connection, locale, sender: peer }, callbacks));
+    .on('connection', (connection) => establishConnection({ connection, sender: peer }, callbacks));
 
   const senderId = await promiseWithTimeout<string>(TIMEOUT, (resolve) => peer.on('open', (id) => resolve(id)));
 
@@ -60,9 +61,11 @@ function resetAll() {
   setSender(undefined);
 }
 
-async function establishConnection(params: { connection: DataConnection; locale: string; sender: Peer }, callbacks?: Callbacks) {
+async function establishConnection(params: { connection: DataConnection; sender: Peer }, callbacks?: Callbacks) {
   const { onMessage = () => {}, onClose = () => {}, onError = () => {} } = callbacks ?? {};
-  const { locale, connection } = params;
+  const { connection } = params;
+  const locale = await getLocaleLang();
+
   setConnection(connection);
 
   const reset = () => {

@@ -15,6 +15,7 @@ type TurnOnParams = { quizId: number; locale: string };
 
 type ConnectionContextType = {
   locale: string;
+  online: boolean;
   quizId: number;
   state: StateType;
   showError: () => void;
@@ -24,6 +25,7 @@ type ConnectionContextType = {
 
 const initialValues: ConnectionContextType = Object.freeze({
   locale: DEFAULT_LOCALE,
+  online: false,
   quizId: DEFAULT_QUIZ_ID,
   state: STATES.OFFLINE,
   showError: () => {},
@@ -41,6 +43,7 @@ export function ConnectionProvider({
   const [state, setState] = useState<StateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
+  const online = state === STATES.ONLINE;
 
   const turnOn = (params: TurnOnParams) => {
     setQuizId(params.quizId);
@@ -62,6 +65,7 @@ export function ConnectionProvider({
     <ConnectionContext.Provider
       value={{
         locale,
+        online,
         quizId,
         state,
         showError,

@@ -57,14 +57,15 @@ const showIcon = (online: boolean) => {
   );
 };
 
-function ConnectionButtonView(props: { online?: boolean }) {
-  const { online = false } = props;
+function ConnectionButtonView(props: { onClick: () => void; online?: boolean }) {
+  const { onClick, online = false } = props;
   const text = online ? 'Disconnect' : 'Connect';
 
   return (
     <button
       className="inline-flex py-3 px-5 font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
       type="button"
+      onClick={onClick}
     >
       {showIcon(online)}
       {text}
