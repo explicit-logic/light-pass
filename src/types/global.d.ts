@@ -1,12 +1,14 @@
 import type { TYPES as MESSAGE_TYPES } from '../constants/message';
 
 declare global {
+  type ThemeMode = 'auto' | 'dark' | 'light';
+
   interface Client {
     id: string;
 
     agent: string;
     locale: string;
-    theme: string;
+    theme: ThemeMode;
   }
 
   type Message =
@@ -36,7 +38,7 @@ declare global {
         clientId?: string;
         locale: string;
         pathname: string;
-        theme: 'auto' | 'dark' | 'light';
+        theme: ThemeMode;
         timeZone: string;
       };
     }
@@ -62,7 +64,7 @@ declare global {
         agent: string;
         clientId: string;
         locale: string;
-        theme: 'auto' | 'dark' | 'light';
+        theme: ThemeMode;
         timeZone: string;
       };
     }
@@ -87,14 +89,18 @@ declare global {
     }
   }
 
-  interface Responder {
-    id: number;
-
-    clientId: string;
+  interface ResponderInterface {
+    id: string; // clientId
     quizId: number;
 
-    email: string;
+    agent: string;
+    identified: boolean;
+    locale: string;
+    timeZone: string;
+
+    email?: string;
     name?: string;
+    theme?: ThemeMode;
     group?: string;
     answer?: object;
   }

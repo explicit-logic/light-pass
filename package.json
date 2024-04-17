@@ -12,12 +12,14 @@
   "license": "MIT",
   "contributors": ["Bohdan Andrianov <bogd.an.drianov@gmail.com>"],
   "dependencies": {
+    "@tanstack/react-table": "^8.16.0",
     "@tauri-apps/api": "^1",
     "peerjs": "^1.5.2",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.22.3",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
