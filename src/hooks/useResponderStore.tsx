@@ -11,5 +11,6 @@ export function useResponderStore<T>(selector?: (state: ResponderState) => T) {
 
 useResponderStore.use = {
   addResponder: () => useResponderStore(({ addResponder }) => addResponder),
-  responders: () => useResponderStore(useShallow(({ responders }) => Array.from(responders.values()))),
+  responders: () => useResponderStore(useShallow(({ responders }) => Object.values(responders))),
+  setIdentified: () => useResponderStore(({ setIdentified }) => setIdentified),
 };

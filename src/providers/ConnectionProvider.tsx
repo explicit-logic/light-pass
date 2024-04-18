@@ -9,15 +9,13 @@ import { STATES } from '@/constants/connection';
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_QUIZ_ID = 0;
 
-type StateType = (typeof STATES)[keyof typeof STATES];
-
 type TurnOnParams = { quizId: number; locale: string };
 
 type ConnectionContextType = {
   locale: string;
   online: boolean;
   quizId: number;
-  state: StateType;
+  state: ConnectionStateType;
   showError: () => void;
   turnOn: (params: TurnOnParams) => void;
   turnOff: () => void;
@@ -40,7 +38,7 @@ export function ConnectionProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [state, setState] = useState<StateType>(STATES.OFFLINE);
+  const [state, setState] = useState<ConnectionStateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
   const online = state === STATES.ONLINE;

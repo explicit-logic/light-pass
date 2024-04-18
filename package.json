@@ -14,6 +14,7 @@
   "dependencies": {
     "@tanstack/react-table": "^8.16.0",
     "@tauri-apps/api": "^1",
+    "immer": "^10.0.4",
     "peerjs": "^1.5.2",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
@@ -34,6 +35,7 @@
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.2",
+    "user-agent-data-types": "^0.4.2",
     "vite": "^5.0.0"
   }
 }

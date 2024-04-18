@@ -1,11 +1,11 @@
 class Responder implements Partial<ResponderInterface> {
   #id: string;
   #quizId: number;
-  #agent: string;
+  #userAgent: string;
   #identified = false;
   #email?: string;
   #name?: string;
-  #theme: ThemeMode;
+  #theme: ThemeModeType;
   #timeZone: string;
   #group?: string;
   #answer?: object;
@@ -13,15 +13,15 @@ class Responder implements Partial<ResponderInterface> {
   constructor(params: {
     id: string;
     quizId: number;
-    agent: string;
+    userAgent: string;
     timeZone: string;
-    theme: ThemeMode;
+    theme: ThemeModeType;
   }) {
-    const { id, quizId, agent, timeZone, theme } = params;
+    const { id, quizId, userAgent, timeZone, theme } = params;
 
     this.#id = id;
     this.#quizId = quizId;
-    this.#agent = agent;
+    this.#userAgent = userAgent;
     this.#timeZone = timeZone;
     this.#theme = theme;
   }
@@ -53,8 +53,8 @@ class Responder implements Partial<ResponderInterface> {
     return this.#quizId;
   }
 
-  get agent() {
-    return this.#agent;
+  get userAgent() {
+    return this.#userAgent;
   }
 
   get email() {

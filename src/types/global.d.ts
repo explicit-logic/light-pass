@@ -1,14 +1,17 @@
+import type { STATES as CONNECTION_STATES } from '@/constants/connection';
 import type { TYPES as MESSAGE_TYPES } from '../constants/message';
 
 declare global {
-  type ThemeMode = 'auto' | 'dark' | 'light';
+  type ThemeModeType = 'auto' | 'dark' | 'light';
+
+  type ConnectionStateType = (typeof CONNECTION_STATES)[keyof typeof CONNECTION_STATES];
 
   interface Client {
     id: string;
 
-    agent: string;
+    userAgent: string;
     locale: string;
-    theme: ThemeMode;
+    theme: ThemeModeType;
   }
 
   type Message =
@@ -19,6 +22,13 @@ declare global {
     | Messages.Message
     | Messages.Page
     | Messages.Progress;
+
+  type PlatformType = {
+    browser: string;
+    os: string;
+    type: string;
+    version: string;
+  };
 
   namespace Messages {
     interface Complete {
@@ -34,11 +44,12 @@ declare global {
       type: typeof MESSAGE_TYPES.connect;
 
       data: {
-        agent: string;
+        userAgent: string;
         clientId?: string;
         locale: string;
         pathname: string;
-        theme: ThemeMode;
+        platform: PlatformType;
+        theme: ThemeModeType;
         timeZone: string;
       };
     }
@@ -61,10 +72,11 @@ declare global {
       type: typeof MESSAGE_TYPES.init;
 
       data: {
-        agent: string;
+        userAgent: string;
         clientId: string;
         locale: string;
-        theme: ThemeMode;
+        platform: PlatformType;
+        theme: ThemeModeType;
         timeZone: string;
       };
     }
@@ -93,14 +105,17 @@ declare global {
     id: string; // clientId
     quizId: number;
 
-    agent: string;
+    completed: boolean;
     identified: boolean;
     locale: string;
+    platform: PlatformType;
     timeZone: string;
+    state: ConnectionStateType;
+    userAgent: string;
 
     email?: string;
     name?: string;
-    theme?: ThemeMode;
+    theme?: ThemeModeType;
     group?: string;
     answer?: object;
   }

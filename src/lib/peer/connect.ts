@@ -1,6 +1,7 @@
 import Peer, { type DataConnection } from 'peerjs';
 
 // Helpers
+import { detectPlatform } from '@/helpers/detectPlatform';
 import { getLocaleLang } from '@/helpers/getLocaleLang';
 
 // Constants
@@ -147,9 +148,10 @@ export function getInit({ clientId, locale }: { clientId: Client['id']; locale: 
   return {
     type: TYPES.init,
     data: {
-      agent: navigator.userAgent,
+      userAgent: navigator.userAgent,
       clientId,
       locale,
+      platform: detectPlatform(),
       theme: 'dark',
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
