@@ -1,6 +1,8 @@
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
+import { compareResponders } from '@/helpers/compareResponders';
+
 import { type ResponderState, responderStore } from '@/store/responderStore';
 
 export function useResponderStore(): ResponderState;
@@ -11,6 +13,6 @@ export function useResponderStore<T>(selector?: (state: ResponderState) => T) {
 
 useResponderStore.use = {
   addResponder: () => useResponderStore(({ addResponder }) => addResponder),
-  responders: () => useResponderStore(useShallow(({ responders }) => Object.values(responders))),
+  responders: () => useResponderStore(useShallow(({ responders }) => Object.values(responders).sort(compareResponders))),
   setIdentified: () => useResponderStore(({ setIdentified }) => setIdentified),
 };

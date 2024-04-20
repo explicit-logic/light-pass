@@ -1,43 +1,27 @@
 import { type Row, createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { memo } from 'react';
-import StatusCell from './components/StatusCell';
 
-// const columnHelper = createColumnHelper<ResponderInterface>();
+import ActionCell from './components/ActionCell';
+import DurationCell from './components/DurationCell';
+import IdentityCell from './components/IdentityCell';
+import ProgressCell from './components/ProgressCell';
+import StatusCell from './components/StatusCell';
 
 const columns = [
   {
     id: 'identity',
     header: 'Name',
-    cell: ({ row }: { row: Row<ResponderInterface> }) => {
-      const { original } = row;
-
-      return (
-        <div className="flex items-center text-gray-900 whitespace-nowrap dark:text-white">
-          {/* <img className="w-10 h-10 rounded-full" src={`https://source.unsplash.com/40x40/?portrait&${original.id}`} alt="Jese" /> */}
-          <div className="ps-3">
-            <div className="text-base font-semibold">{original.name}</div>
-            <div className="font-normal text-gray-500">{original.email}</div>
-          </div>
-        </div>
-      );
-    },
+    cell: IdentityCell,
   },
   {
     id: 'progress',
     header: 'Progress',
-    cell: ({ row }: { row: Row<ResponderInterface> }) => {
-      const { original } = row;
-      const a = Math.round(Math.random() * 10);
-
-      return `${a} / 10`;
-    },
+    cell: ProgressCell,
   },
   {
-    id: 'time',
+    id: 'duration',
     header: 'Time',
-    cell: () => {
-      return `0:${Math.round(Math.random() * 60)}`;
-    },
+    cell: DurationCell,
   },
   {
     id: 'status',
@@ -47,13 +31,7 @@ const columns = [
   {
     id: 'action',
     header: 'Action',
-    cell: () => {
-      return (
-        <a href="/#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-          Edit user
-        </a>
-      );
-    },
+    cell: ActionCell,
   },
 ];
 
@@ -83,7 +61,7 @@ function ResponderTableView(props: { responders: ResponderInterface[] }) {
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-6 py-4">
+                <td key={cell.id} className="px-6 py-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

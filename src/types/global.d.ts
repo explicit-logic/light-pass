@@ -109,6 +109,7 @@ declare global {
     identified: boolean;
     locale: string;
     platform: PlatformType;
+    progress: number;
     timeZone: string;
     state: ConnectionStateType;
     userAgent: string;
@@ -118,5 +119,8 @@ declare global {
     theme?: ThemeModeType;
     group?: string;
     answer?: object;
+
+    startAt?: Date;
+    finishAt?: Date;
   }
 }
