@@ -13,6 +13,9 @@ export function useResponderStore<T>(selector?: (state: ResponderState) => T) {
 
 useResponderStore.use = {
   addResponder: () => useResponderStore(({ addResponder }) => addResponder),
+  complete: () => useResponderStore(({ complete }) => complete),
+  doProgress: () => useResponderStore(({ doProgress }) => doProgress),
+  identify: () => useResponderStore(({ identify }) => identify),
   responders: () => useResponderStore(useShallow(({ responders }) => Object.values(responders).sort(compareResponders))),
-  setIdentified: () => useResponderStore(({ setIdentified }) => setIdentified),
+  setConnectionState: () => useResponderStore(({ setConnectionState }) => setConnectionState),
 };

@@ -1,6 +1,7 @@
 import TimeAgo from '@/components/atoms/TimeAgo';
 import type { Row } from '@tanstack/react-table';
 
+import { STATES } from '@/constants/connection';
 import { getDuration } from '@/helpers/getDuration';
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
 
 function DurationCell({ row }: Props) {
   const { original } = row;
-  const { completed, identified, startAt, finishAt } = original;
+  const { completed, identified, startAt, finishAt, state } = original;
 
   if (completed) {
     if (startAt && finishAt) {
@@ -24,7 +25,17 @@ function DurationCell({ row }: Props) {
   }
 
   if (startAt) {
-    return <TimeAgo date={startAt} />;
+    if (state === STATES.ONLINE) {
+      return <TimeAgo date={startAt} />;
+    }
+    return (
+      <div className="flex items-center text-gray-900 whitespace-nowrap dark:text-white">
+        <div className="flex flex-col space-y-1">
+          <div>{startAt.toLocaleTimeString()}</div>
+          <div className="font-normal text-gray-500 text-xs">{startAt.toLocaleDateString()}</div>
+        </div>
+      </div>
+    );
   }
 }
 

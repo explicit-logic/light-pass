@@ -6,6 +6,7 @@ import { createContext, useCallback, useMemo, useState } from 'react';
 // Constants
 import { STATES } from '@/constants/connection';
 
+import { useClientListener } from '@/hooks/useClientListener';
 // Hooks
 import { useServerListener } from '@/hooks/useServerListener';
 
@@ -36,6 +37,7 @@ export function ConnectionProvider({
   const [state, setState] = useState<ConnectionStateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   const onOpen = useCallback((params: ConnectionOpenParams) => {
     setQuizId(params.quizId);
@@ -54,15 +56,17 @@ export function ConnectionProvider({
   }, []);
 
   useServerListener({ onClose, onError, onOpen });
+  useClientListener({ quizId, locale }, { setInitialized });
 
   const value = useMemo(
     () => ({
+      initialized,
       locale,
       online: state === STATES.ONLINE,
       quizId,
       state,
     }),
-    [locale, quizId, state],
+    [initialized, locale, quizId, state],
   );
 
   return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;

@@ -1,5 +1,5 @@
 import type { STATES as CONNECTION_STATES } from '@/constants/connection';
-import type { TYPES as MESSAGE_TYPES } from '../constants/message';
+import type { TYPES as MESSAGE_TYPES } from '@/constants/message';
 
 declare global {
   type ThemeModeType = 'auto' | 'dark' | 'light';
@@ -16,14 +16,7 @@ declare global {
     theme: ThemeModeType;
   }
 
-  type Message =
-    | Messages.Complete
-    | Messages.Connect
-    | Messages.Identity
-    | Messages.Init
-    | Messages.Message
-    | Messages.Page
-    | Messages.Progress;
+  type Message = Messages.Complete | Messages.Connect | Messages.Identity | Messages.Init | Messages.Message | Messages.Progress;
 
   type PlatformType = {
     browser: string;
@@ -35,7 +28,7 @@ declare global {
   namespace Messages {
     interface Complete {
       clientId: string;
-      type: typeof MESSAGE_TYPES.progress;
+      type: typeof MESSAGE_TYPES.complete;
 
       data: {
         result: object;
@@ -46,13 +39,13 @@ declare global {
       type: typeof MESSAGE_TYPES.connect;
 
       data: {
-        userAgent: string;
         clientId?: string;
         locale: string;
         pathname: string;
         platform: PlatformType;
         theme: ThemeModeType;
         timeZone: string;
+        userAgent: string;
       };
     }
 
@@ -104,7 +97,8 @@ declare global {
   }
 
   interface ResponderInterface {
-    id: string; // clientId
+    id: string;
+    clientId: string;
     quizId: number;
 
     completed: boolean;
@@ -121,9 +115,14 @@ declare global {
     name?: string;
     theme?: ThemeModeType;
     group?: string;
-    answer?: object;
 
     startAt?: Date;
     finishAt?: Date;
+
+    answer?: object;
+
+    context: {
+      slugs: string[];
+    };
   }
 }

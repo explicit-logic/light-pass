@@ -7,23 +7,23 @@ function TimeAgo({ date }: { date: Date }) {
 
   useEffect(() => {
     const tick = () => {
-      return setTimeout(() => {
+      return setInterval(() => {
         setTimeNow(Date.now());
       }, 1000);
     };
 
-    const timeoutId = tick();
+    const intervalId = tick();
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
   }, []);
 
   const then = date.valueOf();
 
-  return <time>{getDuration(then, timeNow)}</time>;
+  return <time className="block w-20">{getDuration(then, timeNow)}</time>;
 }
 
 export default TimeAgo;
