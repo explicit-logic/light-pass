@@ -5,9 +5,15 @@ export const STATES = Object.freeze({
   ONLINE: 3,
 } as const);
 
-export const EVENTS = Object.freeze({
-  CLOSE: 'CONNECTION:CLOSE',
-  ERROR: 'CONNECTION:ERROR',
-  MESSAGE: 'CONNECTION:MESSAGE',
-  OPEN: 'CONNECTION:OPEN',
+export const CLIENT_EVENTS = Object.freeze({
+  CLOSE: 'CLIENT:CLOSE',
+  ERROR: 'CLIENT:ERROR',
+  MESSAGE: 'CLIENT:MESSAGE',
+  OPEN: 'CLIENT:OPEN',
+} as const);
+
+export const SERVER_EVENTS = Object.freeze({
+  CLOSE: 'SERVER:CLOSE',
+  ERROR: 'SERVER:ERROR',
+  OPEN: 'SERVER:OPEN',
 } as const);

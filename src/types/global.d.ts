@@ -6,6 +6,8 @@ declare global {
 
   type ConnectionStateType = (typeof CONNECTION_STATES)[keyof typeof CONNECTION_STATES];
 
+  type ConnectionOpenParams = { quizId: number; locale: string };
+
   interface Client {
     id: string;
 
@@ -106,6 +108,7 @@ declare global {
     quizId: number;
 
     completed: boolean;
+    connectedAt: Date;
     identified: boolean;
     locale: string;
     platform: PlatformType;

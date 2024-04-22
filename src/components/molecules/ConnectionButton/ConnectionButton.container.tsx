@@ -6,25 +6,25 @@ import { useNavigate } from 'react-router-dom';
 import ConnectionButtonView from './ConnectionButton.view';
 
 // Store
-import { getSender } from '@/lib/peer/store';
+import { getServer } from '@/lib/peer/store';
 
 function ConnectionButtonContainer() {
-  const { online, turnOff } = useConnection();
+  const { online } = useConnection();
   const navigate = useNavigate();
 
   const onClick = useCallback(() => {
+    // Disconnect
     if (online) {
-      const peer = getSender();
+      const peer = getServer();
       if (peer) {
         peer.disconnect();
         peer.destroy();
       }
-
-      turnOff();
     } else {
+      // Connect
       navigate(0);
     }
-  }, [online, navigate, turnOff]);
+  }, [online, navigate]);
 
   return <ConnectionButtonView onClick={onClick} online={online} />;
 }

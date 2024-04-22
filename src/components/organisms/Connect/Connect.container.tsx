@@ -18,19 +18,10 @@ const url = 'https://explicit-logic.github.io/quiz-web-3/en';
 
 function ConnectContainer() {
   const { locale, quizId } = useParams();
-  const { online, turnOn } = useConnection();
+  const { online } = useConnection();
   const peer = useAsyncValue() as Peer;
   const peerId = peer.id;
   const connectionUrl = `${url}?r=${peerId}`;
-
-  useEffect(() => {
-    if (!locale || !quizId || !peerId) return;
-
-    turnOn({
-      locale,
-      quizId: Number(quizId),
-    });
-  }, [locale, peerId, quizId, turnOn]);
 
   return (
     <div className="flex flex-col items-center justify-center pt-6">

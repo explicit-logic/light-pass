@@ -3,11 +3,11 @@ import { confirm } from '@tauri-apps/api/dialog';
 import { appWindow } from '@tauri-apps/api/window';
 
 // Store
-import { getSender } from '@/lib/peer/store';
+import { getServer } from '@/lib/peer/store';
 
 export async function onCloseRequested() {
   await appWindow.onCloseRequested(async (event) => {
-    const peer = getSender();
+    const peer = getServer();
     if (!peer) {
       return;
     }

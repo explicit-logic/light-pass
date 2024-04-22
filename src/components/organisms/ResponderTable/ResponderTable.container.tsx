@@ -6,10 +6,9 @@ import ResponderTableView from './ResponderTable.view';
 // Hooks
 import { useResponderStore } from '@/hooks/useResponderStore';
 
-// Models
-import Responder from '@/models/Responder';
+import { eventEmitter } from '@/lib/eventEmitter';
 
-import { STATES } from '@/constants/connection';
+import { SERVER_EVENTS, STATES } from '@/constants/connection';
 
 function ResponderTableContainer() {
   const responders = useResponderStore.use.responders();
@@ -29,11 +28,15 @@ function ResponderTableContainer() {
     //   name: 'Bob Whistle',
     //   group: 'X-1CS',
     // });
+    setTimeout(() => {
+      eventEmitter.emit(SERVER_EVENTS.OPEN, { quizId: 90, locale: 'en' }, 'hi');
+    }, 100);
     addResponder({
       id: 'r2',
       quizId: 1,
       email: 'member@example.com',
       completed: false,
+      connectedAt: new Date(),
       identified: true,
       locale: 'en',
       name: 'Adam',
@@ -55,6 +58,7 @@ function ResponderTableContainer() {
       quizId: 1,
       userAgent: 'Agent',
       completed: true,
+      connectedAt: new Date(),
       finishAt: new Date('2024-04-10 11:16'),
       identified: true,
       locale: 'en',
@@ -76,6 +80,7 @@ function ResponderTableContainer() {
       quizId: 1,
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
       completed: false,
+      connectedAt: new Date(),
       identified: true,
       platform: {
         browser: 'chrome',
@@ -95,6 +100,7 @@ function ResponderTableContainer() {
       quizId: 1,
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
       completed: false,
+      connectedAt: new Date(),
       identified: false,
       platform: {
         browser: 'chrome',

@@ -1,24 +1,22 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useMemo, useState } from 'react';
 
 // Constants
 import { STATES } from '@/constants/connection';
 
+// Hooks
+import { useServerListener } from '@/hooks/useServerListener';
+
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_QUIZ_ID = 0;
-
-type TurnOnParams = { quizId: number; locale: string };
 
 type ConnectionContextType = {
   locale: string;
   online: boolean;
   quizId: number;
   state: ConnectionStateType;
-  showError: () => void;
-  turnOn: (params: TurnOnParams) => void;
-  turnOff: () => void;
 };
 
 const initialValues: ConnectionContextType = Object.freeze({
@@ -26,9 +24,6 @@ const initialValues: ConnectionContextType = Object.freeze({
   online: false,
   quizId: DEFAULT_QUIZ_ID,
   state: STATES.OFFLINE,
-  showError: () => {},
-  turnOn: () => {},
-  turnOff: () => {},
 });
 
 export const ConnectionContext = createContext<ConnectionContextType>(initialValues);
@@ -41,37 +36,34 @@ export function ConnectionProvider({
   const [state, setState] = useState<ConnectionStateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
-  const online = state === STATES.ONLINE;
 
-  const turnOn = (params: TurnOnParams) => {
+  const onOpen = useCallback((params: ConnectionOpenParams) => {
     setQuizId(params.quizId);
     setLocale(params.locale);
     setState(STATES.ONLINE);
-  };
+  }, []);
 
-  const turnOff = () => {
+  const onClose = useCallback(() => {
     setQuizId(DEFAULT_QUIZ_ID);
     setLocale(DEFAULT_LOCALE);
     setState(STATES.OFFLINE);
-  };
+  }, []);
 
-  const showError = () => {
+  const onError = useCallback(() => {
     setState(STATES.ERROR);
-  };
+  }, []);
 
-  return (
-    <ConnectionContext.Provider
-      value={{
-        locale,
-        online,
-        quizId,
-        state,
-        showError,
-        turnOn,
-        turnOff,
-      }}
-    >
-      {children}
-    </ConnectionContext.Provider>
+  useServerListener({ onClose, onError, onOpen });
+
+  const value = useMemo(
+    () => ({
+      locale,
+      online: state === STATES.ONLINE,
+      quizId,
+      state,
+    }),
+    [locale, quizId, state],
   );
+
+  return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
 }

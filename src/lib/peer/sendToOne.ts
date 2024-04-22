@@ -1,13 +1,13 @@
 import type { TYPES } from '../../constants/message';
 
 // Store
-import { getConnectionByClientId, getSender } from './store';
+import { getConnectionByClientId, getServer } from './store';
 
 export async function sendToOne(clientId: Client['id'], type: (typeof TYPES)[keyof typeof TYPES], data: Message['data']) {
-  const sender = getSender();
+  const server = getServer();
 
-  if (!sender) {
-    console.error('Sender is not set');
+  if (!server) {
+    console.error('Server is not set');
     return;
   }
 
@@ -19,7 +19,7 @@ export async function sendToOne(clientId: Client['id'], type: (typeof TYPES)[key
   }
 
   await connection.send({
-    clientId: sender.id,
+    clientId: server.id,
     type,
     data,
   });

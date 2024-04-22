@@ -1,7 +1,7 @@
 import type Peer from 'peerjs';
 
 import { Suspense } from 'react';
-import { Await, defer, useLoaderData, useParams } from 'react-router-dom';
+import { Await, type LoaderFunction, defer, useLoaderData, useParams } from 'react-router-dom';
 
 // Lib
 import { connect } from '@/lib/peer/connect';
@@ -10,21 +10,13 @@ import HeaderLocale from '@/components/atoms/HeaderLocale';
 import Header from '@/components/molecules/Header';
 import { ConnectContainer, ConnectError, ConnectSkeleton } from '@/components/organisms/Connect';
 
-export async function loader() {
+export const loader: LoaderFunction = async ({ params }) => {
+  const { quizId, locale } = params as unknown as { quizId: string; locale: string };
+
   return defer({
-    peer: connect({
-      onMessage: (clientId, message) => {
-        console.info('Message', clientId, message);
-      },
-      onClose: (clientId) => {
-        console.info('Student disconnected:', clientId);
-      },
-      onError: (clientId, error) => {
-        console.error(clientId, error);
-      },
-    }),
+    peer: connect({ quizId: Number(quizId), locale }),
   });
-}
+};
 
 function QuizJoin() {
   const { locale } = useParams();

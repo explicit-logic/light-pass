@@ -3,7 +3,7 @@ import type { DataConnection, Peer } from 'peerjs';
 const connectionMap = new Map<DataConnection['peer'], DataConnection>();
 const clientConnectionMap = new Map<Client['id'], DataConnection['peer']>();
 
-let _sender: Peer | undefined;
+let _server: Peer | undefined;
 
 export function attachConnection(clientId: Client['id'], connectionId: DataConnection['peer']) {
   clientConnectionMap.set(clientId, connectionId);
@@ -46,8 +46,8 @@ export function getClientIdByConnection(connection: DataConnection) {
   }
 }
 
-export function getSender() {
-  return _sender;
+export function getServer() {
+  return _server;
 }
 
 export function hasConnection(clientId: Client['id']) {
@@ -58,6 +58,6 @@ export function setConnection(connection: DataConnection) {
   connectionMap.set(connection.peer, connection);
 }
 
-export function setSender(sender: Peer | undefined) {
-  _sender = sender;
+export function setServer(server: Peer | undefined) {
+  _server = server;
 }

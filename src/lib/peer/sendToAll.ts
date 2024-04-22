@@ -1,19 +1,19 @@
 import type { TYPES } from '../../constants/message';
 
 // Store
-import { getConnections, getSender } from './store';
+import { getConnections, getServer } from './store';
 
 export async function sendToAll(type: (typeof TYPES)[keyof typeof TYPES], data: Message['data']) {
-  const sender = getSender();
+  const server = getServer();
 
-  if (!sender) {
-    console.error('Sender is not set');
+  if (!server) {
+    console.error('Server is not set');
     return;
   }
 
   for (const connection of getConnections()) {
     await connection.send({
-      clientId: sender.id,
+      clientId: server.id,
       type,
       data,
     });

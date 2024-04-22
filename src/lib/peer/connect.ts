@@ -5,7 +5,11 @@ import { detectPlatform } from '@/helpers/detectPlatform';
 import { getLocaleLang } from '@/helpers/getLocaleLang';
 
 // Constants
-import { TYPES } from '../../constants/message';
+import { CLIENT_EVENTS, SERVER_EVENTS } from '@/constants/connection';
+import { TYPES } from '@/constants/message';
+
+// Lib
+import { eventEmitter } from '@/lib/eventEmitter';
 
 // Store
 import {
@@ -15,32 +19,28 @@ import {
   // detachConnection,
   getClientIdByConnection,
   getConnectionByClientId,
-  getSender,
+  getServer,
   hasConnection,
   setConnection,
-  setSender,
+  setServer,
 } from './store';
 
 const TIMEOUT = 60_000;
 
-type Callbacks = {
-  onMessage?: (clientId: Client['id'], message: Message) => void;
-  onClose?: (clientId: Client['id']) => void;
-  onError?: (clientId: Client['id'], error: Error) => void;
-};
-
-export async function connect(callbacks?: Callbacks) {
-  const cachedSender = getSender();
-  if (cachedSender) return cachedSender;
+export async function connect(context: ConnectionOpenParams) {
+  const cachedServer = getServer();
+  if (cachedServer) return cachedServer;
 
   const peer = new Peer();
-  setSender(peer);
+  setServer(peer);
 
   const close = () => {
     resetAll();
+    eventEmitter.emit(SERVER_EVENTS.CLOSE, context);
   };
   const errorHandler = (error: Error) => {
     resetAll();
+    eventEmitter.emit(SERVER_EVENTS.ERROR, context, error);
     console.error(error);
   };
   peer
@@ -48,22 +48,23 @@ export async function connect(callbacks?: Callbacks) {
     .on('disconnected', close)
     .on('error', errorHandler)
 
-    .on('connection', (connection) => establishConnection({ connection, sender: peer }, callbacks));
+    .on('connection', (connection) => establishConnection({ connection, server: peer }));
 
-  const senderId = await promiseWithTimeout<string>(TIMEOUT, (resolve) => peer.on('open', (id) => resolve(id)));
+  const serverId = await promiseWithTimeout<string>(TIMEOUT, (resolve) => peer.on('open', (id) => resolve(id)));
 
-  console.log('Sender ID: ', senderId);
+  eventEmitter.emit(SERVER_EVENTS.OPEN, context);
+
+  console.log('Server ID: ', serverId);
 
   return peer;
 }
 
 function resetAll() {
   clearConnectionMap();
-  setSender(undefined);
+  setServer(undefined);
 }
 
-async function establishConnection(params: { connection: DataConnection; sender: Peer }, callbacks?: Callbacks) {
-  const { onMessage = () => {}, onClose = () => {}, onError = () => {} } = callbacks ?? {};
+async function establishConnection(params: { connection: DataConnection; server: Peer }) {
   const { connection } = params;
   const locale = await getLocaleLang();
 
@@ -79,14 +80,14 @@ async function establishConnection(params: { connection: DataConnection; sender:
       const clientId = getClientIdByConnection(connection);
       reset();
       if (clientId) {
-        onClose(clientId);
+        eventEmitter.emit(CLIENT_EVENTS.CLOSE, clientId);
       }
     })
     .on('error', (error) => {
       const clientId = getClientIdByConnection(connection);
       reset();
       if (clientId) {
-        onError(clientId, error);
+        eventEmitter.emit(CLIENT_EVENTS.ERROR, clientId, error);
       }
     })
     .on('data', async (body) => {
@@ -110,7 +111,7 @@ async function establishConnection(params: { connection: DataConnection; sender:
 
         await connection.send(getInit({ clientId, locale }) as Messages.Init);
 
-        onMessage(clientId, message);
+        eventEmitter.emit(CLIENT_EVENTS.MESSAGE, clientId, message);
 
         return;
       }
@@ -123,7 +124,7 @@ async function establishConnection(params: { connection: DataConnection; sender:
         return;
       }
 
-      onMessage(connectionClientId, message);
+      eventEmitter.emit(CLIENT_EVENTS.MESSAGE, connectionClientId, message);
     });
 }
 
@@ -139,9 +140,9 @@ function ensureClientId(connection: DataConnection, message: Messages.Connect): 
 /*
   Exception listeners
 
-  Sender: close, disconnected, error
+  Server: close, disconnected, error
 
-  Receiver: close, error
+  Client: close, error
 */
 
 export function getInit({ clientId, locale }: { clientId: Client['id']; locale: string }): Messages.Init {
