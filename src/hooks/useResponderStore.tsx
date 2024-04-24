@@ -17,5 +17,6 @@ useResponderStore.use = {
   doProgress: () => useResponderStore(({ doProgress }) => doProgress),
   identify: () => useResponderStore(({ identify }) => identify),
   responders: () => useResponderStore(useShallow(({ responders }) => Object.values(responders).sort(compareResponders))),
+  respondersTree: () => useResponderStore(useShallow(({ responders }) => responders)),
   setConnectionState: () => useResponderStore(({ setConnectionState }) => setConnectionState),
 };

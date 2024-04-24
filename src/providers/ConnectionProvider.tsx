@@ -37,7 +37,6 @@ export function ConnectionProvider({
   const [state, setState] = useState<ConnectionStateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
-  const [initialized, setInitialized] = useState<boolean>(false);
 
   const onOpen = useCallback((params: ConnectionOpenParams) => {
     setQuizId(params.quizId);
@@ -56,17 +55,16 @@ export function ConnectionProvider({
   }, []);
 
   useServerListener({ onClose, onError, onOpen });
-  useClientListener({ quizId, locale }, { setInitialized });
+  useClientListener({ quizId, locale });
 
   const value = useMemo(
     () => ({
-      initialized,
       locale,
       online: state === STATES.ONLINE,
       quizId,
       state,
     }),
-    [initialized, locale, quizId, state],
+    [locale, quizId, state],
   );
 
   return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;

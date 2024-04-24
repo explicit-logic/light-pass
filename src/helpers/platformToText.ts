@@ -18,5 +18,9 @@ export function platformToText(platform: PlatformType) {
     }
   }
 
-  return (type ? type.concat(': ') : '').concat(parts.join(', '));
+  return (type ? capitalizeFirstLetter(type).concat(': ') : '').concat(parts.join(', '));
+}
+
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }

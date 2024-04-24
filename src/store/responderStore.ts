@@ -1,6 +1,9 @@
 import { immer } from 'zustand/middleware/immer';
 import { createStore } from 'zustand/vanilla';
 
+// Constants
+import { STATES as CONNECTION_STATES } from '@/constants/connection';
+
 type IdentityParam = {
   clientId: ResponderInterface['clientId'];
   context: ResponderInterface['context'];
@@ -113,10 +116,18 @@ export const responderStore = createStore<ResponderState>()(
     },
     setConnectionState: (clientId, connectionState) => {
       set((state) => {
-        const { clientResponderMap } = get();
+        const { clientResponderMap, responders } = get();
         const id = clientResponderMap[clientId];
+        const responder = responders[id];
         if (id) {
-          state.responders[id].state = connectionState;
+          if (
+            !responders[id].identified &&
+            (responder.state === CONNECTION_STATES.OFFLINE || responder.state === CONNECTION_STATES.ERROR)
+          ) {
+            delete state.responders[id];
+          } else {
+            state.responders[id].state = connectionState;
+          }
         }
       });
     },

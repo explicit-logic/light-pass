@@ -4,23 +4,27 @@ import { useCallback, useEffect } from 'react';
 import { CLIENT_EVENTS, STATES as CONNECTION_STATES } from '@/constants/connection';
 import { TYPES as MESSAGE_TYPES } from '@/constants/message';
 
+import { sendNotification } from '@/helpers/sendNotification';
 // Lib
 import { eventEmitter } from '@/lib/eventEmitter';
+
+// Helpers
+import { platformToText } from '@/helpers/platformToText';
 
 // Hooks
 import { useResponderStore } from '@/hooks/useResponderStore';
 
-export function useClientListener({ quizId }: ConnectionOpenParams, { setInitialized }: { setInitialized: (v: boolean) => void }) {
+export function useClientListener({ quizId }: ConnectionOpenParams) {
   const addResponder = useResponderStore.use.addResponder();
   const complete = useResponderStore.use.complete();
   const doProgress = useResponderStore.use.doProgress();
   const identify = useResponderStore.use.identify();
   const setConnectionState = useResponderStore.use.setConnectionState();
+  const respondersTree = useResponderStore.use.respondersTree();
 
   const onMessage = useCallback(
     (clientId: Client['id'], message: Message) => {
       if (message.type === MESSAGE_TYPES.connect) {
-        setInitialized(true);
         const { locale, platform, timeZone, userAgent } = message.data as Messages.Connect['data'];
         addResponder({
           clientId,
@@ -32,6 +36,11 @@ export function useClientListener({ quizId }: ConnectionOpenParams, { setInitial
           userAgent,
           connectedAt: new Date(),
         });
+
+        if (!respondersTree[clientId]) {
+          sendNotification('New connection', platformToText(platform));
+        }
+
         return;
       }
 
@@ -59,7 +68,7 @@ export function useClientListener({ quizId }: ConnectionOpenParams, { setInitial
         complete(clientId);
       }
     },
-    [addResponder, complete, doProgress, identify, setInitialized, quizId],
+    [addResponder, complete, doProgress, identify, respondersTree, quizId],
   );
 
   const onError = useCallback(

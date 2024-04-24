@@ -14,7 +14,9 @@ import './styles.css';
 
 // Helpers
 import { onCloseRequested } from '@/helpers/onCloseRequested';
+import { requestNotificationPermission } from '@/helpers/requestNotificationPermission';
 
+void requestNotificationPermission();
 void onCloseRequested();
 
 const router = createBrowserRouter([
