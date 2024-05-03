@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
 function RespondersButton() {
-  const { quizId, locale } = useParams();
+  const { quizId, language } = useParams();
   const navigate = useNavigate();
 
   const onClick = () => {
-    navigate(`/quizzes/${quizId}/locales/${locale}/responders`);
+    navigate(`/quizzes/${quizId}/locales/${language}/responders`);
   };
 
   return (

@@ -77,7 +77,7 @@ pub async fn locale_delete_many(app_handle: AppHandle, quiz_id: i64) -> CommandR
 
 fn many(db: &Connection, quiz_id: i64) -> Result<Vec<Locale>, rusqlite::Error> {
     let mut statement =
-        db.prepare("SELECT * FROM locales WHERE quiz_id = :quiz_id ORDER BY main ASC, language ASC")?;
+        db.prepare("SELECT * FROM locales WHERE quiz_id = :quiz_id ORDER BY main DESC, language ASC")?;
     let mut rows = statement.query(named_params! { ":quiz_id": quiz_id })?;
     let mut items = Vec::new();
 

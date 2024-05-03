@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 // Components
 import JoinButtonView from './JoinButton.view';
@@ -14,11 +14,11 @@ function JoinButtonContainer() {
   const params = useParams();
 
   if (connection.state === STATES.ONLINE) {
-    return <JoinButtonView locale={connection.locale} online quizId={connection.quizId} />;
+    return <JoinButtonView language={connection.locale} online quizId={connection.quizId} />;
   }
 
-  if (params.quizId && params.locale) {
-    return <JoinButtonView locale={params.locale} quizId={Number(params.quizId)} />;
+  if (params.quizId && params.language) {
+    return <JoinButtonView language={params.language} quizId={Number(params.quizId)} />;
   }
 }
 

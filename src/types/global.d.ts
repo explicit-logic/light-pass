@@ -98,17 +98,21 @@ declare global {
 
   interface ResponderInterface {
     id: string;
-    clientId: string;
+    clientId: string; // needs to be removed
     quizId: number;
 
     completed: boolean;
     connectedAt: Date;
-    identified: boolean;
+
+    identified: boolean; // virtual
+
     locale: string;
     platform: PlatformType;
     progress: number;
     timeZone: string;
-    state: ConnectionStateType;
+
+    state: ConnectionStateType; // virtual
+
     userAgent: string;
 
     email?: string;

@@ -16,12 +16,12 @@ const showIcon = (online: boolean) => {
   return <QrIcon className="w-6 h-6 me-1" />;
 };
 
-function JoinButtonView(props: { locale: string; online?: boolean; quizId: number }) {
-  const { locale, online = false, quizId } = props;
+function JoinButtonView(props: { language: string; online?: boolean; quizId: number }) {
+  const { language, online = false, quizId } = props;
 
   return (
     <Link
-      to={`/quizzes/${quizId}/locales/${locale}`}
+      to={`/quizzes/${quizId}/locales/${language}`}
       className="flex items-center justify-center rounded-lg dark:hover:bg-gray-700 hover:bg-gray-200 px-2 py-1 text-gray-800 dark:text-white"
     >
       {showIcon(online)}

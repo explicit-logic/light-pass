@@ -1,9 +1,10 @@
+import type { Locale } from '@/api/locales';
 // Modules
 import type Peer from 'peerjs';
 
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect } from 'react';
-import { useAsyncValue, useNavigate, useParams } from 'react-router-dom';
+import { useAsyncValue, useLoaderData, useNavigate, useParams } from 'react-router-dom';
 
 // Components
 import QrIcon from '@/components/atoms/QrIcon';
@@ -22,22 +23,21 @@ import { useResponderStore } from '@/hooks/useResponderStore';
 // Lib
 import { eventEmitter } from '@/lib/eventEmitter';
 
-const url = 'https://explicit-logic.github.io/quiz-web-3/en';
-
 function ConnectContainer() {
-  const { locale, quizId } = useParams();
+  const { language, quizId } = useParams();
   const { online } = useConnection();
+  const { locale } = useLoaderData() as { locale: Locale };
   const peer = useAsyncValue() as Peer;
   const navigate = useNavigate();
   const responders = useResponderStore.use.responders();
   const respondersCount = responders.length;
   const peerId = peer.id;
-  const connectionUrl = `${url}?r=${peerId}`;
+  const connectionUrl = `${locale.url}?r=${peerId}`;
 
   useEffect(() => {
-    const onMessage = (clientId: Client['id'], message: Message) => {
+    const onMessage = (_clientId: Client['id'], message: Message) => {
       if (respondersCount <= 1 && message.type === MESSAGE_TYPES.connect) {
-        navigate(`/quizzes/${quizId}/locales/${locale}/responders`);
+        navigate(`/quizzes/${quizId}/locales/${language}/responders`);
       }
     };
 
@@ -46,7 +46,7 @@ function ConnectContainer() {
     return () => {
       eventEmitter.off(CLIENT_EVENTS.MESSAGE, onMessage);
     };
-  }, [locale, respondersCount, quizId, navigate]);
+  }, [language, respondersCount, quizId, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center pt-6">

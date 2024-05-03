@@ -4,11 +4,12 @@ import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom'
 
 import Root from '@/components/pages/Root';
 
-import LocaleList from '@/components/pages/LocaleList';
+import LocaleList, { loader as localeListLoader } from '@/components/pages/LocaleList';
 import QuizCreate from '@/components/pages/QuizCreate';
+import QuizEdit, { loader as quizEditLoader } from '@/components/pages/QuizEdit';
 import QuizJoin, { loader as quizJoinLoader } from '@/components/pages/QuizJoin';
 import QuizList from '@/components/pages/QuizList';
-import ResponderList from '@/components/pages/ResponderList';
+import ResponderList, { loader as responderListLoader } from '@/components/pages/ResponderList';
 
 import './styles.css';
 
@@ -26,7 +27,8 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        loader: () => redirect('quizzes/1/locales/en/responders'),
+        // loader: () => redirect('quizzes/1/locales/en/responders'),
+        loader: () => redirect('quizzes'),
       },
       {
         path: 'quizzes',
@@ -37,17 +39,24 @@ const router = createBrowserRouter([
         element: <QuizCreate />,
       },
       {
-        path: 'quizzes/:quizId/locales',
-        element: <LocaleList />,
+        path: 'quizzes/:quizId/edit',
+        element: <QuizEdit />,
+        loader: quizEditLoader,
       },
       {
-        path: 'quizzes/:quizId/locales/:locale',
+        path: 'quizzes/:quizId/locales',
+        element: <LocaleList />,
+        loader: localeListLoader,
+      },
+      {
+        path: 'quizzes/:quizId/locales/:language',
         element: <QuizJoin />,
         loader: quizJoinLoader,
       },
       {
-        path: 'quizzes/:quizId/locales/:locale/responders',
+        path: 'quizzes/:quizId/locales/:language/responders',
         element: <ResponderList />,
+        loader: responderListLoader,
       },
     ],
   },
