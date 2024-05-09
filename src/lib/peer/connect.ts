@@ -21,7 +21,9 @@ import {
   getConnectionByClientId,
   getServer,
   hasConnection,
+  resetContext,
   setConnection,
+  setContext,
   setServer,
 } from './store';
 
@@ -33,6 +35,7 @@ export async function connect(context: ConnectionOpenParams) {
 
   const peer = new Peer();
   setServer(peer);
+  setContext(context);
 
   const close = () => {
     resetAll();
@@ -61,6 +64,7 @@ export async function connect(context: ConnectionOpenParams) {
 
 function resetAll() {
   clearConnectionMap();
+  resetContext();
   setServer(undefined);
 }
 

@@ -6,7 +6,7 @@ declare global {
 
   type ConnectionStateType = (typeof CONNECTION_STATES)[keyof typeof CONNECTION_STATES];
 
-  type ConnectionOpenParams = { quizId: number; locale: string };
+  type ConnectionOpenParams = { quizId: number; language: string };
 
   interface Client {
     id: string;

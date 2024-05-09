@@ -4,6 +4,7 @@ const connectionMap = new Map<DataConnection['peer'], DataConnection>();
 const clientConnectionMap = new Map<Client['id'], DataConnection['peer']>();
 
 let _server: Peer | undefined;
+let _context: ConnectionOpenParams | undefined;
 
 export function attachConnection(clientId: Client['id'], connectionId: DataConnection['peer']) {
   clientConnectionMap.set(clientId, connectionId);
@@ -46,6 +47,10 @@ export function getClientIdByConnection(connection: DataConnection) {
   }
 }
 
+export function getContext() {
+  return _context;
+}
+
 export function getServer() {
   return _server;
 }
@@ -54,8 +59,16 @@ export function hasConnection(clientId: Client['id']) {
   return clientConnectionMap.has(clientId);
 }
 
+export function resetContext() {
+  _context = undefined;
+}
+
 export function setConnection(connection: DataConnection) {
   connectionMap.set(connection.peer, connection);
+}
+
+export function setContext(context: ConnectionOpenParams) {
+  _context = context;
 }
 
 export function setServer(server: Peer | undefined) {

@@ -5,23 +5,23 @@ import { createContext, useCallback, useMemo, useState } from 'react';
 
 // Constants
 import { STATES } from '@/constants/connection';
+import { DEFAULT_LANGUAGE } from '@/constants/languages';
 
 import { useClientListener } from '@/hooks/useClientListener';
 // Hooks
 import { useServerListener } from '@/hooks/useServerListener';
 
-const DEFAULT_LOCALE = 'en';
 const DEFAULT_QUIZ_ID = 0;
 
 type ConnectionContextType = {
-  locale: string;
+  language: string;
   online: boolean;
   quizId: number;
   state: ConnectionStateType;
 };
 
 const initialValues: ConnectionContextType = Object.freeze({
-  locale: DEFAULT_LOCALE,
+  language: DEFAULT_LANGUAGE,
   online: false,
   quizId: DEFAULT_QUIZ_ID,
   state: STATES.OFFLINE,
@@ -36,17 +36,17 @@ export function ConnectionProvider({
 }>) {
   const [state, setState] = useState<ConnectionStateType>(STATES.OFFLINE);
   const [quizId, setQuizId] = useState<number>(DEFAULT_QUIZ_ID);
-  const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
+  const [language, setLanguage] = useState<string>(DEFAULT_LANGUAGE);
 
   const onOpen = useCallback((params: ConnectionOpenParams) => {
     setQuizId(params.quizId);
-    setLocale(params.locale);
+    setLanguage(params.language);
     setState(STATES.ONLINE);
   }, []);
 
   const onClose = useCallback(() => {
     setQuizId(DEFAULT_QUIZ_ID);
-    setLocale(DEFAULT_LOCALE);
+    setLanguage(DEFAULT_LANGUAGE);
     setState(STATES.OFFLINE);
   }, []);
 
@@ -55,16 +55,16 @@ export function ConnectionProvider({
   }, []);
 
   useServerListener({ onClose, onError, onOpen });
-  useClientListener({ quizId, locale });
+  useClientListener({ quizId, language });
 
   const value = useMemo(
     () => ({
-      locale,
+      language,
       online: state === STATES.ONLINE,
       quizId,
       state,
     }),
-    [locale, quizId, state],
+    [language, quizId, state],
   );
 
   return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;

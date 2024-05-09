@@ -22,8 +22,10 @@ CREATE TABLE IF NOT EXISTS locales (
 );
 
 CREATE TABLE IF NOT EXISTS responders (
-  id TEXT PRIMARY KEY NOT NULL,
+  id INTEGER PRIMARY KEY NOT NULL,
   quiz_id INTEGER NOT NULL,
+
+  client_id TEXT NOT NULL,
 
   email TEXT NOT NULL,
   "name" TEXT,
@@ -34,7 +36,7 @@ CREATE TABLE IF NOT EXISTS responders (
 
   completed BOOLEAN NOT NULL CHECK (completed IN (0, 1)) DEFAULT 0,
 
-  locale CHAR(2) NOT NULL,
+  "language" CHAR(2) NOT NULL,
   platform TEXT NOT NULL,
   progress INTEGER NOT NULL,
   timezone TEXT NOT NULL,

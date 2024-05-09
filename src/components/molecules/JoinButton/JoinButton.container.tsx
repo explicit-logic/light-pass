@@ -13,8 +13,8 @@ function JoinButtonContainer() {
   const connection = useConnection();
   const params = useParams();
 
-  if (connection.state === STATES.ONLINE) {
-    return <JoinButtonView language={connection.locale} online quizId={connection.quizId} />;
+  if (connection.online) {
+    return <JoinButtonView language={connection.language} online quizId={connection.quizId} />;
   }
 
   if (params.quizId && params.language) {
