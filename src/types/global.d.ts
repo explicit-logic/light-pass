@@ -97,8 +97,8 @@ declare global {
   }
 
   interface ResponderInterface {
-    id: string;
-    clientId: string; // needs to be removed
+    id: number;
+    clientId: string;
     quizId: number;
 
     completed: boolean;
@@ -122,8 +122,6 @@ declare global {
 
     startAt?: Date;
     finishAt?: Date;
-
-    answer?: object;
 
     context: {
       slugs: string[];

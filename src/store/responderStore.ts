@@ -12,8 +12,7 @@ type IdentityParam = {
 } & Pick<ResponderInterface, 'name' | 'theme' | 'group'>;
 
 export interface ResponderState {
-  clientResponderMap: Record<ResponderInterface['clientId'], ResponderInterface['id']>;
-  responders: Record<ResponderInterface['id'], ResponderInterface>;
+  responders: Record<ResponderInterface['clientId'], ResponderInterface>;
   addResponder: (
     responder: Pick<ResponderInterface, 'clientId' | 'quizId' | 'locale' | 'platform' | 'timeZone' | 'state' | 'userAgent' | 'connectedAt'>,
   ) => void;
@@ -34,10 +33,9 @@ export const responderStore = createStore<ResponderState>()(
           state.responders[responder.clientId].state = responder.state;
           return;
         }
-        state.clientResponderMap[responder.clientId] = responder.clientId;
         state.responders[responder.clientId] = {
           ...responder,
-          id: responder.clientId,
+          id: 0,
           completed: false,
           identified: false,
           progress: 0,
@@ -49,26 +47,21 @@ export const responderStore = createStore<ResponderState>()(
     },
 
     complete: (clientId) => {
-      const { clientResponderMap } = get();
-      const responderId = clientResponderMap[clientId];
-      if (!responderId) return;
       set((state) => {
-        state.responders[responderId].completed = true;
-        state.responders[responderId].finishAt = new Date();
+        state.responders[clientId].completed = true;
+        state.responders[clientId].finishAt = new Date();
       });
     },
 
     doProgress: (clientId, page) => {
-      const { clientResponderMap, responders } = get();
-      const responderId = clientResponderMap[clientId];
-      if (!responderId) return;
-      const { slugs } = responders[responderId].context;
+      const { responders } = get();
+      const { slugs } = responders[clientId].context;
       const progress = slugs.findIndex((slug) => slug === page) + 1;
       set((state) => {
-        state.responders[responderId].progress = progress;
+        state.responders[clientId].progress = progress;
         if (progress === slugs.length) {
-          state.responders[responderId].completed = true;
-          state.responders[responderId].finishAt = new Date();
+          state.responders[clientId].completed = true;
+          state.responders[clientId].finishAt = new Date();
         }
       });
     },
@@ -78,15 +71,13 @@ export const responderStore = createStore<ResponderState>()(
         const { responders } = get();
         const { clientId } = patch;
         const respondersList = Object.values(responders);
-        let id: ResponderInterface['id'] = clientId;
+        let id: ResponderInterface['id'] = 0;
         for (const responder of respondersList) {
           if (responder.email === patch.email) {
             id = responder.id;
             break;
           }
         }
-
-        state.clientResponderMap[clientId] = id;
 
         state.responders[id].email = patch.email;
         state.responders[id].identified = true;
@@ -109,25 +100,19 @@ export const responderStore = createStore<ResponderState>()(
       set(
         {
           responders: {},
-          clientResponderMap: {},
         },
         true,
       );
     },
     setConnectionState: (clientId, connectionState) => {
       set((state) => {
-        const { clientResponderMap, responders } = get();
-        const id = clientResponderMap[clientId];
-        const responder = responders[id];
-        if (id) {
-          if (
-            !responders[id].identified &&
-            (responder.state === CONNECTION_STATES.OFFLINE || responder.state === CONNECTION_STATES.ERROR)
-          ) {
-            delete state.responders[id];
-          } else {
-            state.responders[id].state = connectionState;
-          }
+        const { responders } = get();
+        const responder = responders[clientId];
+        if (!responder) return;
+        if (!responder.identified && (responder.state === CONNECTION_STATES.OFFLINE || responder.state === CONNECTION_STATES.ERROR)) {
+          delete state.responders[clientId];
+        } else {
+          state.responders[clientId].state = connectionState;
         }
       });
     },

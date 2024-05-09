@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS responders (
   email TEXT NOT NULL,
   "name" TEXT,
   "theme" TEXT,
-  "group" TEXT,
+  "group" TEXT DEFAULT '',
 
   "context" TEXT NOT NULL,
 
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS responders (
   user_agent TEXT NOT NULL,
 
   connected_at INTEGER NOT NULL,
-  finish_at INTEGER NOT NULL,
-  start_at INTEGER NOT NULL,
+  finished_at INTEGER NOT NULL,
+  started_at INTEGER NOT NULL,
 
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL,

@@ -11,6 +11,7 @@ use state::AppState;
 use tauri::{Manager, State};
 
 use crud::locale::*;
+use crud::responder::*;
 use crud::quiz::*;
 
 fn main() {
@@ -29,6 +30,13 @@ fn main() {
             locale_delete_many,
             locale_many,
             locale_one,
+
+            responder_create,
+            responder_delete_one,
+            responder_many,
+            responder_one,
+            responder_update_progress,
+            responder_complete,
         ])
         .setup(|app| {
             let handle = app.handle();

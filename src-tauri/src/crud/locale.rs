@@ -36,14 +36,14 @@ fn create(db: &Connection, locale: &mut Locale) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub fn locale_create(
+pub async fn locale_create(
     app_handle: AppHandle,
     quiz_id: i64,
     language: String,
     main: bool,
     url: String,
 ) -> CommandResult<Locale> {
-    let mut quiz = Locale {
+    let mut locale = Locale {
         quiz_id,
         language,
         main,
@@ -53,9 +53,9 @@ pub fn locale_create(
         created_at: time::now(),
     };
 
-    app_handle.db(|db| create(db, &mut quiz))?;
+    app_handle.db(|db| create(db, &mut locale))?;
 
-    Ok(quiz)
+    Ok(locale)
 }
 
 

@@ -45,7 +45,7 @@ fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub fn quiz_create(app_handle: AppHandle, name: &str) -> CommandResult<Quiz> {
+pub async fn quiz_create(app_handle: AppHandle, name: &str) -> CommandResult<Quiz> {
     let mut quiz = Quiz {
         id: 0,
         name: name.to_string(),

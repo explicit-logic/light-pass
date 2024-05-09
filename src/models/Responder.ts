@@ -1,5 +1,5 @@
 class Responder implements Partial<ResponderInterface> {
-  #id: string;
+  #id: number;
   #quizId: number;
   #userAgent: string;
   #identified = false;
@@ -11,7 +11,7 @@ class Responder implements Partial<ResponderInterface> {
   #answer?: object;
 
   constructor(params: {
-    id: string;
+    id: number;
     quizId: number;
     userAgent: string;
     timeZone: string;
