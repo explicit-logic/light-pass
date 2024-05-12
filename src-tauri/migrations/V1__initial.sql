@@ -2,6 +2,9 @@
 CREATE TABLE IF NOT EXISTS quizzes (
   id INTEGER PRIMARY KEY NOT NULL,
   "name" VARCHAR(250) NOT NULL UNIQUE,
+  "description" TEXT NOT NULL DEFAULT '',
+
+  "state" INTEGER NOT NULL DEFAULT 0,
 
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL
@@ -12,6 +15,11 @@ CREATE TABLE IF NOT EXISTS locales (
   "language" CHAR(2) NOT NULL,
   main BOOLEAN NOT NULL CHECK (main IN (0, 1)) DEFAULT 0,
   "url" TEXT NOT NULL,
+
+  page_count INTEGER NOT NULL DEFAULT 0,
+  question_count INTEGER NOT NULL DEFAULT 0,
+
+  "state" INTEGER NOT NULL DEFAULT 0,
 
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL,

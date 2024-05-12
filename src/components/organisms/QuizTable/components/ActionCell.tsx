@@ -14,7 +14,7 @@ function ActionCell(props: Props) {
   const to = `${id}/edit`;
 
   return (
-    <div className="text-right">
+    <div className="flex justify-end gap-2 text-right">
       <Link to={to} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
         Edit
       </Link>

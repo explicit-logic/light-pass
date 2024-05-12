@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { type Locale, getMany } from '@/api/locales';
@@ -39,4 +39,4 @@ function LocaleList() {
   );
 }
 
-export default LocaleList;
+export default memo(LocaleList);

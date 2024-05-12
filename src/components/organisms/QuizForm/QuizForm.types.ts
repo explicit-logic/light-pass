@@ -7,4 +7,5 @@ export type FormData = {
     url: string;
   }[];
   name: string;
+  description?: string;
 };

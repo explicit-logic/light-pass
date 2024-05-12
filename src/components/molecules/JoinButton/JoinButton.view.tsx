@@ -21,7 +21,7 @@ function JoinButtonView(props: { language: string; online?: boolean; quizId: num
 
   return (
     <Link
-      to={`/quizzes/${quizId}/locales/${language}`}
+      to={`/quizzes/${quizId}/locales/${language}/join`}
       className="flex items-center justify-center rounded-lg dark:hover:bg-gray-700 hover:bg-gray-200 px-2 py-1 text-gray-800 dark:text-white"
     >
       {showIcon(online)}

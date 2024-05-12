@@ -21,5 +21,6 @@ export const schema = yup
       )
       .required(),
     name: yup.string().required(),
+    description: yup.string(),
   })
   .required();

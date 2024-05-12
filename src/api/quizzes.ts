@@ -3,8 +3,11 @@ import { invoke } from '@tauri-apps/api';
 export type Quiz = {
   id: number;
   name: string;
+  description?: string;
+
   localeCount: number;
   mainLanguage?: string;
+  mainUrl?: string;
 };
 
 export async function getMany() {
@@ -19,13 +22,13 @@ export async function getOne(id: Quiz['id']) {
   return item;
 }
 
-export async function create(data: { name: string }) {
+export async function create(data: { name: string; description: string }) {
   const quiz = (await invoke('quiz_create', data)) as Quiz;
 
   return quiz;
 }
 
-export async function update(id: Quiz['id'], data: { name: string }) {
+export async function update(id: Quiz['id'], data: { name: string; description: string }) {
   const quiz = (await invoke('quiz_update', { ...data, id })) as Quiz;
 
   return quiz;

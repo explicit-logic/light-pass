@@ -10,11 +10,12 @@ use crate::utils::time;
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Quiz {
-    id: i64,
-    name: String,
+  id: i64,
+  pub name: String,
+  description: String,
 
-    updated_at: i64,
-    created_at: i64,
+  updated_at: i64,
+  created_at: i64,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -25,6 +26,7 @@ pub struct QuizListItem {
 
   locale_count: i64,
   main_language: Option<String>,
+  main_url: Option<String>,
 
   updated_at: i64,
   created_at: i64,
@@ -32,10 +34,11 @@ pub struct QuizListItem {
 
 fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
     let mut statement = db.prepare(
-    "INSERT INTO quizzes (name, updated_at, created_at) VALUES (:name, :updated_at, :created_at)"
+    "INSERT INTO quizzes (name, description, updated_at, created_at) VALUES (:name, :description, :updated_at, :created_at)"
 )?;
     statement.execute(named_params! {
         ":name": quiz.name,
+        ":description": quiz.description,
         ":updated_at": quiz.updated_at,
         ":created_at": quiz.created_at
     })?;
@@ -45,10 +48,11 @@ fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub async fn quiz_create(app_handle: AppHandle, name: &str) -> CommandResult<Quiz> {
+pub async fn quiz_create(app_handle: AppHandle, name: &str, description: &str) -> CommandResult<Quiz> {
     let mut quiz = Quiz {
         id: 0,
         name: name.to_string(),
+        description: description.to_string(),
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -81,8 +85,10 @@ fn many(db: &Connection) -> Result<Vec<QuizListItem>, rusqlite::Error> {
           SELECT 
             quizzes.*,
             (SELECT COUNT(*) FROM locales WHERE quiz_id = quizzes.id) AS locale_count,
-            (SELECT language FROM locales WHERE quiz_id = quizzes.id AND main = 1 LIMIT 1) AS main_language
+            locales.language AS main_language,
+            locales.url AS main_url
           FROM quizzes
+            LEFT JOIN locales ON locales.quiz_id = quizzes.id AND main = 1
           ORDER BY id DESC
           LIMIT :limit OFFSET :offset
         ")?;
@@ -96,6 +102,7 @@ fn many(db: &Connection) -> Result<Vec<QuizListItem>, rusqlite::Error> {
 
             locale_count: row.get("locale_count")?,
             main_language: row.get("main_language")?,
+            main_url: row.get("main_url")?,
 
             updated_at: row.get("updated_at")?,
             created_at: row.get("created_at")?,
@@ -114,7 +121,7 @@ pub async fn quiz_many(app_handle: AppHandle) -> CommandResult<Vec<QuizListItem>
     Ok(result)
 }
 
-fn one(db: &Connection, id: i64) -> Result<Quiz, rusqlite::Error> {
+pub fn one(db: &Connection, id: i64) -> Result<Quiz, rusqlite::Error> {
     db.query_row(
         "SELECT * FROM quizzes WHERE id = :id",
         named_params! { ":id": id },
@@ -122,6 +129,7 @@ fn one(db: &Connection, id: i64) -> Result<Quiz, rusqlite::Error> {
             Ok(Quiz {
                 id: row.get("id")?,
                 name: row.get("name")?,
+                description: row.get("description")?,
                 updated_at: row.get("updated_at")?,
                 created_at: row.get("created_at")?,
             })
@@ -136,12 +144,13 @@ pub async fn quiz_one(app_handle: AppHandle, id: i64) -> CommandResult<Quiz> {
     Ok(result)
 }
 
-fn update(db: &Connection, id: i64, name: &str) -> Result<(), rusqlite::Error> {
+fn update(db: &Connection, id: i64, name: &str, description: &str) -> Result<(), rusqlite::Error> {
     let mut statement =
-        db.prepare("UPDATE quizzes SET name = :name, updated_at = :updated_at WHERE id = :id")?;
+        db.prepare("UPDATE quizzes SET name = :name, description = :description, updated_at = :updated_at WHERE id = :id")?;
     statement.execute(named_params! {
         ":id": id,
         ":name": name,
+        ":description": description,
         ":updated_at": time::now(),
     })?;
 
@@ -149,8 +158,8 @@ fn update(db: &Connection, id: i64, name: &str) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str) -> CommandResult<()> {
-    app_handle.db(|db| update(db, id, name))?;
+pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str, description: &str) -> CommandResult<()> {
+    app_handle.db(|db| update(db, id, name, description))?;
 
     Ok(())
 }

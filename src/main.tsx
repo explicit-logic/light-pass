@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom'
 
 import Root from '@/components/pages/Root';
 
+import LocaleItem, { loader as localeItemLoader } from '@/components/pages/LocaleItem';
 import LocaleList, { loader as localeListLoader } from '@/components/pages/LocaleList';
 import QuizCreate from '@/components/pages/QuizCreate';
 import QuizEdit, { loader as quizEditLoader } from '@/components/pages/QuizEdit';
@@ -50,6 +51,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'quizzes/:quizId/locales/:language',
+        element: <LocaleItem />,
+        loader: localeItemLoader,
+      },
+      {
+        path: 'quizzes/:quizId/locales/:language/join',
         element: <QuizJoin />,
         loader: quizJoinLoader,
       },
