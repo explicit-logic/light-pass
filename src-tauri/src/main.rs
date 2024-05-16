@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod builder;
 mod error;
 mod crud;
 mod database;
@@ -20,6 +21,9 @@ fn main() {
             db: Default::default(),
         })
         .invoke_handler(tauri::generate_handler![
+            builder::open_builder,
+            builder::builder_save_page,
+
             quiz_create,
             quiz_delete,
             quiz_many,
@@ -30,6 +34,8 @@ fn main() {
             locale_delete_many,
             locale_many,
             locale_one,
+            locale_update_question_counter,
+            locale_reset_question_counter,
 
             responder_create,
             responder_delete_one,

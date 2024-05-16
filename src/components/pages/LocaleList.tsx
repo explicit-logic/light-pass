@@ -3,7 +3,7 @@ import { type LoaderFunction, useLoaderData } from 'react-router-dom';
 import { type Quiz, getOne } from '@/api/quizzes';
 
 import Header from '@/components/molecules/Header';
-import LocaleListComponent from '@/components/organisms/LocaleList';
+import LocaleListComponent from '@/components/molecules/LocaleList';
 
 export const loader: LoaderFunction = async ({ params }) => {
   const { quizId } = params as unknown as { quizId: string };

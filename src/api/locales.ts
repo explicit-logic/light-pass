@@ -7,6 +7,9 @@ export type Locale = {
   language: keyof typeof languages;
   url: string;
   main: boolean;
+
+  questionCount: number;
+  pageCount: number;
 };
 
 export async function getMany(quizId: Locale['quizId']) {
