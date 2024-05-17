@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/molecules/Header';
 import QuizTable from '@/components/organisms/QuizTable';
 
-function QuizList() {
+export function Component() {
   return (
     <>
       <Header
@@ -22,5 +22,3 @@ function QuizList() {
     </>
   );
 }
-
-export default QuizList;

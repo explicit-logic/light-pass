@@ -12,6 +12,8 @@ export type Locale = {
   pageCount: number;
 };
 
+export type LocaleCreate = Pick<Locale, 'quizId' | 'language' | 'url' | 'main'>;
+
 export async function getMany(quizId: Locale['quizId']) {
   const items = (await invoke('locale_many', { quizId })) as Locale[];
 
@@ -24,7 +26,7 @@ export async function getOne(quizId: Locale['quizId'], language: Locale['languag
   return item;
 }
 
-export async function create(data: Locale) {
+export async function create(data: LocaleCreate) {
   const locale = (await invoke('locale_create', data)) as Locale;
 
   return locale;

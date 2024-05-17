@@ -16,7 +16,7 @@ export const loader: LoaderFunction = async ({ params }) => {
   return { quiz };
 };
 
-function ResponderList() {
+export function Component() {
   const { quizId, language } = useParams();
   const { quiz } = useLoaderData() as { quiz: Quiz };
 
@@ -35,5 +35,3 @@ function ResponderList() {
     </>
   );
 }
-
-export default ResponderList;

@@ -14,7 +14,7 @@ export const loader: LoaderFunction = async ({ params }) => {
   return { locales, quiz };
 };
 
-function QuizEdit() {
+export function Component() {
   const { quiz } = useLoaderData() as { quiz: Quiz };
 
   return (
@@ -26,5 +26,3 @@ function QuizEdit() {
     </>
   );
 }
-
-export default QuizEdit;

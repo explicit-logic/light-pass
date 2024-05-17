@@ -2,7 +2,7 @@ import Header from '@/components/molecules/Header';
 
 import { QuizCreateForm } from '@/components/organisms/QuizForm';
 
-function QuizCreate() {
+export function Component() {
   return (
     <>
       <Header />
@@ -12,5 +12,3 @@ function QuizCreate() {
     </>
   );
 }
-
-export default QuizCreate;

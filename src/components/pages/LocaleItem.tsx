@@ -5,7 +5,7 @@ import { type Quiz, getOne as getOneQuiz } from '@/api/quizzes';
 
 import HeaderLocale from '@/components/atoms/HeaderLocale';
 import Header from '@/components/molecules/Header';
-import LocaleItemComponent from '@/components/molecules/LocaleItem';
+import LocaleItem from '@/components/molecules/LocaleItem';
 
 export const loader: LoaderFunction = async ({ params }) => {
   const { quizId, language } = params as unknown as { quizId: string; language: Locale['language'] };
@@ -15,7 +15,7 @@ export const loader: LoaderFunction = async ({ params }) => {
   return { locale, quiz };
 };
 
-function LocaleItem() {
+export function Component() {
   const { language } = useParams();
   const { quiz } = useLoaderData() as { quiz: Quiz };
 
@@ -23,10 +23,8 @@ function LocaleItem() {
     <>
       <Header right={<HeaderLocale>{language}</HeaderLocale>} title={quiz.name} />
       <main className="flex flex-col items-center justify-center">
-        <LocaleItemComponent />
+        <LocaleItem />
       </main>
     </>
   );
 }
-
-export default LocaleItem;

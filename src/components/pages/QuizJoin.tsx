@@ -32,7 +32,7 @@ export const loader: LoaderFunction = async ({ params }) => {
   });
 };
 
-function QuizJoin() {
+export function Component() {
   const { language } = useParams();
   const { quiz, peer } = useLoaderData() as { quiz: Quiz; peer: Peer };
 
@@ -49,5 +49,3 @@ function QuizJoin() {
     </>
   );
 }
-
-export default QuizJoin;
