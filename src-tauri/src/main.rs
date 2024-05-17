@@ -2,9 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod builder;
-mod error;
 mod crud;
 mod database;
+mod editor;
+mod error;
 mod state;
 mod utils;
 
@@ -24,18 +25,21 @@ fn main() {
             builder::open_builder,
             builder::builder_save_page,
 
+            editor::open_editor,
+
             quiz_create,
             quiz_delete,
             quiz_many,
             quiz_one,
             quiz_update,
+            quiz_update_configuration,
 
             locale_create,
             locale_delete_many,
             locale_many,
             locale_one,
             locale_update_question_counter,
-            locale_reset_question_counter,
+            locale_update_text_state,
 
             responder_create,
             responder_delete_one,

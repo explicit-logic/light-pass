@@ -9,10 +9,14 @@
   const quizId = Number(urlParams.get('quiz_id'));
   const language = urlParams.get('language');
 
+  async function getBasePathParts() {
+    const appDataDirPath = await appDataDir();
+    return [appDataDirPath, 'builder', quizId.toString(), 'data', language];
+  }
+
   async function getSlugs() {
     try {
-      const appDataDirPath = await appDataDir();
-      const basePathParts = [appDataDirPath, 'builder', quizId.toString(), language];
+      const basePathParts = await getBasePathParts();
       const directoryPath = await join(...basePathParts);
       const entries = await readDir(directoryPath);
 
@@ -37,8 +41,7 @@
   }
 
   async function getPageData(slug) {
-    const appDataDirPath = await appDataDir();
-    const basePathParts = [appDataDirPath, 'builder', quizId.toString(), language];
+    const basePathParts = await getBasePathParts();
     const filePath = await join(...basePathParts, slug, `${slug}.json`);
 
     const content = await readTextFile(filePath);

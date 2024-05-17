@@ -1,0 +1,50 @@
+{
+  "Metadata": {
+    "applicationName": "",
+    "keywords": "",
+    "creator": "",
+    "publisher": "",
+    "title": {
+      "default": "",
+      "template": "%s | "
+    },
+    "description": ""
+  },
+  "Common": {
+    "loading": "Loading..."
+  },
+  "Home": {
+    "title": "",
+    "headline": "",
+    "caption": "Take this quiz to test your knowledge",
+    "start": "Let’s start",
+    "fields": {
+      "email": {
+        "label": "Your email",
+        "placeholder": "example@domain.com"
+      },
+      "group": {
+        "label": "Your group",
+        "placeholder": ""
+      },
+      "name": {
+        "label": "Your name",
+        "placeholder": "Bonnie Green"
+      }
+    }
+  },
+  "Question": {
+    "next": "Next question",
+    "back": "Go Back",
+    "finish": "Finish"
+  },
+  "Result": {
+    "headline": "Well Done!",
+    "caption": "Take a cup of tea ☕",
+    "score": "Your Score",
+    "download": {
+      "caption": "Click here to download your answers:",
+      "button": "Download"
+    }
+  }
+}

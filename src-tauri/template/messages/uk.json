@@ -1,0 +1,44 @@
+{
+  "Metadata": {
+    "applicationName": "",
+    "keywords": "",
+    "creator": "",
+    "publisher": "",
+    "title": {
+      "default": "",
+      "template": "%s | "
+    },
+    "description": ""
+  },
+  "Home": {
+    "headline": "",
+    "caption": "",
+    "start": "Почати",
+    "loading": "Завантаження...",
+    "fields": {
+      "name": {
+        "label": "Ваше імʼя",
+        "placeholder": "Кіт Степан"
+      },
+      "group": {
+        "label": "Ваша група",
+        "placeholder": ""
+      }
+    }
+  },
+  "Question": {
+    "loading": "Завантаження...",
+    "next": "Далі",
+    "back": "Назад",
+    "finish": "Закінчити"
+  },
+  "Result": {
+    "headline": "Готово!",
+    "caption": "Тепер можно попити чаю ☕",
+    "score": "Ваш результат",
+    "download": {
+      "caption": "Натисніть тут щоб завантажити відповіді:",
+      "button": "Завантажити"
+    }
+  }
+}

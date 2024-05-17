@@ -1,10 +1,10 @@
-import { type Locale, getMany as getManyLocales } from '@/api/locales';
-import { type Quiz, getOne as getOneQuiz } from '@/api/quizzes';
-import { type LoaderFunction, useLoaderData } from 'react-router-dom';
+import { getMany as getManyLocales } from '@/api/locales';
+import { getOne as getOneQuiz } from '@/api/quizzes';
+import type { Quiz } from '@/models/Quiz';
+import { type LoaderFunction, Outlet, useLoaderData } from 'react-router-dom';
 
 import Header from '@/components/molecules/Header';
-
-import { QuizEditForm } from '@/components/organisms/QuizForm';
+import QuizEditSideBar from '@/components/molecules/QuizEditSideBar';
 
 export const loader: LoaderFunction = async ({ params }) => {
   const { quizId: _quizId } = params as unknown as { quizId: string };
@@ -20,8 +20,9 @@ export function Component() {
   return (
     <>
       <Header title={quiz.name} />
-      <main className="flex flex-col items-center justify-between pt-8">
-        <QuizEditForm />
+      <QuizEditSideBar />
+      <main className="p-4 md:ml-64 h-auto pt-8">
+        <Outlet />
       </main>
     </>
   );

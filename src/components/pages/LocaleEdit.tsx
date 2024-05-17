@@ -1,11 +1,13 @@
-import { type LoaderFunction, useLoaderData, useParams } from 'react-router-dom';
+import { type LoaderFunction, Outlet, useLoaderData, useParams } from 'react-router-dom';
 
-import { type Locale, getOne as getOneLocale } from '@/api/locales';
-import { type Quiz, getOne as getOneQuiz } from '@/api/quizzes';
+import { getOne as getOneLocale } from '@/api/locales';
+import { getOne as getOneQuiz } from '@/api/quizzes';
+import type { Locale } from '@/models/Locale';
+import type { Quiz } from '@/models/Quiz';
 
 import HeaderLocale from '@/components/atoms/HeaderLocale';
 import Header from '@/components/molecules/Header';
-import LocaleItem from '@/components/molecules/LocaleItem';
+import LocaleEditSideBar from '@/components/molecules/LocaleEditSideBar';
 
 export const loader: LoaderFunction = async ({ params }) => {
   const { quizId, language } = params as unknown as { quizId: string; language: Locale['language'] };
@@ -21,9 +23,10 @@ export function Component() {
 
   return (
     <>
-      <Header right={<HeaderLocale>{language}</HeaderLocale>} title={quiz.name} />
+      <Header right={<HeaderLocale>{language}</HeaderLocale>} title={quiz.name} goBackLink={`/quizzes/${quiz.id}/edit`} />
+      <LocaleEditSideBar />
       <main className="flex flex-col items-center justify-center">
-        <LocaleItem />
+        <Outlet />
       </main>
     </>
   );

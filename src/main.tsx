@@ -32,16 +32,46 @@ const router = createBrowserRouter([
         lazy: () => import('@/components/pages/QuizCreate'),
       },
       {
+        id: 'quiz-edit',
         path: 'quizzes/:quizId/edit',
         lazy: () => import('@/components/pages/QuizEdit'),
+        children: [
+          {
+            index: true,
+            lazy: () => import('@/components/pages/QuizEditDetails'),
+          },
+          {
+            path: 'configuration',
+            lazy: () => import('@/components/pages/QuizEditConfiguration'),
+          },
+          {
+            path: 'deployment',
+            lazy: () => import('@/components/pages/QuizEditDeployment'),
+          },
+          {
+            path: 'locale',
+            lazy: () => import('@/components/pages/QuizEditLocale'),
+          },
+        ],
       },
       {
         path: 'quizzes/:quizId/locales',
         lazy: () => import('@/components/pages/LocaleList'),
       },
       {
-        path: 'quizzes/:quizId/locales/:language',
-        lazy: () => import('@/components/pages/LocaleItem'),
+        id: 'locale-edit',
+        path: 'quizzes/:quizId/locales/:language/edit',
+        lazy: () => import('@/components/pages/LocaleEdit'),
+        children: [
+          {
+            index: true,
+            lazy: () => import('@/components/pages/LocaleEditQuestions'),
+          },
+          {
+            path: 'text',
+            lazy: () => import('@/components/pages/LocaleEditText'),
+          },
+        ],
       },
       {
         path: 'quizzes/:quizId/locales/:language/join',

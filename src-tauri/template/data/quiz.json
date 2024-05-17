@@ -1,0 +1,6 @@
+{
+  "$schema": "./quiz.schema.json",
+  "basePath": "",
+  "fields": ["name", "email"],
+  "order": "random"
+}

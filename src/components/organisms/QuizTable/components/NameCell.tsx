@@ -11,7 +11,7 @@ function NameCell(props: Props) {
   const { original } = row;
   const { id, localeCount, mainLanguage } = original;
 
-  const to = localeCount > 1 ? `${id}/locales` : `${id}/locales/${mainLanguage}`;
+  const to = localeCount > 1 ? `${id}/locales` : `${id}/locales/${mainLanguage}/join`;
 
   return (
     <div className="font-medium text-gray-900 whitespace-nowrap dark:text-white">

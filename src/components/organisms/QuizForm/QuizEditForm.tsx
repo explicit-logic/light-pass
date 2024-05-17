@@ -1,11 +1,15 @@
+import { memo } from 'react';
+
 import type { FormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useNavigate, useRouteLoaderData } from 'react-router-dom';
 
-import { type Locale, create as createLocale, removeAll as removeAllLocales } from '@/api/locales';
-import { type Quiz, remove as removeQuiz, update as updateQuiz } from '@/api/quizzes';
+import { create as createLocale, removeAll as removeAllLocales } from '@/api/locales';
+import { remove as removeQuiz, update as updateQuiz } from '@/api/quizzes';
+import type { Locale } from '@/models/Locale';
+import type { Quiz } from '@/models/Quiz';
 
 import LocalesArrayField from './components/LocalesArrayField';
 
@@ -14,10 +18,8 @@ import { schema } from './schema';
 
 function QuizEditForm() {
   const navigate = useNavigate();
-  const { locales, quiz } = useLoaderData() as { quiz: Quiz; locales: Locale[] };
+  const { locales, quiz } = useRouteLoaderData('quiz-edit') as { quiz: Quiz; locales: Locale[] };
   const quizId = quiz.id;
-
-  console.log(quiz);
 
   const methods = useForm<FormData>({
     defaultValues: {
@@ -101,4 +103,4 @@ function QuizEditForm() {
   );
 }
 
-export default QuizEditForm;
+export default memo(QuizEditForm);

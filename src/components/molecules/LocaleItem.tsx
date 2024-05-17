@@ -1,18 +1,20 @@
 import { invoke } from '@tauri-apps/api';
 import { TauriEvent, type UnlistenFn, listen } from '@tauri-apps/api/event';
-import { memo, useCallback, useEffect } from 'react';
-import { Link, useLoaderData, useParams, useRevalidator } from 'react-router-dom';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useParams, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
-import type { Locale } from '@/api/locales';
-import type { Quiz } from '@/api/quizzes';
 import { DEFAULT_LANGUAGE, languages } from '@/constants/languages';
+import type { Locale } from '@/models/Locale';
+import type { Quiz } from '@/models/Quiz';
+
+import InfoCard from '@/components/atoms/InfoCard';
 
 const getLabel = (key: Locale['language']) => languages[key];
 
 let didInit = false;
 function LocaleItem() {
   const { quizId, language = DEFAULT_LANGUAGE } = useParams() as { quizId: string; language: keyof typeof languages };
-  const { locale, quiz } = useLoaderData() as { locale: Locale; quiz: Quiz };
+  const { locale } = useRouteLoaderData('locale-edit') as { locale: Locale; quiz: Quiz };
   const revalidator = useRevalidator();
 
   useEffect(() => {
@@ -22,8 +24,6 @@ function LocaleItem() {
     const listener = async () => {
       unlisten = await listen<string>(TauriEvent.WINDOW_DESTROYED, (event) => {
         if (event.windowLabel === 'builder') {
-          console.log('event');
-          console.log(event);
           revalidator.revalidate();
         }
       });
@@ -37,45 +37,35 @@ function LocaleItem() {
     };
   }, [revalidator]);
 
+  const items = useMemo(
+    () => [
+      {
+        id: 1,
+        label: 'Language',
+        value: getLabel(language),
+      },
+      {
+        id: 2,
+        label: 'Question Count',
+        value: locale.questionCount || '-',
+      },
+      {
+        id: 3,
+        label: 'Page Count',
+        value: locale.pageCount || '-',
+      },
+    ],
+    [language, locale.questionCount, locale.pageCount],
+  );
+
   const openBuilder = useCallback(async () => {
     await invoke('open_builder', { quizId: Number(quizId), language });
   }, [quizId, language]);
 
   return (
-    <div className="mt-2 w-full">
-      <div className="mb-4 m-auto max-w-lg text-base text-left rtl:text-right text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 overflow-x-auto shadow-md sm:rounded-lg">
-        <div className="flex flex-row border-b dark:border-gray-700">
-          <div className="flex-none w-36 px-2 py-2 text-center text-base font-medium text-gray-900 whitespace-nowrap dark:text-white border-r dark:bg-gray-800 dark:border-gray-700">
-            Name
-          </div>
-          <div className="px-2 py-2">{quiz.name}</div>
-        </div>
-        <div className="flex flex-row border-b dark:border-gray-700">
-          <div className="flex-none w-36 px-2 py-2 text-center text-base font-medium text-gray-900 whitespace-nowrap dark:text-white border-r dark:bg-gray-800 dark:border-gray-700">
-            Description
-          </div>
-          <div className="px-2 py-2">{quiz.description}</div>
-        </div>
-        <div className="flex flex-row border-b dark:border-gray-700">
-          <div className="flex-none w-36 px-2 py-2 text-center text-base font-medium text-gray-900 whitespace-nowrap dark:text-white border-r dark:bg-gray-800 dark:border-gray-700">
-            Language
-          </div>
-          <div className="px-2 py-2">{getLabel(language)}</div>
-        </div>
-        <div className="flex flex-row border-b dark:border-gray-700">
-          <div className="flex-none w-36 px-2 py-2 text-center text-base font-medium text-gray-900 whitespace-nowrap dark:text-white border-r dark:bg-gray-800 dark:border-gray-700">
-            Question Count
-          </div>
-          <div className="px-2 py-2">{locale.questionCount || '-'}</div>
-        </div>
-        <div className="flex flex-row">
-          <div className="flex-none w-36 px-2 py-2 text-center text-base font-medium text-gray-900 whitespace-nowrap dark:text-white border-r dark:bg-gray-800 dark:border-gray-700">
-            Page Count
-          </div>
-          <div className="px-2 py-2">{locale.pageCount || '-'}</div>
-        </div>
-      </div>
-      <div className="flex flex-row justify-center m-auto max-w-lg">
+    <div className="mt-6 w-full">
+      <InfoCard items={items} />
+      <div className="flex flex-row justify-center m-auto max-w-lg mt-4">
         <button
           type="button"
           className="text-center inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
@@ -99,7 +89,7 @@ function LocaleItem() {
               clipRule="evenodd"
             />
           </svg>
-          Add Questions
+          {locale.questionCount ? 'Edit' : 'Add'} Questions
         </button>
 
         <button

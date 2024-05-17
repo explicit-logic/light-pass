@@ -7,12 +7,19 @@ use tauri::AppHandle;
 
 use crate::utils::time;
 
+const DETAILS_COMPLETED: u8 = 1;
+const CONFIGURATION_COMPLETED: u8 = 2;
+const LOCALE_COMPLETED: u8 = 4;
+const DEPLOYED: u8 = 8;
+
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Quiz {
   id: i64,
   pub name: String,
   description: String,
+
+  state: i64,
 
   updated_at: i64,
   created_at: i64,
@@ -34,11 +41,12 @@ pub struct QuizListItem {
 
 fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
     let mut statement = db.prepare(
-    "INSERT INTO quizzes (name, description, updated_at, created_at) VALUES (:name, :description, :updated_at, :created_at)"
+    "INSERT INTO quizzes (name, description, state, updated_at, created_at) VALUES (:name, :description, :state, :updated_at, :created_at)"
 )?;
     statement.execute(named_params! {
         ":name": quiz.name,
         ":description": quiz.description,
+        ":state": quiz.state,
         ":updated_at": quiz.updated_at,
         ":created_at": quiz.created_at
     })?;
@@ -53,6 +61,7 @@ pub async fn quiz_create(app_handle: AppHandle, name: &str, description: &str) -
         id: 0,
         name: name.to_string(),
         description: description.to_string(),
+        state: DETAILS_COMPLETED as i64,
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -129,6 +138,7 @@ pub fn one(db: &Connection, id: i64) -> Result<Quiz, rusqlite::Error> {
             Ok(Quiz {
                 id: row.get("id")?,
                 name: row.get("name")?,
+                state: row.get("state")?,
                 description: row.get("description")?,
                 updated_at: row.get("updated_at")?,
                 created_at: row.get("created_at")?,
@@ -162,4 +172,60 @@ pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str, description
     app_handle.db(|db| update(db, id, name, description))?;
 
     Ok(())
+}
+
+fn update_configuration(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {  let mut statement;
+  if checked {
+    statement = db.prepare("
+      UPDATE quizzes
+      SET state = state | :state, updated_at = :updated_at
+      WHERE id = :id
+    ")?;
+  } else {
+    statement = db.prepare("
+      UPDATE quizzes
+      SET state = state & (~:state), updated_at = :updated_at
+      WHERE id = :id
+    ")?;
+  }
+
+  statement.execute(named_params! {
+    ":id": id,
+    ":state": CONFIGURATION_COMPLETED,
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn quiz_update_configuration(app_handle: AppHandle, id: i64, checked: bool) -> CommandResult<()> {
+  app_handle.db(|db| update_configuration(db, id, checked))?;
+
+  Ok(())
+}
+
+pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
+  let mut statement;
+  if checked {
+    statement = db.prepare("
+      UPDATE quizzes
+      SET state = state | :state, updated_at = :updated_at
+      WHERE id = :id
+    ")?;
+  } else {
+    statement = db.prepare("
+      UPDATE quizzes
+      SET state = state & (~:state), updated_at = :updated_at
+      WHERE id = :id
+    ")?;
+  }
+
+  statement.execute(named_params! {
+    ":id": id,
+    ":state": LOCALE_COMPLETED,
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
 }

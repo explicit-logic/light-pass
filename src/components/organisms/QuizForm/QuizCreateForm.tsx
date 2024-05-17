@@ -3,10 +3,11 @@ import type { FormData } from './QuizForm.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import * as yup from 'yup';
+
+import type { Quiz } from '@/models/Quiz';
 
 import { create as createLocale, removeAll as removeAllLocales } from '@/api/locales';
-import { type Quiz, create as createQuiz, remove as removeQuiz } from '@/api/quizzes';
+import { create as createQuiz, remove as removeQuiz } from '@/api/quizzes';
 
 import LocalesArrayField from './components/LocalesArrayField';
 

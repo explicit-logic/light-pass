@@ -7,6 +7,13 @@ use tauri::AppHandle;
 
 use crate::utils::time;
 
+use crate::crud::quiz;
+
+const QUESTION_COMPLETED: u8 = 1;
+const TEXT_COMPLETED: u8 = 2;
+
+const STATE_SUM: u8 = QUESTION_COMPLETED + TEXT_COMPLETED;
+
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Locale {
@@ -62,7 +69,7 @@ pub async fn locale_create(
 
         page_count: 0,
         question_count: 0,
-        state: 1,
+        state: 0,
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -150,20 +157,49 @@ pub async fn locale_one(app_handle: AppHandle, quiz_id: i64, language: &str) -> 
     Ok(locale)
 }
 
+fn check_completion(db: &Connection, quiz_id: i64) -> Result<bool, rusqlite::Error> {
+  db.query_row(
+      "SELECT SUM(state) AS actual_state, (COUNT(*) * :state_sum) AS expected_state FROM locales WHERE quiz_id = :quiz_id GROUP BY quiz_id",
+      named_params! { ":quiz_id": quiz_id, ":state_sum": STATE_SUM },
+      |row| {
+        let actual_state: i64 = row.get("actual_state")?;
+        let expected_state: i64 = row.get("expected_state")?;
+        let result: bool = actual_state == expected_state;
+
+        Ok(result)
+      },
+  )
+}
+
 fn update_question_counter(db: &Connection, quiz_id: i64, language: &str, page_count: i64, question_count: i64) -> Result<(), rusqlite::Error> {
-  let mut statement =
-    db.prepare("
+  let mut statement;
+
+  if question_count == 0 {
+    statement = db.prepare("
       UPDATE locales
-      SET page_count = :page_count, question_count = :question_count, state = state | 1, updated_at = :updated_at
+      SET page_count = :page_count, question_count = :question_count, state = state & (~:state), updated_at = :updated_at
       WHERE quiz_id = :quiz_id AND language = :language
     ")?;
+  } else {
+    statement = db.prepare("
+      UPDATE locales
+      SET page_count = :page_count, question_count = :question_count, state = state | :state, updated_at = :updated_at
+      WHERE quiz_id = :quiz_id AND language = :language
+    ")?;
+  }
+
   statement.execute(named_params! {
       ":quiz_id": quiz_id,
       ":language": language,
+      ":state": QUESTION_COMPLETED,
       ":page_count": page_count,
       ":question_count": question_count,
       ":updated_at": time::now(),
   })?;
+
+  let completed = if question_count == 0 { false } else { check_completion(db, quiz_id)? };
+
+  quiz::update_locale_state(db, quiz_id, completed)?;
 
   Ok(())
 }
@@ -177,26 +213,40 @@ pub async fn locale_update_question_counter(app_handle: AppHandle, quiz_id: i64,
   Ok(())
 }
 
-fn reset_question_counter(db: &Connection, quiz_id: i64, language: &str) -> Result<(), rusqlite::Error> {
-  let mut statement =
-    db.prepare("
+fn update_text_state(db: &Connection, quiz_id: i64, language: &str, checked: bool) -> Result<(), rusqlite::Error> {
+  let mut statement;
+  if checked {
+    statement = db.prepare("
       UPDATE locales
-      SET page_count = 0, question_count = 0, state = state & (~1), updated_at = :updated_at
+      SET state = state | :state, updated_at = :updated_at
       WHERE quiz_id = :quiz_id AND language = :language
     ")?;
+  } else {
+    statement = db.prepare("
+      UPDATE locales
+      SET state = state & (~:state), updated_at = :updated_at
+      WHERE quiz_id = :quiz_id AND language = :language
+    ")?;
+  }
+
   statement.execute(named_params! {
-      ":quiz_id": quiz_id,
-      ":language": language,
-      ":updated_at": time::now(),
+    ":quiz_id": quiz_id,
+    ":state": TEXT_COMPLETED,
+    ":language": language,
+    ":updated_at": time::now(),
   })?;
+
+  let completed = if checked { check_completion(db, quiz_id)? } else { false };
+
+  quiz::update_locale_state(db, quiz_id, completed)?;
 
   Ok(())
 }
 
 #[tauri::command]
-pub async fn locale_reset_question_counter(app_handle: AppHandle, quiz_id: i64, language: &str) -> CommandResult<()> {
-  app_handle.db(|db| reset_question_counter(
-    db, quiz_id, language,
+pub async fn locale_update_text_state(app_handle: AppHandle, quiz_id: i64, language: &str, checked: bool) -> CommandResult<()> {
+  app_handle.db(|db| update_text_state(
+    db, quiz_id, language, checked
   ))?;
 
   Ok(())

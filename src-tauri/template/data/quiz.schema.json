@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "basePath": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["email", "group", "name"]
+      }
+    },
+    "order": {
+      "enum": ["asc", "desc", "random"]
+    }
+  },
+  "required": [
+    "basePath"
+  ]
+}

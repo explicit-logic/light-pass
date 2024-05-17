@@ -10,9 +10,13 @@
   const quizId = Number(urlParams.get('quiz_id'));
   const language = urlParams.get('language');
 
-  async function save(fbInstances) {
+  async function getBasePathParts() {
     const appDataDirPath = await appDataDir();
-    const basePathParts = [appDataDirPath, 'builder', quizId.toString(), language];
+    return [appDataDirPath, 'builder', quizId.toString(), 'data', language];
+  }
+
+  async function save(fbInstances) {
+    const basePathParts = await getBasePathParts();
     const basePath = await join(...basePathParts);
 
     const basePathExists = await API.fs.exists(basePath);
@@ -38,19 +42,13 @@
       await createDir(directoryPath, { recursive: true });
       await writeTextFile(filePath, json);
     }
-    if (questionCount) {
-      await invoke('locale_update_question_counter', {
-        quizId,
-        language,
-        pageCount,
-        questionCount,
-      });
-    } else {
-      await invoke('locale_reset_question_counter', {
-        quizId,
-        language,
-      });
-    }
+
+    await invoke('locale_update_question_counter', {
+      quizId,
+      language,
+      pageCount,
+      questionCount,
+    });
   }
 
   window.save = save;

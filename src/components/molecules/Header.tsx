@@ -1,14 +1,40 @@
-import { Link } from 'react-router-dom';
+import { useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import JoinButton from './JoinButton';
 
-function Header(params: { left?: React.ReactNode; right?: React.ReactNode; title?: string }) {
-  const { left, right, title } = params;
+type Props = {
+  left?: React.ReactNode;
+  right?: React.ReactNode;
+  title?: string;
+  goBackLink?: string;
+};
+
+function Header(props: Props) {
+  const { left, right, title, goBackLink } = props;
+
+  const navigate = useNavigate();
+  const goBack = useCallback(() => navigate(-1), [navigate]);
 
   return (
     <header className="sticky top-0 w-full border-b-2 border-gray-100 dark:border-gray-800">
       <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-[3.5rem]">
         <div className="flex items-center h-full">
           <div className="flex flex-1 justify-start items-center gap-0.5">
+            {goBackLink && (
+              <Link to={goBackLink} className="flex justify-center items-center p-1 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-200">
+                <svg
+                  className="w-6 h-6 text-gray-800 dark:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M5 12l4-4m-4 4 4 4" />
+                </svg>
+              </Link>
+            )}
             <Link to="/quizzes" className="flex justify-center items-center p-1 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-200">
               <svg
                 className="w-6 h-6 text-gray-800 dark:text-white"
