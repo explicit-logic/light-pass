@@ -3,7 +3,7 @@ import * as fs from '@tauri-apps/api/fs';
 import * as path from '@tauri-apps/api/path';
 
 import type { Quiz } from '@/models/Quiz';
-import type { QuizConfiguration } from '@/models/QuizConfiguration';
+import { QuizConfiguration } from '@/models/QuizConfiguration';
 
 const FILE_NAME = 'quiz.json';
 
@@ -14,10 +14,8 @@ export async function read(quizId: Quiz['id']) {
 
   if (fileExists) {
     const text = await fs.readTextFile(filePath);
-    const content = parse(text) as QuizConfiguration;
-    content.basePath = content?.basePath?.replace(/^\//, '');
 
-    return content;
+    return QuizConfiguration.fromText(text);
   }
 }
 
@@ -25,8 +23,8 @@ export async function save(quizId: Quiz['id'], configuration: QuizConfiguration)
   const dir = await getDataDir(quizId);
   await fs.createDir(dir, { recursive: true });
   const filePath = await path.join(dir, FILE_NAME);
-  configuration.basePath = `/${configuration.basePath}`;
-  await fs.writeTextFile(filePath, JSON.stringify(configuration));
+  const text = QuizConfiguration.toText(configuration);
+  await fs.writeTextFile(filePath, text);
   await invoke('quiz_update_configuration', { id: quizId, checked: true });
 }
 

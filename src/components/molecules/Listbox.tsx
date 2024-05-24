@@ -1,6 +1,6 @@
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react';
 import { memo, useMemo } from 'react';
-import { ControllerFieldState, type FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
 
 type Id = string;
 

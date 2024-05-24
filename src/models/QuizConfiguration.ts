@@ -8,4 +8,27 @@ export class QuizConfiguration {
   constructor(data: Partial<QuizConfiguration>) {
     Object.assign(this, data);
   }
+
+  public static toText(data: QuizConfiguration) {
+    return JSON.stringify({
+      basePath: `/${data.basePath}`,
+      fields: data.fields,
+      order: data.order,
+    });
+  }
+
+  public static fromText(text: string) {
+    const data = parse(text) as QuizConfiguration;
+    data.basePath = data.basePath?.replace(/^\//, '');
+
+    return new QuizConfiguration(data);
+  }
+}
+
+function parse(content: string) {
+  try {
+    return JSON.parse(content);
+  } catch {
+    return {};
+  }
 }

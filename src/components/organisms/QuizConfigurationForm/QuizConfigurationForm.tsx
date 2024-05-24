@@ -1,3 +1,4 @@
+import { toast } from '@/lib/toaster';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { memo } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -37,14 +38,19 @@ function QuizConfigurationForm() {
     formState: { errors },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data: QuizConfiguration) => {
-    await save(quizId, data);
-    revalidator.revalidate();
-  });
+  const onSubmit = async (data: QuizConfiguration) => {
+    try {
+      await save(quizId, data);
+      revalidator.revalidate();
+      toast.success('Quiz configuration saved');
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
-      <form className="w-full max-w-lg px-8" onSubmit={onSubmit}>
+      <form className="w-full max-w-lg px-8" onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-6">
           <label htmlFor="basePath" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Base path
