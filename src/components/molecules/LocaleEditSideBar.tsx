@@ -29,7 +29,7 @@ function LocaleEditSideBar() {
           </svg>
         </SideBarLink>
 
-        <SideBarLink to="text" title="Text" caption="" completed={locale.textCompleted}>
+        <SideBarLink to="text" title="Text" caption="" completed={locale.textCompleted} disabled={!locale.questionCompleted}>
           <svg
             className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400"
             aria-hidden="true"

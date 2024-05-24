@@ -4,11 +4,17 @@ import type { FieldError } from 'react-hook-form';
 
 type Id = string;
 
+type Option = {
+  id: Id;
+  name: string;
+  highlight?: boolean;
+};
+
 type Props = {
   error: FieldError | undefined;
   value: Id[];
   onChange: (value: Id[]) => void;
-  options: { id: Id; name: string }[];
+  options: Option[];
   placeholder: string;
 };
 
@@ -16,9 +22,10 @@ function ListboxComponent(props: Props) {
   const { error, options, placeholder, value, onChange } = props;
   const selected = value;
 
-  const idName: Record<(typeof value)[number], string> = useMemo(() => {
-    return options.reduce((acc: Record<Id, string>, { id, name }) => {
-      acc[id] = name;
+  const idMap: Record<(typeof value)[number], Option> = useMemo(() => {
+    return options.reduce((acc: Record<Id, Option>, option) => {
+      const { id } = option;
+      acc[id] = option;
       return acc;
     }, {});
   }, [options]);
@@ -31,9 +38,13 @@ function ListboxComponent(props: Props) {
             {selected.map((id) => (
               <span
                 key={id}
-                className=" bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
+                className={`${
+                  idMap[id].highlight
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-400 dark:text-gray-800'
+                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                } text-xs font-medium px-2.5 py-0.5 rounded`}
               >
-                {idName[id]}
+                {idMap[id].name}
               </span>
             ))}
             {selected.length === 0 && <span className=" text-gray-700 dark:text-gray-400">{placeholder}</span>}

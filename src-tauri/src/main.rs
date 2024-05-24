@@ -34,12 +34,13 @@ fn main() {
             quiz_update,
             quiz_update_configuration,
 
-            locale_create,
+            locale_upsert,
             locale_delete_many,
+            locale_delete_one,
             locale_many,
             locale_one,
             locale_update_question_counter,
-            locale_update_text_state,
+            locale_update_state,
 
             responder_create,
             responder_delete_one,

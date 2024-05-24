@@ -174,38 +174,7 @@ pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str, description
     Ok(())
 }
 
-fn update_configuration(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {  let mut statement;
-  if checked {
-    statement = db.prepare("
-      UPDATE quizzes
-      SET state = state | :state, updated_at = :updated_at
-      WHERE id = :id
-    ")?;
-  } else {
-    statement = db.prepare("
-      UPDATE quizzes
-      SET state = state & (~:state), updated_at = :updated_at
-      WHERE id = :id
-    ")?;
-  }
-
-  statement.execute(named_params! {
-    ":id": id,
-    ":state": CONFIGURATION_COMPLETED,
-    ":updated_at": time::now(),
-  })?;
-
-  Ok(())
-}
-
-#[tauri::command]
-pub async fn quiz_update_configuration(app_handle: AppHandle, id: i64, checked: bool) -> CommandResult<()> {
-  app_handle.db(|db| update_configuration(db, id, checked))?;
-
-  Ok(())
-}
-
-pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
+fn update_state(db: &Connection, id: i64, state: u8, checked: bool) -> Result<(), rusqlite::Error> {
   let mut statement;
   if checked {
     statement = db.prepare("
@@ -223,9 +192,21 @@ pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<()
 
   statement.execute(named_params! {
     ":id": id,
-    ":state": LOCALE_COMPLETED,
+    ":state": state,
     ":updated_at": time::now(),
   })?;
 
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn quiz_update_configuration(app_handle: AppHandle, id: i64, checked: bool) -> CommandResult<()> {
+  app_handle.db(|db| update_state(db, id, CONFIGURATION_COMPLETED, checked))?;
+
+  Ok(())
+}
+
+pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
+  update_state(db, id, LOCALE_COMPLETED, checked)?;
   Ok(())
 }

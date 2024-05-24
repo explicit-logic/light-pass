@@ -1,12 +1,13 @@
+import { toast } from '@/lib/toaster';
 import { memo } from 'react';
 
-import type { FormData } from './QuizForm.types';
+import type { EditFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useNavigate, useRouteLoaderData } from 'react-router-dom';
+import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
-import { create as createLocale, removeAll as removeAllLocales } from '@/api/locales';
+import { removeAll as removeAllLocales, remove as removeLocale, upsert as upsertLocale } from '@/api/locales';
 import { remove as removeQuiz, update as updateQuiz } from '@/api/quizzes';
 import type { Locale } from '@/models/Locale';
 import type { Quiz } from '@/models/Quiz';
@@ -14,20 +15,37 @@ import type { Quiz } from '@/models/Quiz';
 import LocalesArrayField from './components/LocalesArrayField';
 
 import { useCallback } from 'react';
-import { schema } from './schema';
+import { editSchema } from './schema';
+
+function getDeletedLocales(source: Locale[], target: EditFormData['locales']) {
+  const deleted: Locale[] = [];
+  const targetLang = target.reduce<{ [key: string]: boolean }>((acc, curr) => {
+    acc[curr.language] = true;
+    return acc;
+  }, {});
+
+  for (const sourceLocale of source) {
+    if (!targetLang[sourceLocale.language]) {
+      deleted.push(sourceLocale);
+    }
+  }
+
+  return deleted;
+}
 
 function QuizEditForm() {
   const navigate = useNavigate();
   const { locales, quiz } = useRouteLoaderData('quiz-edit') as { quiz: Quiz; locales: Locale[] };
   const quizId = quiz.id;
+  const revalidator = useRevalidator();
 
-  const methods = useForm<FormData>({
+  const methods = useForm<EditFormData>({
     defaultValues: {
       locales,
       name: quiz.name,
       description: quiz.description,
     },
-    resolver: yupResolver(schema),
+    resolver: yupResolver(editSchema),
   });
   const {
     register,
@@ -35,20 +53,35 @@ function QuizEditForm() {
     formState: { errors },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data: FormData) => {
-    const { locales, name, description } = data;
-    await removeAllLocales(quizId);
-    await updateQuiz(quizId, { name, description: description ?? '' });
-    for (const locale of locales) {
-      await createLocale({ ...locale, quizId: quiz.id });
+  const onSubmit = handleSubmit(async (target: EditFormData) => {
+    try {
+      await updateQuiz(quizId, { name: target.name, description: target.description ?? '' });
+
+      const deletedLocales = getDeletedLocales(locales, target.locales);
+      for (const deletedLocale of deletedLocales) {
+        await removeLocale(quizId, deletedLocale.language);
+      }
+
+      for (const targetLocale of target.locales) {
+        await upsertLocale({ ...targetLocale, quizId });
+      }
+      revalidator.revalidate();
+
+      toast.success('Quiz updated');
+    } catch (error) {
+      toast.error((error as Error).message);
     }
-    return navigate('/quizzes', { replace: true });
   });
 
   const onRemove = useCallback(async () => {
-    await removeAllLocales(quizId);
-    await removeQuiz(quizId);
-    navigate('/quizzes', { replace: true });
+    try {
+      await removeAllLocales(quizId);
+      await removeQuiz(quizId);
+      navigate('/quizzes', { replace: true });
+      toast('Quiz removed');
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
   }, [quizId, navigate]);
 
   return (

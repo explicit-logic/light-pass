@@ -2,7 +2,7 @@ import { toast } from '@/lib/toaster';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { memo } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
+import { useLoaderData, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
 import { save } from '@/api/configuration';
 

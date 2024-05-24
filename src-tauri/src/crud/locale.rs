@@ -31,21 +31,30 @@ pub struct Locale {
     created_at: i64,
 }
 
-fn create(db: &Connection, locale: &mut Locale) -> Result<(), rusqlite::Error> {
+#[derive(Serialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct LocaleUpsert {
+  quiz_id: i64,
+  language: String,
+  main: bool,
+  url: String,
+
+  updated_at: i64,
+  created_at: i64,
+}
+
+fn upsert(db: &Connection, locale: &mut LocaleUpsert) -> Result<(), rusqlite::Error> {
   let mut statement = db.prepare("
     INSERT INTO locales (
-      quiz_id, language, main, url, state, page_count, question_count, updated_at, created_at
+      quiz_id, language, main, url, updated_at, created_at
     )
-      VALUES (:quiz_id, :language, :main, :url, :state, :page_count, :question_count, :updated_at, :created_at)
+      VALUES (:quiz_id, :language, :main, :url, :updated_at, :created_at)
     ")?;
     statement.execute(named_params! {
         ":quiz_id": locale.quiz_id,
         ":language": locale.language,
         ":main": locale.main,
         ":url": locale.url,
-        ":state": locale.state,
-        ":page_count": locale.page_count,
-        ":question_count": locale.question_count,
         ":updated_at": locale.updated_at,
         ":created_at": locale.created_at
     })?;
@@ -54,28 +63,24 @@ fn create(db: &Connection, locale: &mut Locale) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub async fn locale_create(
+pub async fn locale_upsert(
     app_handle: AppHandle,
     quiz_id: i64,
     language: String,
     main: bool,
     url: String,
-) -> CommandResult<Locale> {
-    let mut locale = Locale {
+) -> CommandResult<LocaleUpsert> {
+    let mut locale = LocaleUpsert {
         quiz_id,
         language,
         main,
         url,
 
-        page_count: 0,
-        question_count: 0,
-        state: 0,
-
         updated_at: time::now(),
         created_at: time::now(),
     };
 
-    app_handle.db(|db| create(db, &mut locale))?;
+    app_handle.db(|db| upsert(db, &mut locale))?;
 
     Ok(locale)
 }
@@ -94,6 +99,25 @@ pub async fn locale_delete_many(app_handle: AppHandle, quiz_id: i64) -> CommandR
     app_handle.db(|db| delete_many(db, quiz_id))?;
 
     Ok(())
+}
+
+fn delete_one(db: &Connection, quiz_id: i64, language: String) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare(
+    "DELETE FROM locales WHERE quiz_id = :quiz_id AND language = :language"
+  )?;
+  statement.execute(named_params! {
+    ":quiz_id": quiz_id,
+    ":language": language
+  })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn locale_delete_one(app_handle: AppHandle, quiz_id: i64, language: String) -> CommandResult<()> {
+  app_handle.db(|db| delete_one(db, quiz_id, language))?;
+
+  Ok(())
 }
 
 fn many(db: &Connection, quiz_id: i64) -> Result<Vec<Locale>, rusqlite::Error> {
@@ -171,49 +195,7 @@ fn check_completion(db: &Connection, quiz_id: i64) -> Result<bool, rusqlite::Err
   )
 }
 
-fn update_question_counter(db: &Connection, quiz_id: i64, language: &str, page_count: i64, question_count: i64) -> Result<(), rusqlite::Error> {
-  let mut statement;
-
-  if question_count == 0 {
-    statement = db.prepare("
-      UPDATE locales
-      SET page_count = :page_count, question_count = :question_count, state = state & (~:state), updated_at = :updated_at
-      WHERE quiz_id = :quiz_id AND language = :language
-    ")?;
-  } else {
-    statement = db.prepare("
-      UPDATE locales
-      SET page_count = :page_count, question_count = :question_count, state = state | :state, updated_at = :updated_at
-      WHERE quiz_id = :quiz_id AND language = :language
-    ")?;
-  }
-
-  statement.execute(named_params! {
-      ":quiz_id": quiz_id,
-      ":language": language,
-      ":state": QUESTION_COMPLETED,
-      ":page_count": page_count,
-      ":question_count": question_count,
-      ":updated_at": time::now(),
-  })?;
-
-  let completed = if question_count == 0 { false } else { check_completion(db, quiz_id)? };
-
-  quiz::update_locale_state(db, quiz_id, completed)?;
-
-  Ok(())
-}
-
-#[tauri::command]
-pub async fn locale_update_question_counter(app_handle: AppHandle, quiz_id: i64, language: &str, page_count: i64, question_count: i64) -> CommandResult<()> {
-  app_handle.db(|db| update_question_counter(
-    db, quiz_id, language, page_count, question_count,
-  ))?;
-
-  Ok(())
-}
-
-fn update_text_state(db: &Connection, quiz_id: i64, language: &str, checked: bool) -> Result<(), rusqlite::Error> {
+fn update_state(db: &Connection, quiz_id: i64, language: &str, state: u8, checked: bool) -> Result<(), rusqlite::Error> {
   let mut statement;
   if checked {
     statement = db.prepare("
@@ -231,7 +213,7 @@ fn update_text_state(db: &Connection, quiz_id: i64, language: &str, checked: boo
 
   statement.execute(named_params! {
     ":quiz_id": quiz_id,
-    ":state": TEXT_COMPLETED,
+    ":state": state,
     ":language": language,
     ":updated_at": time::now(),
   })?;
@@ -243,11 +225,48 @@ fn update_text_state(db: &Connection, quiz_id: i64, language: &str, checked: boo
   Ok(())
 }
 
+fn update_question_counter(db: &Connection, quiz_id: i64, language: &str, page_count: i64, question_count: i64) -> Result<(), rusqlite::Error> {
+  let mut statement;
+
+  statement = db.prepare("
+    UPDATE locales
+    SET page_count = :page_count, question_count = :question_count, updated_at = :updated_at
+    WHERE quiz_id = :quiz_id AND language = :language
+  ")?;
+
+  statement.execute(named_params! {
+    ":quiz_id": quiz_id,
+    ":language": language,
+    ":page_count": page_count,
+    ":question_count": question_count,
+    ":updated_at": time::now(),
+  })?;
+
+  update_state(db, quiz_id, language, QUESTION_COMPLETED, question_count > 0)?;
+
+  let completed = if question_count == 0 { false } else { check_completion(db, quiz_id)? };
+
+  quiz::update_locale_state(db, quiz_id, completed)?;
+
+  Ok(())
+}
+
 #[tauri::command]
-pub async fn locale_update_text_state(app_handle: AppHandle, quiz_id: i64, language: &str, checked: bool) -> CommandResult<()> {
-  app_handle.db(|db| update_text_state(
-    db, quiz_id, language, checked
+pub async fn locale_update_question_counter(app_handle: AppHandle, quiz_id: i64, language: &str, page_count: i64, question_count: i64) -> CommandResult<()> {
+  app_handle.db(|db| update_question_counter(
+    db, quiz_id, language, page_count, question_count,
   ))?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn locale_update_state(app_handle: AppHandle, quiz_id: i64, language: &str, state: u8, checked: bool) -> CommandResult<()> {
+  if (state & (state - 1)) == 0 && state <= STATE_SUM {
+    app_handle.db(|db| update_state(
+      db, quiz_id, language, state, checked
+    ))?;
+  }
 
   Ok(())
 }

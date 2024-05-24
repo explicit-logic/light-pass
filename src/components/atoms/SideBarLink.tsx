@@ -5,11 +5,12 @@ type Props = {
   caption?: string;
   children: React.ReactNode;
   completed?: boolean;
+  disabled?: boolean;
   to: string;
   title: string;
 };
 
-function completedIcon() {
+function CompletedIcon() {
   return (
     <span className="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
       <svg
@@ -25,24 +26,36 @@ function completedIcon() {
   );
 }
 
+function Content(props: Props) {
+  const { caption = '', children, completed = false, title } = props;
+
+  return (
+    <>
+      {completed ? (
+        CompletedIcon()
+      ) : (
+        <span className="absolute flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-gray-700">
+          {children}
+        </span>
+      )}
+      <h3 className="font-medium leading-tight">{title}</h3>
+      <p className="text-sm">{caption}</p>
+    </>
+  );
+}
+
 function SideBarLink(props: Props) {
-  const { caption = '', completed = false, children, title, to } = props;
+  const { caption = '', completed = false, children, disabled = false, title, to } = props;
 
   return (
     <li className="mb-10 ms-6">
-      <NavLink to={to} className={({ isActive }) => (isActive ? 'text-blue-600 dark:text-blue-500' : '')} end>
-        <>
-          {completed ? (
-            completedIcon()
-          ) : (
-            <span className="absolute flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-gray-700">
-              {children}
-            </span>
-          )}
-          <h3 className="font-medium leading-tight">{title}</h3>
-          <p className="text-sm">{caption}</p>
-        </>
-      </NavLink>
+      {disabled ? (
+        <Content {...props} />
+      ) : (
+        <NavLink to={to} className={({ isActive }) => (isActive ? 'text-blue-600 dark:text-blue-500' : '')} end>
+          <Content {...props} />
+        </NavLink>
+      )}
     </li>
   );
 }

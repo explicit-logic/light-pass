@@ -1,6 +1,6 @@
 import type { languages } from '@/constants/languages';
 
-export type FormData = {
+export type EditFormData = {
   locales: {
     language: keyof typeof languages;
     main: boolean;
@@ -8,4 +8,10 @@ export type FormData = {
   }[];
   name: string;
   description?: string;
+};
+
+export type CreateFormData = {
+  description?: string;
+  languages: (keyof typeof languages)[];
+  name: string;
 };

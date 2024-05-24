@@ -1,7 +1,5 @@
 import { invoke } from '@tauri-apps/api';
 
-import type { languages } from '@/constants/languages';
-
 import { Locale } from '@/models/Locale';
 
 export type LocaleCreate = Pick<Locale, 'quizId' | 'language' | 'url' | 'main'>;
@@ -18,10 +16,14 @@ export async function getOne(quizId: Locale['quizId'], language: Locale['languag
   return new Locale(item);
 }
 
-export async function create(data: LocaleCreate) {
-  const locale = (await invoke('locale_create', data)) as Locale;
+export async function upsert(data: LocaleCreate) {
+  const locale = (await invoke('locale_upsert', data)) as Locale;
 
   return new Locale(locale);
+}
+
+export async function remove(quizId: Locale['quizId'], language: Locale['language']) {
+  await invoke('locale_delete_one', { quizId, language });
 }
 
 export async function removeAll(quizId: Locale['quizId']) {

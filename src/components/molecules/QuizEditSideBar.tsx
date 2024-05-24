@@ -25,7 +25,13 @@ function QuizEditSideBar() {
             <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M9 8h10M9 12h10M9 16h10M4.99 8H5m-.02 4h.01m0 4H5" />
           </svg>
         </SideBarLink>
-        <SideBarLink to="configuration" title="Configuration" caption="" completed={quiz.configurationCompleted}>
+        <SideBarLink
+          to="configuration"
+          title="Configuration"
+          caption=""
+          completed={quiz.configurationCompleted}
+          disabled={!quiz.detailsCompleted}
+        >
           <svg
             className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400"
             aria-hidden="true"
@@ -39,7 +45,7 @@ function QuizEditSideBar() {
             <path d="M10.83 5a3.001 3.001 0 0 0-5.66 0H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17ZM4 11h9.17a3.001 3.001 0 0 1 5.66 0H20a1 1 0 1 1 0 2h-1.17a3.001 3.001 0 0 1-5.66 0H4a1 1 0 1 1 0-2Zm1.17 6H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17a3.001 3.001 0 0 0-5.66 0Z" />
           </svg>
         </SideBarLink>
-        <SideBarLink to="locale" title="Local versions" caption="" completed={quiz.localeCompleted}>
+        <SideBarLink to="locale" title="Local versions" caption="" completed={quiz.localeCompleted} disabled={!quiz.configurationCompleted}>
           <svg
             className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400"
             aria-hidden="true"
@@ -57,7 +63,7 @@ function QuizEditSideBar() {
             />
           </svg>
         </SideBarLink>
-        <SideBarLink to="deployment" title="Deployment" caption="" completed={quiz.deployed}>
+        <SideBarLink to="deployment" title="Deployment" caption="" completed={quiz.deployed} disabled={!quiz.localeCompleted}>
           <GlobeIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
         </SideBarLink>
       </ol>

@@ -3,6 +3,7 @@ import * as fs from '@tauri-apps/api/fs';
 import * as path from '@tauri-apps/api/path';
 
 import { DEFAULT_LANGUAGE } from '@/constants/languages';
+import { STATES } from '@/constants/locales';
 import type { Messages } from './messages.types';
 
 import { setValue } from '@/helpers/setValue';
@@ -41,7 +42,7 @@ export async function create(quiz: CreateData, language: Locale['language']) {
   const filePath = await path.join(dir, `${language}.json`);
   await fs.writeTextFile(filePath, JSON.stringify(messages));
 
-  await invoke('locale_update_text_state', { quizId: quiz.id, language, checked: true });
+  await invoke('locale_update_state', { quizId: quiz.id, language, state: STATES.TEXT_COMPLETED, checked: true });
 
   return messages;
 }

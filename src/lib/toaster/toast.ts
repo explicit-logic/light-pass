@@ -26,10 +26,6 @@ const toast = (message: Renderable, opts?: ToastOptions) => createHandler('blank
 
 toast.error = createHandler('error');
 toast.success = createHandler('success');
-toast.loading = createHandler('loading');
-toast.info = createHandler('info');
-toast.message = createHandler('message');
-toast.warning = createHandler('warning');
 
 toast.dismiss = (toastId?: string) => {
   dispatch({
@@ -39,36 +35,5 @@ toast.dismiss = (toastId?: string) => {
 };
 
 toast.remove = (toastId?: string) => dispatch({ type: ActionType.REMOVE_TOAST, toastId });
-
-toast.promise = <T>(
-  promise: Promise<T>,
-  msgs: {
-    loading: Renderable;
-    success: Renderable;
-    error: Renderable;
-  },
-  opts?: DefaultToastOptions,
-) => {
-  const id = toast.loading(msgs.loading, { ...opts, ...opts?.loading });
-
-  promise
-    .then((p) => {
-      toast.success(resolveValue(msgs.success, p), {
-        id,
-        ...opts,
-        ...opts?.success,
-      });
-      return p;
-    })
-    .catch((e) => {
-      toast.error(resolveValue(msgs.error, e), {
-        id,
-        ...opts,
-        ...opts?.error,
-      });
-    });
-
-  return promise;
-};
 
 export { toast };

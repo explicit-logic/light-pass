@@ -1,49 +1,67 @@
-import type { FormData } from './QuizForm.types';
+import type { CreateFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+
+import { toast } from '@/lib/toaster';
 
 import type { Quiz } from '@/models/Quiz';
 
-import { create as createLocale, removeAll as removeAllLocales } from '@/api/locales';
+import { removeAll as removeAllLocales, upsert as upsertLocale } from '@/api/locales';
 import { create as createQuiz, remove as removeQuiz } from '@/api/quizzes';
 
-import LocalesArrayField from './components/LocalesArrayField';
+import Listbox from '@/components/molecules/Listbox';
 
-import { DEFAULT_LANGUAGE } from '@/constants/languages';
-import { schema } from './schema';
+import { languages } from '@/constants/languages';
+import { createSchema } from './schema';
+
+const languageOptions = Object.entries(languages).map(([id, name]) => ({ id, name, highlight: id === 'uk' }));
 
 function QuizCreateForm() {
   const navigate = useNavigate();
-  const methods = useForm<FormData>({
+  const methods = useForm<CreateFormData>({
     defaultValues: {
-      locales: [{ language: DEFAULT_LANGUAGE, main: true, url: '' }],
+      languages: [],
       name: '',
       description: '',
     },
-    resolver: yupResolver(schema),
+    resolver: yupResolver(createSchema),
   });
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data: FormData) => {
-    const { locales, name, description } = data;
+  const onSubmit = handleSubmit(async (data: CreateFormData) => {
+    const { languages, name, description } = data;
     let quiz: Quiz | null = null;
     try {
       quiz = await createQuiz({ name, description: description ?? '' });
-      for (const locale of locales) {
-        await createLocale({ ...locale, quizId: quiz.id });
+      let main = true;
+      for (const language of languages) {
+        await upsertLocale({
+          language,
+          main,
+          quizId: quiz.id,
+          url: `https://example.com/${language}`,
+        });
+        main = false;
       }
-      return navigate('/quizzes', { replace: true });
+      navigate('/quizzes', { replace: true });
+
+      toast.success('Quiz created');
+
+      return;
     } catch (error) {
       if (quiz) {
         await removeAllLocales(quiz.id);
         await removeQuiz(quiz.id);
       }
+
+      toast.error((error as Error).message);
       return;
     }
   });
@@ -79,7 +97,24 @@ function QuizCreateForm() {
             placeholder="Describe your quiz"
           />
         </div>
-        <LocalesArrayField />
+        <div className="mb-6">
+          <label htmlFor="fields" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Languages
+          </label>
+          <Controller
+            name="languages"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Listbox
+                error={fieldState.error}
+                value={field.value}
+                onChange={field.onChange}
+                options={languageOptions}
+                placeholder="Select languages..."
+              />
+            )}
+          />
+        </div>
         <button
           type="submit"
           className="px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

@@ -1,4 +1,4 @@
-import type { FormData } from '../QuizForm.types';
+import type { EditFormData } from '../QuizForm.types';
 
 import { useCallback, useMemo } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
@@ -13,7 +13,7 @@ function LocalesArrayField() {
     control,
     formState: { errors },
     register,
-  } = useFormContext<FormData>();
+  } = useFormContext<EditFormData>();
 
   const { fields, append, remove, update } = useFieldArray({
     name: 'locales',

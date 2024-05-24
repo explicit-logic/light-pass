@@ -1,5 +1,5 @@
 import type { FieldArrayWithId, UseFieldArrayUpdate } from 'react-hook-form';
-import type { FormData } from '../QuizForm.types';
+import type { EditFormData } from '../QuizForm.types';
 
 import { DEFAULT_LANGUAGE, languages } from '@/constants/languages';
 import { memo, useCallback, useState } from 'react';
@@ -16,10 +16,10 @@ function LocalesDropdown({
   languagesArray,
   update,
 }: {
-  field: FieldArrayWithId<FormData>;
+  field: FieldArrayWithId<EditFormData>;
   idx: number;
   languagesArray: { id: keyof typeof languages; name: string }[];
-  update: UseFieldArrayUpdate<FormData, 'locales'>;
+  update: UseFieldArrayUpdate<EditFormData, 'locales'>;
 }) {
   const language = getLanguageById(field.language);
 
