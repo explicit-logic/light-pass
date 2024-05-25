@@ -15,7 +15,6 @@ export function Component() {
             Create
           </Link>
         }
-        noGoBack
       />
       <main className="flex flex-col">
         <QuizTable />

@@ -175,11 +175,7 @@ export const defaultTimeouts: {
 } = {
   blank: 4000,
   error: 4000,
-  info: 4000,
-  loading: Number.POSITIVE_INFINITY,
-  message: 4000,
   success: 2000,
-  warning: 4000,
 };
 
 export const useStore = (): State => {

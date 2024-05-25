@@ -1,4 +1,4 @@
-import type { Quiz } from '@/api/quizzes';
+import type { Quiz } from '@/models/Quiz';
 import type { Row } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
 

@@ -1,4 +1,4 @@
-import type { Quiz } from '@/api/quizzes';
+import type { Quiz } from '@/models/Quiz';
 
 import { memo } from 'react';
 

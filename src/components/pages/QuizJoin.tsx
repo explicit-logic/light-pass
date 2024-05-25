@@ -1,4 +1,5 @@
 import type { languages } from '@/constants/languages';
+import type { Quiz } from '@/models/Quiz';
 import type Peer from 'peerjs';
 
 import { Suspense } from 'react';
@@ -6,7 +7,7 @@ import { Await, type LoaderFunction, defer, redirect, useLoaderData, useParams }
 
 // Lib
 import { getOne as getOneLocale } from '@/api/locales';
-import { type Quiz, getOne as getOneQuiz } from '@/api/quizzes';
+import { getOne as getOneQuiz } from '@/api/quizzes';
 import { connect } from '@/lib/peer/connect';
 import { getContext } from '@/lib/peer/store';
 

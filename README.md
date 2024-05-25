@@ -1,4 +1,4 @@
-## Simple Quiz GUI
+## Light Pass
 
 *** Get Started ***
 

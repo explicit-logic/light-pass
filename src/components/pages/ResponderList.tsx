@@ -1,6 +1,6 @@
+import { getOne } from '@/api/quizzes';
+import type { Quiz } from '@/models/Quiz';
 import { type LoaderFunction, useLoaderData, useParams } from 'react-router-dom';
-
-import { type Quiz, getOne } from '@/api/quizzes';
 
 // Components
 import HeaderLocale from '@/components/atoms/HeaderLocale';

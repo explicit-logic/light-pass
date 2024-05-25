@@ -1,4 +1,4 @@
-import type { Locale } from '@/api/locales';
+import type { Locale } from '@/models/Locale';
 // Modules
 import type Peer from 'peerjs';
 

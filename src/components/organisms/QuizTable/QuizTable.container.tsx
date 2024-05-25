@@ -1,4 +1,5 @@
-import { type Quiz, getMany } from '@/api/quizzes';
+import { getMany } from '@/api/quizzes';
+import type { Quiz } from '@/models/Quiz';
 import { useEffect, useState } from 'react';
 
 import QuizTableView from './QuizTable.view';
