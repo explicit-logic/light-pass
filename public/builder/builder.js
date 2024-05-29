@@ -98,6 +98,11 @@ jQuery(($) => {
     fbInstances[tabId] = $(selector).formBuilder(
       {
         dataType: 'json',
+        clobberingProtection: {
+          document: true,
+          form: false, //Set true for FormRender
+          namespaceAttributes: true,
+        },
         disabledAttrs: [
           'access',
           'className',

@@ -6,7 +6,9 @@ mod crud;
 mod database;
 mod editor;
 mod error;
+mod github;
 mod state;
+mod trace;
 mod utils;
 
 use state::AppState;
@@ -48,6 +50,9 @@ fn main() {
             responder_one,
             responder_update_progress,
             responder_complete,
+
+            github::init_device_oauth,
+            github::check_auth_status,
         ])
         .setup(|app| {
             let handle = app.handle();

@@ -36,6 +36,7 @@ export async function create(quiz: CreateData, language: Locale['language']) {
   setValue(messages, 'Metadata.title.template', `%s | ${quiz.name}`);
   setValue(messages, 'Metadata.description', quiz.description);
   setValue(messages, 'Home.title', quiz.name);
+  setValue(messages, 'Home.headline', quiz.name);
 
   const dir = await getMessagesDir(quiz.id);
   await fs.createDir(dir, { recursive: true });

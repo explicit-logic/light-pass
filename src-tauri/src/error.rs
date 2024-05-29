@@ -1,10 +1,12 @@
+use std::fmt;
 use serde::{ser::Serializer, Serialize};
+use anyhow;
 
 // create the error type that represents all errors possible in our program
 #[derive(Debug, thiserror::Error)]
 pub enum CommandError {
-    #[error(transparent)]
-    RusqliteError(#[from] rusqlite::Error),
+  #[error(transparent)]
+  RusqliteError(#[from] rusqlite::Error),
 }
 
 // we must manually implement serde::Serialize

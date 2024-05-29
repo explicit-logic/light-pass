@@ -42,11 +42,11 @@ function ClipBoardField({ value }: { value: string }) {
 
   return (
     <div className="relative">
-      <label htmlFor="npm-install-copy-button" className="sr-only">
+      <label htmlFor="clipboard-input" className="sr-only">
         Copy
       </label>
       <input
-        id="npm-install-copy-button"
+        id="clipboard-input"
         type="text"
         className="col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         value={value}
@@ -60,7 +60,7 @@ function ClipBoardField({ value }: { value: string }) {
       >
         {showIcon(copied)}
       </button>
-      {/* <div id="tooltip-copy-npm-install-copy-button" role="tooltip" className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+      {/* <div id="tooltip-clipboard" role="tooltip" className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
               <span id="default-tooltip-message">Copy to clipboard</span>
               <span id="success-tooltip-message" className="hidden">Copied!</span>
               <div className="tooltip-arrow" data-popper-arrow></div>
