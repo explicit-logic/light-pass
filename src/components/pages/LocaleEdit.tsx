@@ -23,7 +23,7 @@ export function Component() {
 
   return (
     <>
-      <Header right={<HeaderLocale>{language}</HeaderLocale>} title={quiz.name} goBackLink={`/quizzes/${quiz.id}/edit`} />
+      <Header right={<HeaderLocale>{language}</HeaderLocale>} title={quiz.name} goBackLink={`/quizzes/${quiz.id}/edit/locale`} />
       <LocaleEditSideBar />
       <main className="flex flex-col items-center justify-center">
         <Outlet />

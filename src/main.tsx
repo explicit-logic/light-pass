@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom'
 
 import Root from '@/components/pages/Root';
 
+import './animation.css';
 import './styles.css';
 
 // Helpers

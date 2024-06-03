@@ -1,21 +1,23 @@
-import { toast } from '@/lib/toaster';
 import { Dialog, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
 import { open } from '@tauri-apps/api/shell';
 import { memo, useCallback, useState } from 'react';
 
-import { identify } from '@/lib/github';
+import { getAuthenticated, identify } from '@/lib/github/auth';
 
 import ClipBoardField from '@/components/molecules/ClipboardField';
 
 type Props = {
   close: () => void;
-  onAuth: () => void;
+  onAuth: (user: { login: string }) => void;
+  onError: (error: unknown) => void;
   isOpen: boolean;
   deviceCode: string;
   userCode: string;
 };
 
-function GitHubOauthModal({ isOpen, deviceCode, userCode, close, onAuth }: Props) {
+const GITHUB_APP_LINK = 'https://github.com/apps/light-pass';
+
+function GitHubOauthModal({ isOpen, deviceCode, userCode, close, onAuth, onError }: Props) {
   const [ghActivationPageOpened, setGhActivationPageOpened] = useState(false);
 
   const openGhActivationPage = useCallback(async () => {
@@ -23,16 +25,24 @@ function GitHubOauthModal({ isOpen, deviceCode, userCode, close, onAuth }: Props
     setGhActivationPageOpened(true);
   }, []);
 
+  const openAppLink = useCallback(async () => {
+    await open(GITHUB_APP_LINK);
+  }, []);
+
   const gitHubOauthCheckStatus = useCallback(async () => {
     try {
       await identify(deviceCode);
-      onAuth();
-      close();
-      toast.success('Authorized with GitHub');
+      const user = await getAuthenticated();
+      if (!user) {
+        throw new Error('Failed to authorize with GitHub');
+      }
+      onAuth(user);
     } catch (error) {
-      toast.error((error as Error).message);
+      onError(error);
+    } finally {
+      close();
     }
-  }, [deviceCode, close, onAuth]);
+  }, [deviceCode, close, onAuth, onError]);
 
   return (
     <Transition
@@ -67,6 +77,35 @@ function GitHubOauthModal({ isOpen, deviceCode, userCode, close, onAuth }: Props
               </button>
             </DialogTitle>
             <div className="p-4 md:p-5 space-y-4">
+              <div className="p-4 border border-gray-300 rounded-lg bg-gray-50 dark:border-gray-600 dark:bg-gray-800" role="alert">
+                <div className="flex items-center">
+                  <svg
+                    className="flex-shrink-0 w-4 h-4 me-2 dark:text-gray-300"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                  </svg>
+                  <span className="sr-only">Info</span>
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300">Require installed GitHub App</h3>
+                </div>
+                <div className="mt-2 text-sm space-y-4 text-gray-800 dark:text-gray-300">
+                  <p>Follow the link bellow, to install the GitHub App for all your repositories</p>
+                  <button type="button" className="underline" onClick={openAppLink}>
+                    {GITHUB_APP_LINK}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Copy the following verification code:</p>
+                <ClipBoardField value={userCode} />
+                <p className="block mt-2 mb-2 text-sm font-medium text-gray-900 dark:text-gray-400">
+                  Navigate to the GitHub activation page and paste the code you copied.
+                </p>
+              </div>
               {ghActivationPageOpened ? (
                 <button
                   type="button"
@@ -77,13 +116,6 @@ function GitHubOauthModal({ isOpen, deviceCode, userCode, close, onAuth }: Props
                 </button>
               ) : (
                 <>
-                  <div>
-                    <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Copy the following verification code:</p>
-                    <ClipBoardField value={userCode} />
-                    <p className="block mt-2 mb-2 text-sm font-medium text-gray-900 dark:text-gray-400">
-                      Navigate to the GitHub activation page and paste the code you copied.
-                    </p>
-                  </div>
                   <button
                     type="button"
                     className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

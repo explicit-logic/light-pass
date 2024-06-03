@@ -22,6 +22,10 @@ export async function upsert(data: LocaleCreate) {
   return new Locale(locale);
 }
 
+export async function updateUrl(data: { quizId: Locale['quizId']; language: Locale['language']; url: Locale['url'] }) {
+  await invoke('locale_update_url', data);
+}
+
 export async function remove(quizId: Locale['quizId'], language: Locale['language']) {
   await invoke('locale_delete_one', { quizId, language });
 }

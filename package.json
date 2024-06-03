@@ -14,7 +14,6 @@
   "dependencies": {
     "@headlessui/react": "^2.0.3",
     "@hookform/resolvers": "^3.3.4",
-    "@octokit/rest": "^20.1.1",
     "@sindresorhus/slugify": "^2.2.1",
     "@tanstack/react-table": "^8.16.0",
     "@tauri-apps/api": "^1",

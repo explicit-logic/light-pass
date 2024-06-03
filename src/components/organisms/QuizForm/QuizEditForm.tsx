@@ -1,43 +1,37 @@
 import { toast } from '@/lib/toaster';
-import { memo } from 'react';
+import slugify from '@sindresorhus/slugify';
+import { memo, useCallback, useState } from 'react';
 
+import type { Locale } from '@/models/Locale';
+import type { Quiz } from '@/models/Quiz';
 import type { EditFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
-import { removeAll as removeAllLocales, remove as removeLocale, upsert as upsertLocale } from '@/api/locales';
-import { remove as removeQuiz, update as updateQuiz } from '@/api/quizzes';
-import type { Locale } from '@/models/Locale';
-import type { Quiz } from '@/models/Quiz';
+import { remove as removeLocale, updateUrl as updateLocaleUrl, upsert as upsertLocale } from '@/api/locales';
+import { getMode, remove as removeQuiz, update as updateQuiz, updateRepo } from '@/api/quizzes';
+import { getChanges as getLocaleChanges } from './helpers/locales';
 
+import RemovalModal from '@/components/molecules/RemovalModal';
 import LocalesArrayField from './components/LocalesArrayField';
 
-import { useCallback } from 'react';
+import { MODES } from '@/constants/deployment';
+
 import { editSchema } from './schema';
-
-function getDeletedLocales(source: Locale[], target: EditFormData['locales']) {
-  const deleted: Locale[] = [];
-  const targetLang = target.reduce<{ [key: string]: boolean }>((acc, curr) => {
-    acc[curr.language] = true;
-    return acc;
-  }, {});
-
-  for (const sourceLocale of source) {
-    if (!targetLang[sourceLocale.language]) {
-      deleted.push(sourceLocale);
-    }
-  }
-
-  return deleted;
-}
 
 function QuizEditForm() {
   const navigate = useNavigate();
   const { locales, quiz } = useRouteLoaderData('quiz-edit') as { quiz: Quiz; locales: Locale[] };
   const quizId = quiz.id;
   const revalidator = useRevalidator();
+
+  const [removalModalOpen, setRemovalModalOpen] = useState(false);
+
+  const closeRemoveModal = useCallback(() => {
+    setRemovalModalOpen(false);
+  }, []);
 
   const methods = useForm<EditFormData>({
     defaultValues: {
@@ -57,30 +51,41 @@ function QuizEditForm() {
     try {
       await updateQuiz(quizId, { name: target.name, description: target.description ?? '' });
 
-      const deletedLocales = getDeletedLocales(locales, target.locales);
+      const mode = await getMode(quizId);
+      if (mode === MODES.CREATE) {
+        await updateRepo(quiz.id, slugify(target.name));
+      }
+
+      const { created: createdLocales, deleted: deletedLocales, updated: updatedLocales } = getLocaleChanges(locales, target.locales);
+
       for (const deletedLocale of deletedLocales) {
         await removeLocale(quizId, deletedLocale.language);
       }
 
-      for (const targetLocale of target.locales) {
-        await upsertLocale({ ...targetLocale, quizId });
+      for (const createdLocale of createdLocales) {
+        await upsertLocale({ ...createdLocale, quizId });
+      }
+
+      for (const { language, url } of updatedLocales) {
+        await updateLocaleUrl({ quizId, language, url });
       }
       revalidator.revalidate();
 
       toast.success('Quiz updated');
     } catch (error) {
-      toast.error((error as Error).message);
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
     }
   });
 
   const onRemove = useCallback(async () => {
     try {
-      await removeAllLocales(quizId);
       await removeQuiz(quizId);
       navigate('/quizzes', { replace: true });
       toast('Quiz removed');
     } catch (error) {
-      toast.error((error as Error).message);
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
     }
   }, [quizId, navigate]);
 
@@ -126,11 +131,17 @@ function QuizEditForm() {
           <button
             type="button"
             className="px-5 py-3.5 text-sm text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-            onClick={onRemove}
+            onClick={() => setRemovalModalOpen(true)}
           >
             Remove
           </button>
         </div>
+        <RemovalModal
+          isOpen={removalModalOpen}
+          close={closeRemoveModal}
+          message="Are you sure you want to delete this Quiz?"
+          onRemove={onRemove}
+        />
       </form>
     </FormProvider>
   );

@@ -63,7 +63,7 @@ function QuizEditSideBar() {
             />
           </svg>
         </SideBarLink>
-        <SideBarLink to="deployment" title="Deployment" caption="" completed={quiz.deployed} disabled={!quiz.localeCompleted}>
+        <SideBarLink to="deployment" title="Create a Website" caption="" completed={quiz.deployed} disabled={!quiz.localeCompleted}>
           <GlobeIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
         </SideBarLink>
       </ol>

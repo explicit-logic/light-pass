@@ -1,6 +1,7 @@
 import type { CreateFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
+import slugify from '@sindresorhus/slugify';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +10,7 @@ import { toast } from '@/lib/toaster';
 import type { Quiz } from '@/models/Quiz';
 
 import { removeAll as removeAllLocales, upsert as upsertLocale } from '@/api/locales';
-import { create as createQuiz, remove as removeQuiz } from '@/api/quizzes';
+import { create as createQuiz, remove as removeQuiz, updateRepo } from '@/api/quizzes';
 
 import Listbox from '@/components/molecules/Listbox';
 
@@ -50,6 +51,7 @@ function QuizCreateForm() {
         });
         main = false;
       }
+      await updateRepo(quiz.id, slugify(name));
       navigate('/quizzes', { replace: true });
 
       toast.success('Quiz created');
@@ -60,9 +62,7 @@ function QuizCreateForm() {
         await removeAllLocales(quiz.id);
         await removeQuiz(quiz.id);
       }
-
-      toast.error((error as Error).message);
-      return;
+      toast.error(error instanceof Error ? error.message : (error as string));
     }
   });
 

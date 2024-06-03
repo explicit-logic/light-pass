@@ -14,6 +14,7 @@ mod utils;
 use state::AppState;
 use tauri::{Manager, State};
 
+use crud::deployment_process::*;
 use crud::locale::*;
 use crud::responder::*;
 use crud::quiz::*;
@@ -29,12 +30,25 @@ fn main() {
 
             editor::open_editor,
 
+            deployment_process_update_indicator,
+            deployment_process_upsert,
+            deployment_process_many,
+            deployment_process_reset,
+
             quiz_create,
             quiz_delete,
             quiz_many,
             quiz_one,
             quiz_update,
             quiz_update_configuration,
+            quiz_update_state,
+
+            quiz_website,
+            quiz_update_owner,
+            quiz_update_repo,
+
+            quiz_mode,
+            quiz_update_mode,
 
             locale_upsert,
             locale_delete_many,
@@ -43,6 +57,7 @@ fn main() {
             locale_one,
             locale_update_question_counter,
             locale_update_state,
+            locale_update_url,
 
             responder_create,
             responder_delete_one,
@@ -53,6 +68,7 @@ fn main() {
 
             github::init_device_oauth,
             github::check_auth_status,
+            github::request_access_token,
         ])
         .setup(|app| {
             let handle = app.handle();
