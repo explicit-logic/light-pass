@@ -6,8 +6,29 @@ CREATE TABLE IF NOT EXISTS quizzes (
 
   "state" INTEGER NOT NULL DEFAULT 0,
 
+  "mode" TEXT NOT NULL DEFAULT 'create',
+
+  "repo" TEXT NOT NULL DEFAULT '',
+  "owner" TEXT NOT NULL DEFAULT '',
+
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS deployment_process (
+  quiz_id INTEGER NOT NULL,
+  stage TEXT NOT NULL,
+
+  indicator INTEGER NOT NULL DEFAULT 0,
+
+  "order" INTEGER NOT NULL DEFAULT 0,
+
+  updated_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+
+  UNIQUE(quiz_id, stage, "order") ON CONFLICT REPLACE,
+
+  FOREIGN KEY (quiz_id) REFERENCES quizzes (id)
 );
 
 CREATE TABLE IF NOT EXISTS locales (

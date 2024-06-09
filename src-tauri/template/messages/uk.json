@@ -10,12 +10,19 @@
     },
     "description": ""
   },
+  "Common": {
+    "loading": "Завантаження..."
+  },
   "Home": {
+    "title": "",
     "headline": "",
     "caption": "",
     "start": "Почати",
-    "loading": "Завантаження...",
     "fields": {
+      "email": {
+        "label": "Ваш імейл",
+        "placeholder": "example@domain.com"
+      },
       "name": {
         "label": "Ваше імʼя",
         "placeholder": "Кіт Степан"
@@ -27,7 +34,6 @@
     }
   },
   "Question": {
-    "loading": "Завантаження...",
     "next": "Далі",
     "back": "Назад",
     "finish": "Закінчити"

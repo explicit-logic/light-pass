@@ -28,17 +28,18 @@ export async function save(quizId: Quiz['id'], configuration: QuizConfiguration)
   await invoke('quiz_update_configuration', { id: quizId, checked: true });
 }
 
+export async function updateBasePath(quizId: Quiz['id'], basePath: QuizConfiguration['basePath']) {
+  const configuration = await read(quizId);
+  if (!configuration) return;
+
+  configuration.basePath = basePath;
+
+  await save(quizId, configuration);
+}
+
 async function getDataDir(quizId: Quiz['id']) {
   const appDataDirPath = await path.appDataDir();
   const dir = await path.join(appDataDirPath, 'builder', quizId.toString(), 'data');
 
   return dir;
-}
-
-function parse(content: string) {
-  try {
-    return JSON.parse(content);
-  } catch {
-    return {};
-  }
 }

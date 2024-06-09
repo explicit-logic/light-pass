@@ -23,7 +23,10 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$APPDATA/builder/**", "$RESOURCE/**"]
+        "scope": {
+          "allow": ["$APPDATA/builder/**", "$RESOURCE/**"],
+          "requireLiteralLeadingDot": false
+        }
       },
       "notification": {
         "all": true

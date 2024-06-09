@@ -1,11 +1,13 @@
 (function() {
   const API = window.__TAURI__;
-  const { fs, path } = API;
+  const { invoke, fs, path } = API;
   let unlisten;
 
   const urlParams = new URLSearchParams(window.location.search);
   const quizId = Number(urlParams.get('quiz_id'));
   const language = urlParams.get('language');
+
+  const STATE_TEXT_COMPLETED = 2;
 
   // create the editor
   const editor = new JSONEditor(document.getElementById("jsoneditor"), {
@@ -45,6 +47,12 @@
 
     const json = editor.get();
     await fs.writeTextFile(filePath, JSON.stringify(json));
+    await invoke('locale_update_state', {
+      checked: true,
+      language,
+      state: STATE_TEXT_COMPLETED,
+      quizId,
+    });
   }
 
   function parse(content) {

@@ -1,0 +1,39 @@
+.deploy-button {
+  position: relative;
+  border: transparent;
+  outline: transparent;
+  white-space: nowrap;
+  color: white;
+  background: linear-gradient(90deg, #3f82f5, #6c18fc, #3f82f5);
+  background-size: 300%;
+  border-radius: 0.5em;
+
+  animation: glow 8s linear infinite;
+}
+
+.deploy-button::before {
+  position: absolute;
+  content: "";
+  top: -5px;
+  left: -5px;
+  bottom: -5px;
+  right: -5px;
+  z-index: -1;
+  background: inherit;
+  background-size: inherit;
+  border-radius: 0.5em;
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.deploy-button:hover::before {
+  opacity: 1;
+  filter: blur(20px);
+  animation: glow 8s linear infinite;
+}
+
+@keyframes glow {
+  to {
+    background-position: 300%;
+  }
+}

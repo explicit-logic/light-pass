@@ -2,7 +2,9 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, Result};
+use keyring;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tracing::instrument;
 
 use crate::trace::error::Error;
@@ -72,10 +74,19 @@ pub async fn check_auth_status(device_code: &str) -> Result<String, Error> {
         .await
         .context("Failed to send request")?;
 
-    let rsp_body = res.text().await.context("Failed to get response body")?;
+    let auth = res.json::<AccessTokenContainer>().await.context("Failed to get response body")?;
+    let entry = keyring::Entry::new("github", "auth").context("Failed to init keyring entry")?;
+    entry.set_password(&auth.access_token).context("Failed to save token")?;
 
-    serde_json::from_str::<AccessTokenContainer>(&rsp_body)
-        .map(|rsp_body| rsp_body.access_token)
-        .context("Failed to parse response body")
-        .map_err(Into::into)
+    Ok(auth.access_token)
+}
+
+#[tauri::command]
+#[instrument]
+pub fn request_access_token() -> Result<String, Error> {
+    let entry = keyring::Entry::new("github", "auth").context("Failed to init keyring entry")?;
+    let token = entry
+        .get_password()
+        .context("Failed to get token from keyring")?;
+    Ok(token)
 }

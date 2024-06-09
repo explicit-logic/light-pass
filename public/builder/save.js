@@ -29,18 +29,23 @@
     let questionCount = 0;
 
     for (const [slug, fbInstance] of entries) {
-      const json = fbInstance.formData;
       const data = fbInstance.actions.getData();
       for (const item of data) {
         if (['header', 'paragraph'].includes(item.type)) continue;
         questionCount++;
+      }
+      for (const item of data) {
+        if (item.label) {
+          item.label = item.label.replaceAll('<br>', '');
+          item.label = item.label.replaceAll('&nbsp;', ' ');
+        }
       }
 
       const directoryPath = await join(...basePathParts, slug);
       const filePath = await join(...basePathParts, slug, `${slug}.json`);
 
       await createDir(directoryPath, { recursive: true });
-      await writeTextFile(filePath, json);
+      await writeTextFile(filePath, JSON.stringify(data));
     }
 
     await invoke('locale_update_question_counter', {

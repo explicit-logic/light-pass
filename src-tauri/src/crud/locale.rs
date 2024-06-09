@@ -270,3 +270,25 @@ pub async fn locale_update_state(app_handle: AppHandle, quiz_id: i64, language: 
 
   Ok(())
 }
+
+fn update_url(db: &Connection, quiz_id: i64, language: &str, url: &str) -> Result<(), rusqlite::Error> {
+  let mut statement =
+    db.prepare("UPDATE locales SET url = :url, updated_at = :updated_at WHERE quiz_id = :quiz_id AND language = :language")?;
+  statement.execute(named_params! {
+    ":quiz_id": quiz_id,
+    ":language": language,
+    ":url": url,
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn locale_update_url(app_handle: AppHandle, quiz_id: i64, language: &str, url: &str) -> CommandResult<()> {
+  app_handle.db(|db| update_url(
+    db, quiz_id, language, url,
+  ))?;
+
+  Ok(())
+}

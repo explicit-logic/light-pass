@@ -9,26 +9,29 @@ import { save } from '@/api/configuration';
 import type { Quiz } from '@/models/Quiz';
 import type { QuizConfiguration } from '@/models/QuizConfiguration';
 
-import { getDefaultValues } from './helpers/getDefaultValues';
-
+import type { Website } from '@/api/quizzes';
 import GlobeIcon from '@/components/atoms/GlobeIcon';
 import Listbox from '@/components/molecules/Listbox';
 import { schema } from './schema';
 
-import { FIELD_LABELS, ORDER_LABELS } from '@/constants/configuration';
+import { DEFAULT_FIELDS, DEFAULT_ORDER, FIELD_LABELS, ORDER_LABELS } from '@/constants/configuration';
 
 const identityFieldsOptions = Object.entries(FIELD_LABELS).map(([id, name]) => ({ id, name }));
 const orderOptions = Object.entries(ORDER_LABELS).map(([id, name]) => ({ id, name }));
 
 function QuizConfigurationForm() {
   const { quiz } = useRouteLoaderData('quiz-edit') as { quiz: Quiz };
-  const { configuration } = useLoaderData() as { configuration: QuizConfiguration };
+  const { configuration, website } = useLoaderData() as { configuration: QuizConfiguration; website: Website };
   const revalidator = useRevalidator();
 
   const quizId = quiz.id;
 
   const methods = useForm<QuizConfiguration>({
-    defaultValues: configuration ?? getDefaultValues(quiz),
+    defaultValues: configuration ?? {
+      basePath: website.repo,
+      fields: DEFAULT_FIELDS,
+      order: DEFAULT_ORDER,
+    },
     resolver: yupResolver(schema),
   });
   const {
@@ -51,7 +54,7 @@ function QuizConfigurationForm() {
   return (
     <FormProvider {...methods}>
       <form className="w-full max-w-lg px-8" onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label htmlFor="basePath" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Base path
           </label>
@@ -70,7 +73,7 @@ function QuizConfigurationForm() {
               {errors.basePath?.message}
             </p>
           )}
-        </div>
+        </div> */}
         <div className="mb-6">
           <label htmlFor="order" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Page order

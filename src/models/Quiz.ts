@@ -1,18 +1,21 @@
+import { MODES } from '@/constants/deployment';
 import { STATES } from '@/constants/quizzes';
 
 export class Quiz {
-  public id: number;
+  public readonly id: number;
   public name: string;
   public description: string;
 
-  public localeCount: number;
-  public mainLanguage?: string;
-  public mainUrl?: string;
+  public readonly localeCount: number = 0;
+  public readonly mainLanguage?: string;
+  public readonly mainUrl?: string;
 
-  public state: number;
+  public readonly state: number = 0;
 
-  public createdAt: number;
-  public updatedAt: number;
+  public readonly mode: (typeof MODES)[keyof typeof MODES] = MODES.CREATE;
+
+  public readonly createdAt: number;
+  public readonly updatedAt: number;
 
   constructor(data: Partial<Quiz>) {
     Object.assign(this, data);

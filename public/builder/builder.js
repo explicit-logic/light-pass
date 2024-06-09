@@ -100,7 +100,7 @@ jQuery(($) => {
         dataType: 'json',
         clobberingProtection: {
           document: true,
-          form: false, //Set true for FormRender
+          form: true, //Set true for FormRender
           namespaceAttributes: true,
         },
         disabledAttrs: [
@@ -125,7 +125,7 @@ jQuery(($) => {
           'toggle',
           // 'value'
         ],
-        disableFields: ['autocomplete', 'button', 'date', 'hidden', 'file'],
+        disableFields: ['autocomplete', 'button', 'date', 'hidden', 'file', 'number', 'paragraph', 'starRating', 'text', 'textarea', 'select'],
         formData,
         replaceFields: [
           {
@@ -147,15 +147,15 @@ jQuery(($) => {
             ],
           },
 
-          {
-            type: "select",
-            label: "Select",
-            values: [
-              { label: "Response 1", value: "1" },
-              { label: "Response 2", value: "2" },
-              { label: "Response 3", value: "3" }
-            ],
-          },
+          // {
+          //   type: "select",
+          //   label: "Select",
+          //   values: [
+          //     { label: "Response 1", value: "1" },
+          //     { label: "Response 2", value: "2" },
+          //     { label: "Response 3", value: "3" }
+          //   ],
+          // },
           
         ],
         showActionButtons: false,
