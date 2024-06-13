@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Light Pass",
-    "version": "0.0.1"
+    "version": "0.0.11"
   },
   "tauri": {
     "allowlist": {
@@ -44,6 +44,17 @@
         "maximize": true,
         "unmaximize": true,
         "close": true
+      }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://gist.github.com/explicit-logic/589602aff1033330190fb6c5e618e8ea"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVGNjVFN0JFMkFGMzc4NEEKUldSS2VQTXF2dWRsNzYzallpa0Frb1M5c3BiazloTnlpc3UvaUF6czFBNFNGdmtxZXppT1d6WEoK",
+      "windows": {
+        "installMode": "passive"
       }
     },
     "windows": [
