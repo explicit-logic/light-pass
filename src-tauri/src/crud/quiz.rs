@@ -7,6 +7,8 @@ use tauri::AppHandle;
 
 use crate::utils::time;
 
+use crate::crud::locale;
+
 const DETAILS_COMPLETED: u8 = 1;
 const CONFIGURATION_COMPLETED: u8 = 2;
 const LOCALE_COMPLETED: u8 = 4;
@@ -70,7 +72,7 @@ pub async fn quiz_create(app_handle: AppHandle, name: &str, description: &str) -
         id: 0,
         name: name.to_string(),
         description: description.to_string(),
-        state: DETAILS_COMPLETED as i64,
+        state: 0,
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -100,7 +102,7 @@ pub async fn quiz_delete(app_handle: AppHandle, id: i64) -> CommandResult<()> {
 fn many(db: &Connection) -> Result<Vec<QuizListItem>, rusqlite::Error> {
     let mut statement =
         db.prepare("
-          SELECT 
+          SELECT
             quizzes.*,
             (SELECT COUNT(*) FROM locales WHERE quiz_id = quizzes.id) AS locale_count,
             locales.language AS main_language,
@@ -163,22 +165,25 @@ pub async fn quiz_one(app_handle: AppHandle, id: i64) -> CommandResult<Quiz> {
     Ok(result)
 }
 
-fn update(db: &Connection, id: i64, name: &str, description: &str) -> Result<(), rusqlite::Error> {
+fn update(db: &Connection, id: i64, name: &str, description: &str, language: &str) -> Result<(), rusqlite::Error> {
     let mut statement =
-        db.prepare("UPDATE quizzes SET name = :name, description = :description, updated_at = :updated_at WHERE id = :id")?;
+        db.prepare("UPDATE quizzes SET name = :name, description = :description, state = state | :state, updated_at = :updated_at WHERE id = :id")?;
     statement.execute(named_params! {
         ":id": id,
         ":name": name,
         ":description": description,
+        ":state": DETAILS_COMPLETED,
         ":updated_at": time::now(),
     })?;
+
+    locale::update_main_language(db, id, language)?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str, description: &str) -> CommandResult<()> {
-    app_handle.db(|db| update(db, id, name, description))?;
+pub async fn quiz_update(app_handle: AppHandle, id: i64, name: &str, description: &str, language: &str) -> CommandResult<()> {
+    app_handle.db(|db| update(db, id, name, description, language))?;
 
     Ok(())
 }

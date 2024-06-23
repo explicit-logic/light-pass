@@ -6,6 +6,7 @@ import * as fs from '@tauri-apps/api/fs';
 import * as path from '@tauri-apps/api/path';
 
 import type { MODES } from '@/constants/deployment';
+import type { languages } from '@/constants/languages';
 import type { STATES } from '@/constants/quizzes';
 import { Quiz } from '@/models/Quiz';
 
@@ -42,7 +43,7 @@ export async function create(data: { name: string; description: string }) {
   return new Quiz(quiz);
 }
 
-export async function update(id: Quiz['id'], data: { name: string; description: string }) {
+export async function update(id: Quiz['id'], data: { name: string; description: string; language: keyof typeof languages }) {
   const quiz = (await invoke('quiz_update', { ...data, id })) as Quiz;
 
   return new Quiz(quiz);
@@ -51,7 +52,10 @@ export async function update(id: Quiz['id'], data: { name: string; description: 
 export async function remove(id: Quiz['id']) {
   const appDataDirPath = await path.appDataDir();
   const directoryPath = await path.join(appDataDirPath, 'builder', id.toString());
-  await fs.removeDir(directoryPath, { recursive: true });
+  const directoryExists = await fs.exists(directoryPath);
+  if (directoryExists) {
+    await fs.removeDir(directoryPath, { recursive: true });
+  }
 
   await resetDeploymentProcess(id);
   await removeAllLocales(id);

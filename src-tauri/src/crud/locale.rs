@@ -292,3 +292,15 @@ pub async fn locale_update_url(app_handle: AppHandle, quiz_id: i64, language: &s
 
   Ok(())
 }
+
+pub fn update_main_language(db: &Connection, quiz_id: i64, language: &str) -> Result<(), rusqlite::Error> {
+  let mut statement =
+    db.prepare("UPDATE locales SET language = :language, updated_at = :updated_at WHERE quiz_id = :quiz_id AND main = 1")?;
+  statement.execute(named_params! {
+    ":quiz_id": quiz_id,
+    ":language": language,
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}

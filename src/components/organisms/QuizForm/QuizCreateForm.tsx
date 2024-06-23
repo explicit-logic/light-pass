@@ -12,18 +12,16 @@ import type { Quiz } from '@/models/Quiz';
 import { removeAll as removeAllLocales, upsert as upsertLocale } from '@/api/locales';
 import { create as createQuiz, remove as removeQuiz, updateRepo } from '@/api/quizzes';
 
-import Listbox from '@/components/molecules/Listbox';
-
 import { languages } from '@/constants/languages';
 import { createSchema } from './schema';
 
-const languageOptions = Object.entries(languages).map(([id, name]) => ({ id, name, highlight: id === 'uk' }));
+const languageOptions = Object.entries(languages).map(([id, name]) => ({ id, name }));
 
 function QuizCreateForm() {
   const navigate = useNavigate();
   const methods = useForm<CreateFormData>({
     defaultValues: {
-      languages: [],
+      language: undefined,
       name: '',
       description: '',
     },
@@ -37,22 +35,18 @@ function QuizCreateForm() {
   } = methods;
 
   const onSubmit = handleSubmit(async (data: CreateFormData) => {
-    const { languages, name, description } = data;
+    const { language, name, description } = data;
     let quiz: Quiz | null = null;
     try {
       quiz = await createQuiz({ name, description: description ?? '' });
-      let main = true;
-      for (const language of languages) {
-        await upsertLocale({
-          language,
-          main,
-          quizId: quiz.id,
-          url: `https://example.com/${language}`,
-        });
-        main = false;
-      }
+      await upsertLocale({
+        language,
+        main: true,
+        quizId: quiz.id,
+        url: '',
+      });
       await updateRepo(quiz.id, slugify(name));
-      navigate('/quizzes', { replace: true });
+      navigate(`/quizzes/${quiz.id}/edit`, { replace: true });
 
       toast.success('Quiz created');
 
@@ -62,7 +56,8 @@ function QuizCreateForm() {
         await removeAllLocales(quiz.id);
         await removeQuiz(quiz.id);
       }
-      toast.error(error instanceof Error ? error.message : (error as string));
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
     }
   });
 
@@ -98,22 +93,19 @@ function QuizCreateForm() {
           />
         </div>
         <div className="mb-6">
-          <label htmlFor="fields" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Languages
+          <label htmlFor="language" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Language
           </label>
-          <Controller
-            name="languages"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Listbox
-                error={fieldState.error}
-                value={field.value}
-                onChange={field.onChange}
-                options={languageOptions}
-                placeholder="Select languages..."
-              />
-            )}
-          />
+          <select
+            {...register('language')}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            {languageOptions.map(({ id, name }) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="submit"

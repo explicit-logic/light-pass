@@ -8,12 +8,22 @@ import LocalesDropdown from './LocalesDropdown';
 import { languagesArray as _languagesArray, type languages } from '@/constants/languages';
 import { MAX, MIN } from '@/constants/locales';
 
+import type { Locale } from '@/models/Locale';
+
+// import { getChanges as getLocaleChanges } from './helpers/locales';
+
 function LocalesArrayField() {
   const {
     control,
     formState: { errors },
     register,
-  } = useFormContext<EditFormData>();
+  } = useFormContext<{
+    locales: {
+      language: Locale['language'];
+      main: Locale['main'];
+      url: Locale['url'];
+    }[];
+  }>();
 
   const { fields, append, remove, update } = useFieldArray({
     name: 'locales',

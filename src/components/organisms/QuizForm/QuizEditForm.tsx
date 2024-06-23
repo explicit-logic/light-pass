@@ -10,16 +10,17 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
-import { remove as removeLocale, updateUrl as updateLocaleUrl, upsert as upsertLocale } from '@/api/locales';
 import { getMode, remove as removeQuiz, update as updateQuiz, updateRepo } from '@/api/quizzes';
-import { getChanges as getLocaleChanges } from './helpers/locales';
 
 import RemovalModal from '@/components/molecules/RemovalModal';
-import LocalesArrayField from './components/LocalesArrayField';
 
 import { MODES } from '@/constants/deployment';
+// Constants
+import { languages } from '@/constants/languages';
 
 import { editSchema } from './schema';
+
+const languageOptions = Object.entries(languages).map(([id, name]) => ({ id, name }));
 
 function QuizEditForm() {
   const navigate = useNavigate();
@@ -33,9 +34,11 @@ function QuizEditForm() {
     setRemovalModalOpen(false);
   }, []);
 
+  const mainLocale = locales.find(({ main }) => main);
+
   const methods = useForm<EditFormData>({
     defaultValues: {
-      locales,
+      language: mainLocale?.language,
       name: quiz.name,
       description: quiz.description,
     },
@@ -49,25 +52,11 @@ function QuizEditForm() {
 
   const onSubmit = handleSubmit(async (target: EditFormData) => {
     try {
-      await updateQuiz(quizId, { name: target.name, description: target.description ?? '' });
+      await updateQuiz(quizId, { name: target.name, description: target.description ?? '', language: target.language });
 
       const mode = await getMode(quizId);
       if (mode === MODES.CREATE) {
         await updateRepo(quiz.id, slugify(target.name));
-      }
-
-      const { created: createdLocales, deleted: deletedLocales, updated: updatedLocales } = getLocaleChanges(locales, target.locales);
-
-      for (const deletedLocale of deletedLocales) {
-        await removeLocale(quizId, deletedLocale.language);
-      }
-
-      for (const createdLocale of createdLocales) {
-        await upsertLocale({ ...createdLocale, quizId });
-      }
-
-      for (const { language, url } of updatedLocales) {
-        await updateLocaleUrl({ quizId, language, url });
       }
       revalidator.revalidate();
 
@@ -120,7 +109,21 @@ function QuizEditForm() {
             placeholder="Describe your quiz"
           />
         </div>
-        <LocalesArrayField />
+        <div className="mb-6">
+          <label htmlFor="language" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Language
+          </label>
+          <select
+            {...register('language')}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            {languageOptions.map(({ id, name }) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex justify-between">
           <button
             type="submit"

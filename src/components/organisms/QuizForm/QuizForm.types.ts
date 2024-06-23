@@ -1,17 +1,13 @@
 import type { languages } from '@/constants/languages';
 
 export type EditFormData = {
-  locales: {
-    language: keyof typeof languages;
-    main: boolean;
-    url: string;
-  }[];
+  language: keyof typeof languages;
   name: string;
   description?: string;
 };
 
 export type CreateFormData = {
   description?: string;
-  languages: (keyof typeof languages)[];
+  language: keyof typeof languages;
   name: string;
 };
