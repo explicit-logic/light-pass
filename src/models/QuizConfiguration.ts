@@ -9,9 +9,9 @@ export class QuizConfiguration {
     Object.assign(this, data);
   }
 
-  public static toText(data: QuizConfiguration) {
+  public static toText(data: Partial<QuizConfiguration>) {
     return JSON.stringify({
-      basePath: `/${data.basePath}`,
+      basePath: data.basePath ? `/${data.basePath}` : '',
       fields: data.fields,
       order: data.order,
     });

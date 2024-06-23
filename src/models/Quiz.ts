@@ -1,4 +1,5 @@
 import { MODES } from '@/constants/deployment';
+import type { languages } from '@/constants/languages';
 import { STATES } from '@/constants/quizzes';
 
 export class Quiz {
@@ -7,7 +8,7 @@ export class Quiz {
   public description: string;
 
   public readonly localeCount: number = 0;
-  public readonly mainLanguage?: string;
+  public readonly mainLanguage?: keyof typeof languages;
   public readonly mainUrl?: string;
 
   public readonly state: number = 0;
@@ -25,12 +26,8 @@ export class Quiz {
     return (this.state & STATES.DETAILS_COMPLETED) === STATES.DETAILS_COMPLETED;
   }
 
-  public get configurationCompleted() {
-    return (this.state & STATES.CONFIGURATION_COMPLETED) === STATES.CONFIGURATION_COMPLETED;
-  }
-
-  public get localeCompleted() {
-    return (this.state & STATES.LOCALE_COMPLETED) === STATES.LOCALE_COMPLETED;
+  public get questionCompleted() {
+    return (this.state & STATES.QUESTION_COMPLETED) === STATES.QUESTION_COMPLETED;
   }
 
   public get deployed() {

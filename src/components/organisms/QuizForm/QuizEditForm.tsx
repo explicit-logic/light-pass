@@ -2,28 +2,36 @@ import { toast } from '@/lib/toaster';
 import slugify from '@sindresorhus/slugify';
 import { memo, useCallback, useState } from 'react';
 
+import { save } from '@/api/configuration';
+
 import type { Locale } from '@/models/Locale';
 import type { Quiz } from '@/models/Quiz';
+import type { QuizConfiguration } from '@/models/QuizConfiguration';
 import type { EditFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
 import { getMode, remove as removeQuiz, update as updateQuiz, updateRepo } from '@/api/quizzes';
 
+import Listbox from '@/components/molecules/Listbox';
 import RemovalModal from '@/components/molecules/RemovalModal';
 
-import { MODES } from '@/constants/deployment';
 // Constants
+import { DEFAULT_FIELDS, DEFAULT_ORDER, FIELD_LABELS, ORDER_LABELS } from '@/constants/configuration';
+import { MODES } from '@/constants/deployment';
 import { languages } from '@/constants/languages';
 
 import { editSchema } from './schema';
 
+const identityFieldsOptions = Object.entries(FIELD_LABELS).map(([id, name]) => ({ id, name }));
 const languageOptions = Object.entries(languages).map(([id, name]) => ({ id, name }));
+const orderOptions = Object.entries(ORDER_LABELS).map(([id, name]) => ({ id, name }));
 
 function QuizEditForm() {
   const navigate = useNavigate();
+  const { configuration } = useLoaderData() as { configuration: QuizConfiguration };
   const { locales, quiz } = useRouteLoaderData('quiz-edit') as { quiz: Quiz; locales: Locale[] };
   const quizId = quiz.id;
   const revalidator = useRevalidator();
@@ -38,13 +46,16 @@ function QuizEditForm() {
 
   const methods = useForm<EditFormData>({
     defaultValues: {
+      fields: configuration?.fields ?? DEFAULT_FIELDS,
       language: mainLocale?.language,
       name: quiz.name,
+      order: configuration?.order ?? DEFAULT_ORDER,
       description: quiz.description,
     },
     resolver: yupResolver(editSchema),
   });
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -53,6 +64,10 @@ function QuizEditForm() {
   const onSubmit = handleSubmit(async (target: EditFormData) => {
     try {
       await updateQuiz(quizId, { name: target.name, description: target.description ?? '', language: target.language });
+      await save(quizId, {
+        fields: target.fields,
+        order: target.order,
+      });
 
       const mode = await getMode(quizId);
       if (mode === MODES.CREATE) {
@@ -123,6 +138,44 @@ function QuizEditForm() {
               </option>
             ))}
           </select>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="order" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Page order
+          </label>
+          <select
+            {...register('order')}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            {orderOptions.map(({ id, name }) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+          {errors.order && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-500" role="alert">
+              {errors.order?.message}
+            </p>
+          )}
+        </div>
+        <div className="mb-6">
+          <label htmlFor="fields" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Identity fields
+          </label>
+          <Controller
+            name="fields"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Listbox
+                error={fieldState.error}
+                value={field.value}
+                onChange={field.onChange}
+                options={identityFieldsOptions}
+                placeholder="Select fields..."
+              />
+            )}
+          />
         </div>
         <div className="flex justify-between">
           <button

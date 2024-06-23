@@ -19,13 +19,16 @@ export async function read(quizId: Quiz['id']) {
   }
 }
 
-export async function save(quizId: Quiz['id'], configuration: QuizConfiguration) {
+export async function save(quizId: Quiz['id'], configuration: Partial<QuizConfiguration>) {
   const dir = await getDataDir(quizId);
   await fs.createDir(dir, { recursive: true });
   const filePath = await path.join(dir, FILE_NAME);
-  const text = QuizConfiguration.toText(configuration);
+
+  const source = await read(quizId);
+  const data = merge(source, configuration);
+
+  const text = QuizConfiguration.toText(data);
   await fs.writeTextFile(filePath, text);
-  await invoke('quiz_update_configuration', { id: quizId, checked: true });
 }
 
 export async function updateBasePath(quizId: Quiz['id'], basePath: QuizConfiguration['basePath']) {
@@ -42,4 +45,15 @@ async function getDataDir(quizId: Quiz['id']) {
   const dir = await path.join(appDataDirPath, 'builder', quizId.toString(), 'data');
 
   return dir;
+}
+
+function merge(source: QuizConfiguration | undefined, target: Partial<QuizConfiguration>) {
+  if (!source) return target;
+
+  for (const [field, value] of Object.entries(target)) {
+    // @ts-expect-error it's okay
+    source[field] = value;
+  }
+
+  return source;
 }

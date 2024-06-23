@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 type Props = {
   caption?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   completed?: boolean;
   disabled?: boolean;
   to: string;
