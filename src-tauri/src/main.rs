@@ -40,7 +40,6 @@ fn main() {
             quiz_many,
             quiz_one,
             quiz_update,
-            quiz_update_configuration,
             quiz_update_state,
 
             quiz_website,

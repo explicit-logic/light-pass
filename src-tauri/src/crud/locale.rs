@@ -195,6 +195,18 @@ fn check_completion(db: &Connection, quiz_id: i64) -> Result<bool, rusqlite::Err
   )
 }
 
+fn check_is_main(db: &Connection, quiz_id: i64, language: &str) -> Result<bool, rusqlite::Error> {
+  db.query_row(
+      "SELECT main FROM locales WHERE quiz_id = :quiz_id AND language = :language",
+      named_params! { ":quiz_id": quiz_id, ":language": language },
+      |row| {
+        let main: bool = row.get("main")?;
+
+        Ok(main)
+      },
+  )
+}
+
 fn update_state(db: &Connection, quiz_id: i64, language: &str, state: u8, checked: bool) -> Result<(), rusqlite::Error> {
   let mut statement;
   if checked {
@@ -247,6 +259,12 @@ fn update_question_counter(db: &Connection, quiz_id: i64, language: &str, page_c
   let completed = if question_count == 0 { false } else { check_completion(db, quiz_id)? };
 
   quiz::update_locale_state(db, quiz_id, completed)?;
+
+  let main = check_is_main(db, quiz_id, language)?;
+
+  if main {
+    quiz::update_question_state(db, quiz_id, question_count > 0)?;
+  }
 
   Ok(())
 }

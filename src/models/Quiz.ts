@@ -30,6 +30,10 @@ export class Quiz {
     return (this.state & STATES.QUESTION_COMPLETED) === STATES.QUESTION_COMPLETED;
   }
 
+  public get localeCompleted() {
+    return (this.state & STATES.LOCALE_COMPLETED) === STATES.LOCALE_COMPLETED;
+  }
+
   public get deployed() {
     return (this.state & STATES.DEPLOYED) === STATES.DEPLOYED;
   }

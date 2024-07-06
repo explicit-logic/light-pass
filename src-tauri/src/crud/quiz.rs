@@ -10,11 +10,11 @@ use crate::utils::time;
 use crate::crud::locale;
 
 const DETAILS_COMPLETED: u8 = 1;
-const CONFIGURATION_COMPLETED: u8 = 2;
+const QUESTION_COMPLETED: u8 = 2;
 const LOCALE_COMPLETED: u8 = 4;
 const DEPLOYED: u8 = 8;
 
-const STATE_SUM: u8 = DETAILS_COMPLETED + CONFIGURATION_COMPLETED + LOCALE_COMPLETED + DEPLOYED;
+const STATE_SUM: u8 = DETAILS_COMPLETED + QUESTION_COMPLETED + LOCALE_COMPLETED + DEPLOYED;
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -213,15 +213,13 @@ fn update_state(db: &Connection, id: i64, state: u8, checked: bool) -> Result<()
   Ok(())
 }
 
-#[tauri::command]
-pub async fn quiz_update_configuration(app_handle: AppHandle, id: i64, checked: bool) -> CommandResult<()> {
-  app_handle.db(|db| update_state(db, id, CONFIGURATION_COMPLETED, checked))?;
-
+pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
+  update_state(db, id, LOCALE_COMPLETED, checked)?;
   Ok(())
 }
 
-pub fn update_locale_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
-  update_state(db, id, LOCALE_COMPLETED, checked)?;
+pub fn update_question_state(db: &Connection, id: i64, checked: bool) -> Result<(), rusqlite::Error> {
+  update_state(db, id, QUESTION_COMPLETED, checked)?;
   Ok(())
 }
 
