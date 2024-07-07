@@ -1,4 +1,4 @@
-import type { EditFormData } from '../QuizForm.types';
+import type { SettingsFormData } from '../QuizForm.types';
 
 import { useCallback, useMemo } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
@@ -8,22 +8,12 @@ import LocalesDropdown from './LocalesDropdown';
 import { languagesArray as _languagesArray, type languages } from '@/constants/languages';
 import { MAX, MIN } from '@/constants/locales';
 
-import type { Locale } from '@/models/Locale';
-
-// import { getChanges as getLocaleChanges } from './helpers/locales';
-
 function LocalesArrayField() {
   const {
     control,
     formState: { errors },
     register,
-  } = useFormContext<{
-    locales: {
-      language: Locale['language'];
-      main: Locale['main'];
-      url: Locale['url'];
-    }[];
-  }>();
+  } = useFormContext<SettingsFormData>();
 
   const { fields, append, remove, update } = useFieldArray({
     name: 'locales',

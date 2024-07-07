@@ -2,14 +2,16 @@ import type { CreateFormData } from './QuizForm.types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import slugify from '@sindresorhus/slugify';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { toast } from '@/lib/toaster';
 
 import type { Quiz } from '@/models/Quiz';
 
+import { create as createConfiguration } from '@/api/configuration';
 import { removeAll as removeAllLocales, upsert as upsertLocale } from '@/api/locales';
+import { create as createMessages } from '@/api/messages';
 import { create as createQuiz, remove as removeQuiz, updateRepo } from '@/api/quizzes';
 
 import { languages } from '@/constants/languages';
@@ -38,14 +40,17 @@ function QuizCreateForm() {
     const { language, name, description } = data;
     let quiz: Quiz | null = null;
     try {
-      quiz = await createQuiz({ name, description: description ?? '' });
+      const repo = slugify(name);
+      quiz = await createQuiz({ name, description: description ?? '', repo });
       await upsertLocale({
         language,
         main: true,
         quizId: quiz.id,
         url: '',
       });
-      await updateRepo(quiz.id, slugify(name));
+      await createMessages(quiz, language);
+      await createConfiguration(quiz);
+
       navigate(`/quizzes/${quiz.id}/edit`, { replace: true });
 
       toast.success('Quiz created');

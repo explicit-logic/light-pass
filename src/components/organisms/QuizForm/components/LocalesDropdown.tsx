@@ -1,6 +1,5 @@
-import type { Locale } from '@/models/Locale';
 import type { FieldArrayWithId, UseFieldArrayUpdate } from 'react-hook-form';
-import type { EditFormData } from '../QuizForm.types';
+import type { SettingsFormData } from '../QuizForm.types';
 
 import { DEFAULT_LANGUAGE, languages } from '@/constants/languages';
 import { memo, useCallback, useState } from 'react';
@@ -17,21 +16,12 @@ function LocalesDropdown({
   languagesArray,
   update,
 }: {
-  field: FieldArrayWithId<{ language: keyof typeof languages }>;
+  field: FieldArrayWithId<SettingsFormData>;
   idx: number;
   languagesArray: { id: keyof typeof languages; name: string }[];
-  update: UseFieldArrayUpdate<
-    {
-      locales: {
-        language: Locale['language'];
-        main: Locale['main'];
-        url: Locale['url'];
-      }[];
-    },
-    'locales'
-  >;
+  update: UseFieldArrayUpdate<SettingsFormData, 'locales'>;
 }) {
-  const language = getLanguageById(field.id as keyof typeof languages);
+  const language = getLanguageById(field.language);
 
   const [isOpen, setIsOpen] = useState(false);
   const onClick = useCallback(() => {
@@ -52,10 +42,10 @@ function LocalesDropdown({
     (id: keyof typeof languages) => {
       return (e: React.SyntheticEvent) => {
         e.preventDefault();
-        update(idx, { language: id, main: false, url: '' });
+        update(idx, { ...field, language: id });
       };
     },
-    [idx, update],
+    [idx, field, update],
   );
 
   return (

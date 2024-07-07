@@ -37,7 +37,7 @@ export async function getOne(id: Quiz['id']) {
   return new Quiz(item);
 }
 
-export async function create(data: { name: string; description: string }) {
+export async function create(data: { name: string; description: string; repo: string }) {
   const quiz = (await invoke('quiz_create', data)) as Quiz;
 
   return new Quiz(quiz);

@@ -1,7 +1,7 @@
 import type { Locale } from '@/models/Locale';
-import type { EditFormData } from '../QuizForm.types';
+import type { SettingsFormData } from '../QuizForm.types';
 
-export function getChanges(source: Locale[], target: EditFormData['locales']) {
+export function getChanges(source: Locale[], target: SettingsFormData['locales']) {
   const deleted: Locale[] = [];
   const sourceLang = source.reduce<{ [key: string]: boolean }>((acc, curr) => {
     acc[curr.language] = true;

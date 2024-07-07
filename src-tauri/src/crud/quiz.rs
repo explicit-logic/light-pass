@@ -22,6 +22,7 @@ pub struct Quiz {
   id: i64,
   pub name: String,
   description: String,
+  repo: String,
 
   state: i64,
 
@@ -52,11 +53,12 @@ pub struct Website {
 
 fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
     let mut statement = db.prepare(
-    "INSERT INTO quizzes (name, description, state, updated_at, created_at) VALUES (:name, :description, :state, :updated_at, :created_at)"
+    "INSERT INTO quizzes (name, description, repo, state, updated_at, created_at) VALUES (:name, :description, :repo, :state, :updated_at, :created_at)"
 )?;
     statement.execute(named_params! {
         ":name": quiz.name,
         ":description": quiz.description,
+        ":repo": quiz.repo,
         ":state": quiz.state,
         ":updated_at": quiz.updated_at,
         ":created_at": quiz.created_at
@@ -67,12 +69,13 @@ fn create(db: &Connection, quiz: &mut Quiz) -> Result<(), rusqlite::Error> {
 }
 
 #[tauri::command]
-pub async fn quiz_create(app_handle: AppHandle, name: &str, description: &str) -> CommandResult<Quiz> {
+pub async fn quiz_create(app_handle: AppHandle, name: &str, description: &str, repo: &str) -> CommandResult<Quiz> {
     let mut quiz = Quiz {
         id: 0,
         name: name.to_string(),
         description: description.to_string(),
-        state: 0,
+        repo: repo.to_string(),
+        state: DETAILS_COMPLETED as i64,
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -150,6 +153,7 @@ pub fn one(db: &Connection, id: i64) -> Result<Quiz, rusqlite::Error> {
                 id: row.get("id")?,
                 name: row.get("name")?,
                 state: row.get("state")?,
+                repo: row.get("repo")?,
                 description: row.get("description")?,
                 updated_at: row.get("updated_at")?,
                 created_at: row.get("created_at")?,

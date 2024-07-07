@@ -45,7 +45,7 @@ function Content(props: Props) {
 }
 
 function SideBarLink(props: Props) {
-  const { caption = '', completed = false, children, disabled = false, title, to } = props;
+  const { disabled = false, to } = props;
 
   return (
     <li className="mb-10 ms-6">

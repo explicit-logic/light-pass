@@ -59,6 +59,8 @@ fn upsert(db: &Connection, locale: &mut LocaleUpsert) -> Result<(), rusqlite::Er
         ":created_at": locale.created_at
     })?;
 
+    quiz::update_locale_state(db, locale.quiz_id, false)?;
+
     Ok(())
 }
 

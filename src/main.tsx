@@ -53,6 +53,10 @@ const router = createBrowserRouter([
             path: 'questions',
             lazy: () => import('@/components/pages/QuizEditQuestions'),
           },
+          {
+            path: 'settings',
+            lazy: () => import('@/components/pages/QuizEditSettings'),
+          },
         ],
       },
       {

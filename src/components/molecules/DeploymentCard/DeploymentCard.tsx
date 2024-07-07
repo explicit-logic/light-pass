@@ -1,4 +1,4 @@
-import deploymentImage from '@/assets/deployment.jpg';
+import deploymentImage from '@/assets/deployment.png';
 import { memo } from 'react';
 import DeploymentProcessComponent from './components/DeploymentProcess';
 

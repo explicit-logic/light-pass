@@ -1,4 +1,3 @@
-import { invoke } from '@tauri-apps/api';
 import * as fs from '@tauri-apps/api/fs';
 import * as path from '@tauri-apps/api/path';
 
@@ -7,9 +6,32 @@ import { QuizConfiguration } from '@/models/QuizConfiguration';
 
 const FILE_NAME = 'quiz.json';
 
+export async function create(quiz: Pick<Quiz, 'id' | 'repo'>) {
+  const defaultConfig = await readDefault();
+  const dir = await getDataDir(quiz.id);
+  const filePath = await path.join(dir, FILE_NAME);
+
+  await fs.createDir(dir, { recursive: true });
+  const data = merge(defaultConfig, { basePath: quiz.repo });
+
+  const text = QuizConfiguration.toText(data);
+  await fs.writeTextFile(filePath, text);
+}
+
 export async function read(quizId: Quiz['id']) {
   const dir = await getDataDir(quizId);
   const filePath = await path.join(dir, FILE_NAME);
+  const fileExists = await fs.exists(filePath);
+
+  if (fileExists) {
+    const text = await fs.readTextFile(filePath);
+
+    return QuizConfiguration.fromText(text);
+  }
+}
+
+async function readDefault() {
+  const filePath = await path.resolveResource(`template/data/${FILE_NAME}`);
   const fileExists = await fs.exists(filePath);
 
   if (fileExists) {

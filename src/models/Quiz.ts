@@ -6,6 +6,7 @@ export class Quiz {
   public readonly id: number;
   public name: string;
   public description: string;
+  public repo: string;
 
   public readonly localeCount: number = 0;
   public readonly mainLanguage?: keyof typeof languages;

@@ -14,3 +14,11 @@ export type CreateFormData = {
   language: keyof typeof languages;
   name: string;
 };
+
+export type SettingsFormData = {
+  locales: {
+    language: keyof typeof languages;
+    main: boolean;
+    url: string;
+  }[];
+};
