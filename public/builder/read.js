@@ -44,9 +44,13 @@
     const basePathParts = await getBasePathParts();
     const filePath = await join(...basePathParts, slug, `${slug}.json`);
 
-    const content = await readTextFile(filePath);
+    const text = await readTextFile(filePath);
 
-    return content;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {};
+    }
   }
 
   window.getPageData = getPageData;

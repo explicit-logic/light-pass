@@ -4,7 +4,7 @@ import { request } from './request';
 import type { ProcessParams } from '@/types/deployment.types';
 
 const TEMPLATE_OWNER = 'explicit-logic';
-const TEMPLATE_REPO = 'light-pass-template';
+const TEMPLATE_REPO = 'light-pass-template-1';
 
 export async function generateRepo({ repo }: ProcessParams) {
   const response = await request<unknown>(`/repos/${TEMPLATE_OWNER}/${TEMPLATE_REPO}/generate`, {

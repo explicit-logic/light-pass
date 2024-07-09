@@ -72,7 +72,7 @@ jQuery(($) => {
     await API.window.WebviewWindow.getByLabel('builder').close();
   });
 
-  function addPage(tabId, formData) {
+  function addPage(tabId, page) {
     const tabCount = document.getElementById("tabs").children.length;
     const $newPageTemplate = document.getElementById("new-page");
     const $newTabTemplate = document.getElementById("add-page-tab");
@@ -91,10 +91,12 @@ jQuery(($) => {
     $fbPages.tabs("refresh");
     $fbPages.tabs("option", "active", tabCount - 1);
 
-    addBuilder(tabId, $newPage, formData);
+    addBuilder(tabId, $newPage, page);
   }
 
-  function addBuilder(tabId, selector, formData) {
+  function addBuilder(tabId, selector, page = {}) {
+    const { formData } = page;
+
     fbInstances[tabId] = $(selector).formBuilder(
       {
         dataType: 'json',
