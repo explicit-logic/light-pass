@@ -1,12 +1,12 @@
 {
   "Metadata": {
-    "applicationName": "",
+    "applicationName": "Light Pass",
     "keywords": "",
     "creator": "",
     "publisher": "",
     "title": {
-      "default": "",
-      "template": "%s | "
+      "default": "Light Pass",
+      "template": "%s | Light Pass"
     },
     "description": ""
   },
@@ -14,9 +14,9 @@
     "loading": "Завантаження..."
   },
   "Home": {
-    "title": "",
-    "headline": "",
-    "caption": "",
+    "title": "Light Pass",
+    "headline": "Light Pass",
+    "caption": "Пройдіть цей тест щоб перевірити свої знання",
     "start": "Почати",
     "fields": {
       "email": {
@@ -36,7 +36,10 @@
   "Question": {
     "next": "Далі",
     "back": "Назад",
-    "finish": "Закінчити"
+    "finish": "Закінчити",
+    "seeResults": "Дивитися результат",
+    "timeOver": "Час закінчився",
+    "timeRunningOut": "Час закінчується"
   },
   "Result": {
     "headline": "Готово!",

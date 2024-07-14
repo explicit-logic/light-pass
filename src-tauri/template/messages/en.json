@@ -1,12 +1,12 @@
 {
   "Metadata": {
-    "applicationName": "",
+    "applicationName": "Light Pass",
     "keywords": "",
     "creator": "",
     "publisher": "",
     "title": {
-      "default": "",
-      "template": "%s | "
+      "default": "Light Pass",
+      "template": "%s | Light Pass"
     },
     "description": ""
   },
@@ -14,8 +14,8 @@
     "loading": "Loading..."
   },
   "Home": {
-    "title": "",
-    "headline": "",
+    "title": "Light Pass",
+    "headline": "Light Pass",
     "caption": "Take this quiz to test your knowledge",
     "start": "Let’s start",
     "fields": {
@@ -36,7 +36,10 @@
   "Question": {
     "next": "Next question",
     "back": "Go Back",
-    "finish": "Finish"
+    "finish": "Finish",
+    "seeResults": "See results",
+    "timeOver": "Time is over",
+    "timeRunningOut": "Time is running out"
   },
   "Result": {
     "headline": "Well Done!",

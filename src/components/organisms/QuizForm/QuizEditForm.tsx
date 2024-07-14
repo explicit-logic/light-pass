@@ -15,8 +15,11 @@ import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '
 
 import { getMode, remove as removeQuiz, update as updateQuiz, updateRepo } from '@/api/quizzes';
 
+// Components
 import Listbox from '@/components/molecules/Listbox';
 import RemovalModal from '@/components/molecules/RemovalModal';
+import TimeLimitDurationField from './components/TimeLimitDurationField';
+import TimeLimitTypeField from './components/TimeLimitTypeField';
 
 // Constants
 import { DEFAULT_FIELDS, DEFAULT_ORDER, FIELD_LABELS, ORDER_LABELS } from '@/constants/configuration';
@@ -51,22 +54,35 @@ function QuizEditForm() {
       name: quiz.name,
       order: configuration?.order ?? DEFAULT_ORDER,
       description: quiz.description,
+      timeLimit: {
+        type: configuration.timeLimitType,
+        duration: configuration.timeLimitDuration ?? 0,
+      },
     },
     resolver: yupResolver(editSchema),
   });
   const {
     control,
     register,
+    setValue,
     handleSubmit,
-    formState: { errors },
+    formState: { isDirty, errors },
+    watch,
   } = methods;
 
   const onSubmit = handleSubmit(async (target: EditFormData) => {
     try {
+      const timeLimit =
+        target.timeLimit?.type && target.timeLimit?.duration
+          ? target.timeLimit.type.concat(target.timeLimit.duration.toString())
+          : undefined;
+
       await updateQuiz(quizId, { name: target.name, description: target.description ?? '', language: target.language });
+
       await save(quizId, {
         fields: target.fields,
         order: target.order,
+        timeLimit,
       });
 
       const mode = await getMode(quizId);
@@ -140,6 +156,30 @@ function QuizEditForm() {
           </select>
         </div>
         <div className="mb-6">
+          <label htmlFor="timeLimit.type" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Time limit for question pages
+          </label>
+          <Controller
+            name="timeLimit.type"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TimeLimitTypeField error={fieldState.error} value={field.value} onChange={field.onChange} setValue={setValue} />
+            )}
+          />
+          <Controller
+            name="timeLimit.duration"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TimeLimitDurationField
+                error={fieldState.error}
+                hidden={!watch('timeLimit.type')}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
+        <div className="mb-6">
           <label htmlFor="order" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Page order
           </label>
@@ -180,7 +220,11 @@ function QuizEditForm() {
         <div className="flex justify-between">
           <button
             type="submit"
-            className="px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className={`${
+              isDirty
+                ? 'hover:bg-blue-800 bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700'
+                : 'bg-gray-300 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+            } px-5 py-3 text-base font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800`}
           >
             Update
           </button>

@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 
 import { FIELDS, ORDERS } from '@/constants/configuration';
+import { TIME_LIMIT_TYPES } from '@/constants/configuration';
 import { languages } from '@/constants/languages';
 import { MAX, MIN } from '@/constants/locales';
 
@@ -18,6 +19,12 @@ export const editSchema = yup
     name: yup.string().required(),
     order: yup.string().oneOf(Object.values(ORDERS)).required(),
     description: yup.string(),
+    timeLimit: yup
+      .object({
+        type: yup.string().oneOf(Object.values(TIME_LIMIT_TYPES)).nullable(),
+        duration: yup.number().integer().min(0).default(0),
+      })
+      .required(),
   })
   .required();
 

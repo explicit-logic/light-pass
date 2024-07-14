@@ -21,7 +21,12 @@ export const ORDERS = {
 export const DEFAULT_ORDER = ORDERS.ASC;
 
 export const ORDER_LABELS = {
-  [ORDERS.ASC]: 'Ascending',
-  [ORDERS.DESC]: 'Descending',
+  [ORDERS.ASC]: 'A-Z',
+  [ORDERS.DESC]: 'Z-A',
   [ORDERS.RANDOM]: 'Random',
 };
+
+export const TIME_LIMIT_TYPES = Object.freeze({
+  MANY: 'M', // Many (time limit for an entire quiz)
+  ONE: 'A', // One (the time limit for a questions page)
+} as const);
