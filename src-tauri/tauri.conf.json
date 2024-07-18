@@ -37,6 +37,10 @@
       "path": {
         "all": true
       },
+      "protocol": {
+        "asset": true,
+        "assetScope": ["$APPDATA/builder/**"]
+      },
       "shell": {
         "open": "^((https://)|(http://)|(mailto:)|(vscode://)).+"
       },

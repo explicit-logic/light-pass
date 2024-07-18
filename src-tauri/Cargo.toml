@@ -19,7 +19,7 @@ reqwest = { version = "0.12.4", features = ["json"] }
 rusqlite = { version = "0.31.0", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri = { version = "1", features = [ "updater", "fs-all", "path-all", "dialog-all", "window-close", "os-all", "window-unmaximize", "clipboard-all", "window-maximize", "notification-all", "shell-open"] }
+tauri = { version = "1", features = [ "protocol-asset", "updater", "fs-all", "path-all", "dialog-all", "window-close", "os-all", "window-unmaximize", "clipboard-all", "window-maximize", "notification-all", "shell-open"] }
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1.40"
 

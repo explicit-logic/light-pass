@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quiz Builder</title>
+    <title>Question Builder</title>
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.css"> -->
     
@@ -21,11 +21,12 @@
 
   <body>
     <main>
-      <div action="" id="form-builder-pages">
+      <div action="" id="root">
         <ul id="tabs">
-          <li id="add-page-tab"><a href="#new-page">+ Page</a></li>
+          <li id="add-tab"><a href="#new-page">+ Page</a></li>
         </ul>
-        <div id="new-page"></div>
+        <div id="fb-editor" class="fb-editor"></div>
+        <div style="display: none;"><div id="new-page" style="display: none;"></div></div>
       </div>
     </main>
     <footer>
@@ -33,8 +34,8 @@
       <button id="save-btn" class="btn btn-primary" type="button">Save</button>
     </footer>
     <script src="./lib/form-builder.min.js"></script>
-    <script src="./read.js"></script>
-    <script src="./save.js"></script>
+    <script src="./fs.js"></script>
+    <script src="./image.js"></script>
     <script src="./builder.js"></script>
   </body>
 </html>
