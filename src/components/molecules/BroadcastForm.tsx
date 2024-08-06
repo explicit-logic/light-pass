@@ -17,7 +17,7 @@ function BroadcastForm() {
   };
 
   return (
-    <div className="mb-4 px-4 w-full max-w-lg">
+    <div className="w-full">
       <form onSubmit={onSubmit}>
         <label htmlFor="message" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">
           Message

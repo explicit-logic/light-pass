@@ -43,3 +43,5 @@ export const languagesArray = Object.entries(languages).map(([id, name]) => ({ i
 }[];
 
 export const DEFAULT_LANGUAGE = 'en';
+
+export type LanguageType = keyof typeof languages;

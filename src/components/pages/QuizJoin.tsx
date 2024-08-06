@@ -1,4 +1,4 @@
-import type { languages } from '@/constants/languages';
+import type { LanguageType } from '@/constants/languages';
 import type { Quiz } from '@/models/Quiz';
 import type Peer from 'peerjs';
 
@@ -16,7 +16,7 @@ import Header from '@/components/molecules/Header';
 import { ConnectContainer, ConnectError, ConnectSkeleton } from '@/components/organisms/Connect';
 
 export const loader: LoaderFunction = async ({ params }) => {
-  const { quizId: _quizId, language } = params as unknown as { quizId: string; language: keyof typeof languages };
+  const { quizId: _quizId, language } = params as unknown as { quizId: string; language: LanguageType };
   const quizId = Number(_quizId);
   const context = getContext();
 
