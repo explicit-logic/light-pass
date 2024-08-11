@@ -21,12 +21,16 @@ pub struct Responder {
     context: String,
 
     completed: bool,
+    identified: bool,
+    verified: bool,
 
     language: String,
     platform: String,
     progress: i64,
     timezone: String,
     user_agent: String,
+
+    mark: i64,
 
     connected_at: i64,
     finished_at: i64,
@@ -45,10 +49,13 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
         email,
         name,
         theme,
-        group,
+        \"group\",
         context,
         completed,
+        identified,
+        verified,
         language,
+        mark,
         platform,
         progress,
         timezone,
@@ -68,7 +75,10 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
         :group,
         :context,
         :completed,
+        :identified,
+        :verified,
         :language,
+        :mark,
         :platform,
         :progress,
         :timezone,
@@ -90,7 +100,10 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
     ":group": responder.group,
     ":context": responder.context,
     ":completed": responder.completed,
+    ":identified": responder.identified,
+    ":verified": responder.verified,
     ":language": responder.language,
+    ":mark": responder.mark,
     ":platform": responder.platform,
     ":progress": responder.progress,
     ":timezone": responder.timezone,
@@ -132,12 +145,14 @@ pub async fn responder_create(
         id: 0,
         quiz_id,
         client_id,
-        email,
+        email: email.to_lowercase(),
         name,
         theme,
         group,
         context,
         completed: false,
+        identified: false,
+        verified: false,
 
         language,
         platform,
@@ -145,9 +160,56 @@ pub async fn responder_create(
         timezone,
         user_agent,
 
+        mark: 0,
+
         connected_at,
         finished_at: 0,
         started_at,
+
+        updated_at: time::now(),
+        created_at: time::now(),
+    };
+
+    app_handle.db(|db| create(db, &mut responder))?;
+
+    Ok(responder)
+}
+
+#[tauri::command]
+pub async fn responder_create_manually(
+    app_handle: AppHandle,
+
+    quiz_id: i64,
+    language: String,
+
+    email: String,
+    name: String,
+    group: String,
+) -> CommandResult<Responder> {
+    let mut responder = Responder {
+        id: 0,
+        quiz_id,
+        client_id: String::new(),
+        email: email.to_lowercase(),
+        name,
+        theme: String::new(),
+        group,
+        context: String::new(),
+        completed: false,
+        identified: true,
+        verified: false,
+
+        language,
+        platform: String::new(),
+        progress: 0,
+        timezone: String::new(),
+        user_agent: String::new(),
+
+        mark: 0,
+
+        connected_at: 0,
+        finished_at: 0,
+        started_at: 0,
 
         updated_at: time::now(),
         created_at: time::now(),
@@ -223,24 +285,36 @@ pub async fn responder_complete(
   Ok(())
 }
 
-fn delete_one(db: &Connection, id: i64) -> Result<(), rusqlite::Error> {
-    let mut statement = db.prepare("DELETE FROM responders WHERE id = :id")?;
-    statement.execute(named_params! { ":id": id })?;
+fn delete_one(db: &Connection, quiz_id: i64, id: i64) -> Result<(), rusqlite::Error> {
+    let mut statement = db.prepare("DELETE FROM responders WHERE quiz_id = :quiz_id AND id = :id")?;
+    statement.execute(named_params! { ":quiz_id": quiz_id, ":id": id })?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn responder_delete_one(app_handle: AppHandle, id: i64) -> CommandResult<()> {
-    app_handle.db(|db| delete_one(db, id))?;
+pub async fn responder_delete_one(app_handle: AppHandle, quiz_id: i64, id: i64) -> CommandResult<()> {
+    app_handle.db(|db| delete_one(db, quiz_id, id))?;
 
     Ok(())
 }
 
-fn many(db: &Connection, quiz_id: i64) -> Result<Vec<Responder>, rusqlite::Error> {
-  let mut statement =
-      db.prepare("SELECT * FROM responders WHERE quiz_id = :quiz_id ORDER BY completed DESC, name ASC, email ASC LIMIT 100")?;
+fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responder>, rusqlite::Error> {
+  let mut sql = "SELECT * FROM responders".to_owned();
+  let mut filter_components: Vec<String> = Vec::new();
+  filter_components.push("quiz_id = :quiz_id".to_owned());
+
+  let term = q.as_deref().unwrap_or_default();
+  if !term.is_empty() {
+    filter_components.push(format!("(name LIKE '%{0}%' OR email LIKE '{0}%')", term.replace(" ", "%")));
+  }
+  sql.push_str(" WHERE ");
+  sql.push_str(&filter_components.join(" AND "));
+  sql.push_str(" ORDER BY completed DESC, name ASC, email ASC LIMIT 100");
+
+  let mut statement = db.prepare(&sql)?;
   let mut rows = statement.query(named_params! { ":quiz_id": quiz_id })?;
+
   let mut items = Vec::new();
 
   while let Some(row) = rows.next()? {
@@ -254,12 +328,16 @@ fn many(db: &Connection, quiz_id: i64) -> Result<Vec<Responder>, rusqlite::Error
       group: row.get("group")?,
       context: row.get("context")?,
       completed: row.get("completed")?,
+      identified: row.get("identified")?,
+      verified: row.get("verified")?,
 
       language: row.get("language")?,
       platform: row.get("platform")?,
       progress: row.get("progress")?,
       timezone: row.get("timezone")?,
       user_agent: row.get("user_agent")?,
+
+      mark: row.get("mark")?,
 
       connected_at: row.get("connected_at")?,
       finished_at: row.get("finished_at")?,
@@ -276,8 +354,8 @@ fn many(db: &Connection, quiz_id: i64) -> Result<Vec<Responder>, rusqlite::Error
 }
 
 #[tauri::command]
-pub async fn responder_many(app_handle: AppHandle, quiz_id: i64) -> CommandResult<Vec<Responder>> {
-    let result = app_handle.db(|db| many(db, quiz_id))?;
+pub async fn responder_many(app_handle: AppHandle, quiz_id: i64, q: Option<String>) -> CommandResult<Vec<Responder>> {
+    let result = app_handle.db(|db| many(db, quiz_id, q))?;
 
     Ok(result)
 }
@@ -297,12 +375,16 @@ fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
           group: row.get("group")?,
           context: row.get("context")?,
           completed: row.get("completed")?,
+          identified: row.get("identified")?,
+          verified: row.get("verified")?,
 
           language: row.get("language")?,
           platform: row.get("platform")?,
           progress: row.get("progress")?,
           timezone: row.get("timezone")?,
           user_agent: row.get("user_agent")?,
+
+          mark: row.get("mark")?,
 
           connected_at: row.get("connected_at")?,
           finished_at: row.get("finished_at")?,

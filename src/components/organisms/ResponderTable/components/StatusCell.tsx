@@ -3,8 +3,11 @@ import Flasher from './Flasher';
 
 import { platformToText } from '@/helpers/platformToText';
 
+// Models
+import type { Responder } from '@/models/Responder';
+
 type Props = {
-  row: Row<ResponderInterface>;
+  row: Row<Responder>;
 };
 
 function StatusCell(props: Props) {

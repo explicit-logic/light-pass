@@ -1,6 +1,7 @@
 import type { FIELDS, ORDERS, TIME_LIMIT_TYPES } from '@/constants/configuration';
 
 export class QuizConfiguration {
+  readonly quizId: number;
   public basePath: string;
   public fields: (typeof FIELDS)[keyof typeof FIELDS][];
   public order: (typeof ORDERS)[keyof typeof ORDERS];

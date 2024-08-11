@@ -64,12 +64,16 @@ CREATE TABLE IF NOT EXISTS responders (
   "context" TEXT NOT NULL,
 
   completed BOOLEAN NOT NULL CHECK (completed IN (0, 1)) DEFAULT 0,
+  identified BOOLEAN NOT NULL CHECK (identified IN (0, 1)) DEFAULT 0,
+  verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,
 
   "language" CHAR(2) NOT NULL,
   platform TEXT NOT NULL,
   progress INTEGER NOT NULL,
   timezone TEXT NOT NULL,
   user_agent TEXT NOT NULL,
+
+  mark INTEGER NOT NULL CHECK (mark >= 0) DEFAULT 0,
 
   connected_at INTEGER NOT NULL,
   finished_at INTEGER NOT NULL,

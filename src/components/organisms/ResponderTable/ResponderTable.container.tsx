@@ -1,13 +1,58 @@
+import { memo, useCallback, useMemo, useState } from 'react';
+import { type LoaderFunction, useLoaderData, useParams, useRevalidator } from 'react-router-dom';
+
+// Api
+import { remove as removeResponder } from '@/api/responders';
+
 // Components
 import ResponderTableView from './ResponderTable.view';
 
+// Lib
+import { toast } from '@/lib/toaster';
+
+// Models
+import type { Responder } from '@/models/Responder';
+
 // Hooks
-import { useResponderStore } from '@/hooks/useResponderStore';
+// import { useResponderStore } from '@/hooks/useResponderStore';
 
 function ResponderTableContainer() {
-  const responders = useResponderStore.use.responders();
+  const { responders } = useLoaderData() as { responders: Responder[] };
+  // const responders = useResponderStore.use.responders();
 
-  return <ResponderTableView responders={responders} />;
+  const [responderToRemove, setResponderToRemove] = useState<Responder>();
+
+  const revalidator = useRevalidator();
+
+  const openRemoveModal = useCallback((responder: Responder) => setResponderToRemove(responder), []);
+
+  const closeRemoveModal = useCallback(() => {
+    setResponderToRemove(undefined);
+  }, []);
+
+  const onRemove = useCallback(() => {
+    if (!responderToRemove) return;
+    try {
+      const name = responderToRemove.name || responderToRemove.email || 'Unknown';
+      removeResponder(responderToRemove);
+      revalidator.revalidate();
+      closeRemoveModal();
+      toast(`${name} removed`);
+    } catch (error) {
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
+    }
+  }, [closeRemoveModal, responderToRemove, revalidator]);
+
+  return (
+    <ResponderTableView
+      closeRemoveModal={closeRemoveModal}
+      onRemove={onRemove}
+      openRemoveModal={openRemoveModal}
+      responders={responders}
+      responderToRemove={responderToRemove}
+    />
+  );
 }
 
 export default ResponderTableContainer;

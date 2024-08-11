@@ -59,6 +59,7 @@ fn main() {
             locale_update_url,
 
             responder_create,
+            responder_create_manually,
             responder_delete_one,
             responder_many,
             responder_one,

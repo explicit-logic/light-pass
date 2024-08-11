@@ -104,9 +104,9 @@ declare global {
     completed: boolean;
     connectedAt: Date;
 
-    identified: boolean; // virtual
+    identified: boolean;
 
-    locale: string;
+    language: string;
     platform: PlatformType;
     progress: number;
     timeZone: string;

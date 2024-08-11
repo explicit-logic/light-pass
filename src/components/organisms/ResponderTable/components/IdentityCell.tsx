@@ -1,7 +1,10 @@
 import type { Row } from '@tanstack/react-table';
 
+// Models
+import type { Responder } from '@/models/Responder';
+
 type Props = {
-  row: Row<ResponderInterface>;
+  row: Row<Responder>;
 };
 
 function IdentityCell(props: Props) {

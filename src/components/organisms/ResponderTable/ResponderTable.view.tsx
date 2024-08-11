@@ -1,42 +1,69 @@
 import { type Row, createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { memo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
+// Components
 import ActionCell from './components/ActionCell';
 import DurationCell from './components/DurationCell';
 import IdentityCell from './components/IdentityCell';
+import MarkCell from './components/MarkCell';
 import ProgressCell from './components/ProgressCell';
 import StatusCell from './components/StatusCell';
 
-const columns = [
-  {
-    id: 'identity',
-    header: 'Name',
-    cell: IdentityCell,
-  },
-  {
-    id: 'progress',
-    header: 'Progress',
-    cell: ProgressCell,
-  },
-  {
-    id: 'duration',
-    header: 'Time',
-    cell: DurationCell,
-  },
-  {
-    id: 'status',
-    header: 'Status',
-    cell: StatusCell,
-  },
-  {
-    id: 'action',
-    header: 'Action',
-    cell: ActionCell,
-  },
-];
+import RemovalModal from '@/components/molecules/RemovalModal';
 
-function ResponderTableView(props: { responders: ResponderInterface[] }) {
-  const { responders } = props;
+// Models
+import type { Responder } from '@/models/Responder';
+
+type Props = {
+  closeRemoveModal: () => void;
+  onRemove: () => void;
+  openRemoveModal: (responder: Responder) => void;
+  responders: Responder[];
+  responderToRemove?: Responder;
+};
+
+function ResponderTableView(props: Props) {
+  const { closeRemoveModal, onRemove, openRemoveModal, responders, responderToRemove } = props;
+
+  const removalMessage = `Are you sure you want to delete ${responderToRemove?.name || responderToRemove?.email || 'Unknown'}?`;
+
+  const columns = useMemo(() => {
+    return [
+      {
+        id: 'identity',
+        header: 'Name',
+        cell: IdentityCell,
+      },
+      {
+        id: 'progress',
+        header: 'Progress',
+        cell: ProgressCell,
+      },
+      {
+        id: 'duration',
+        header: 'Time',
+        cell: DurationCell,
+      },
+      // {
+      //   id: 'status',
+      //   header: 'Status',
+      //   cell: StatusCell,
+      // },
+      {
+        id: 'mark',
+        header: 'Mark',
+        cell: MarkCell,
+      },
+      {
+        id: 'action',
+        header: '',
+        cell: ({ row }) => {
+          return <ActionCell remove={openRemoveModal} row={row} />;
+        },
+      },
+    ];
+  }, [openRemoveModal]);
+
   const table = useReactTable({
     data: responders,
     columns,
@@ -69,6 +96,8 @@ function ResponderTableView(props: { responders: ResponderInterface[] }) {
           ))}
         </tbody>
       </table>
+
+      <RemovalModal isOpen={Boolean(responderToRemove)} close={closeRemoveModal} message={removalMessage} onRemove={onRemove} />
     </>
   );
 }

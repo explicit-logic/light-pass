@@ -1,12 +1,19 @@
-import * as yup from 'yup';
-
-import type { QuizConfiguration } from '@/models/QuizConfiguration';
-
 import { Dialog, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { memo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
+import * as yup from 'yup';
+
+import type { Locale } from '@/models/Locale';
+import type { Quiz } from '@/models/Quiz';
+import type { QuizConfiguration } from '@/models/QuizConfiguration';
+
+// Api
+import { createManually as createResponderManually } from '@/api/responders';
+
+// Lib
+import { toast } from '@/lib/toaster';
 
 const schema = yup
   .object({
@@ -28,7 +35,9 @@ type Props = {
 };
 
 function NewResponderModal({ isOpen, close }: Props) {
-  const { configuration } = useLoaderData() as { configuration: QuizConfiguration };
+  const { quiz, locale, configuration } = useLoaderData() as { configuration: QuizConfiguration; quiz: Quiz; locale: Locale };
+
+  const revalidator = useRevalidator();
 
   const methods = useForm<NewResponderForm>({
     defaultValues: {
@@ -41,12 +50,30 @@ function NewResponderModal({ isOpen, close }: Props) {
 
   const {
     control,
+    reset,
     register,
     handleSubmit,
     formState: { errors },
   } = methods;
 
   const onSubmit = handleSubmit(async (data: NewResponderForm) => {
+    try {
+      const responder = await createResponderManually({
+        quizId: quiz.id,
+        language: locale.language,
+
+        name: data?.name || '',
+        email: data?.email || '',
+        group: data?.group || '',
+      });
+      revalidator.revalidate();
+      toast.success('Responder created');
+      reset();
+      close();
+    } catch (error) {
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
+    }
     console.log(data);
   });
 

@@ -12,7 +12,7 @@ export async function create(quiz: Pick<Quiz, 'id' | 'repo'>) {
   const filePath = await path.join(dir, FILE_NAME);
 
   await fs.createDir(dir, { recursive: true });
-  const data = merge(defaultConfig, { basePath: quiz.repo });
+  const data = merge(defaultConfig, { quizId: quiz.id, basePath: quiz.repo });
 
   const text = QuizConfiguration.toText(data);
   await fs.writeTextFile(filePath, text);

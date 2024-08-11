@@ -4,8 +4,11 @@ import type { Row } from '@tanstack/react-table';
 import { STATES } from '@/constants/connection';
 import { getDuration } from '@/helpers/getDuration';
 
+// Models
+import type { Responder } from '@/models/Responder';
+
 type Props = {
-  row: Row<ResponderInterface>;
+  row: Row<Responder>;
 };
 
 function DurationCell({ row }: Props) {
@@ -26,13 +29,13 @@ function DurationCell({ row }: Props) {
 
   if (startAt) {
     if (state === STATES.ONLINE) {
-      return <TimeAgo date={startAt} />;
+      return <TimeAgo date={new Date(startAt)} />;
     }
     return (
       <div className="flex items-center text-gray-900 whitespace-nowrap dark:text-white">
         <div className="flex flex-col space-y-1">
-          <div>{startAt.toLocaleTimeString()}</div>
-          <div className="font-normal text-gray-500 text-xs">{startAt.toLocaleDateString()}</div>
+          <div>{new Date(startAt).toLocaleTimeString()}</div>
+          <div className="font-normal text-gray-500 text-xs">{new Date(startAt).toLocaleDateString()}</div>
         </div>
       </div>
     );
