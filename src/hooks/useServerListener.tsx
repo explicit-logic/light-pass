@@ -6,12 +6,14 @@ import { SERVER_EVENTS } from '@/constants/connection';
 type Props = {
   onClose: () => void;
   onError: () => void;
-  onOpen: (params: ConnectionOpenParams) => void;
+  onLoading: () => void;
+  onOpen: () => void;
 };
 
-export function useServerListener({ onClose, onError, onOpen }: Props) {
+export function useServerListener({ onClose, onError, onLoading, onOpen }: Props) {
   useEffect(() => {
     const handlers = {
+      [SERVER_EVENTS.LOADING]: onLoading,
       [SERVER_EVENTS.OPEN]: onOpen,
       [SERVER_EVENTS.CLOSE]: onClose,
       [SERVER_EVENTS.ERROR]: onError,
@@ -26,5 +28,5 @@ export function useServerListener({ onClose, onError, onOpen }: Props) {
         eventEmitter.off(eventName, handler);
       }
     };
-  }, [onClose, onError, onOpen]);
+  }, [onClose, onError, onLoading, onOpen]);
 }

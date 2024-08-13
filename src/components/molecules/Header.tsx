@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import JoinButton from './JoinButton';
+import ConnectionIndicator from './ConnectionIndicator';
 
 type Props = {
   left?: React.ReactNode;
@@ -52,7 +52,7 @@ function Header(props: Props) {
                 />
               </svg>
             </Link>
-            <JoinButton />
+            <ConnectionIndicator />
             {left}
           </div>
 

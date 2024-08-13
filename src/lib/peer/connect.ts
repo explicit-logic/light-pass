@@ -21,29 +21,28 @@ import {
   getConnectionByClientId,
   getServer,
   hasConnection,
-  resetContext,
   setConnection,
-  setContext,
   setServer,
 } from './store';
 
 const TIMEOUT = 60_000;
 
-export async function connect(context: ConnectionOpenParams) {
+export async function connect() {
   const cachedServer = getServer();
   if (cachedServer) return cachedServer;
 
+  eventEmitter.emit(SERVER_EVENTS.LOADING);
+
   const peer = new Peer();
   setServer(peer);
-  setContext(context);
 
   const close = () => {
     resetAll();
-    eventEmitter.emit(SERVER_EVENTS.CLOSE, context);
+    eventEmitter.emit(SERVER_EVENTS.CLOSE);
   };
   const errorHandler = (error: Error) => {
     resetAll();
-    eventEmitter.emit(SERVER_EVENTS.ERROR, context, error);
+    eventEmitter.emit(SERVER_EVENTS.ERROR, error);
     console.error(error);
   };
   peer
@@ -55,7 +54,7 @@ export async function connect(context: ConnectionOpenParams) {
 
   const serverId = await promiseWithTimeout<string>(TIMEOUT, (resolve) => peer.on('open', (id) => resolve(id)));
 
-  eventEmitter.emit(SERVER_EVENTS.OPEN, context);
+  eventEmitter.emit(SERVER_EVENTS.OPEN);
 
   console.log('Server ID: ', serverId);
 
@@ -64,7 +63,6 @@ export async function connect(context: ConnectionOpenParams) {
 
 function resetAll() {
   clearConnectionMap();
-  resetContext();
   setServer(undefined);
 }
 

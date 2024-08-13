@@ -6,8 +6,6 @@ declare global {
 
   type ConnectionStateType = (typeof CONNECTION_STATES)[keyof typeof CONNECTION_STATES];
 
-  type ConnectionOpenParams = { quizId: number; language: string };
-
   interface Client {
     id: string;
 
@@ -28,6 +26,8 @@ declare global {
   namespace Messages {
     interface Complete {
       clientId: string;
+      language: string;
+      quizId: number;
       type: typeof MESSAGE_TYPES.complete;
 
       data: {
@@ -36,6 +36,8 @@ declare global {
     }
 
     interface Connect {
+      language: string;
+      quizId: number;
       type: typeof MESSAGE_TYPES.connect;
 
       data: {
@@ -51,6 +53,8 @@ declare global {
 
     interface Identity {
       clientId: string;
+      language: string;
+      quizId: number;
       type: typeof MESSAGE_TYPES.identity;
 
       data: {
@@ -78,6 +82,8 @@ declare global {
 
     interface Message {
       clientId: string;
+      language: string;
+      quizId: number;
       type: typeof MESSAGE_TYPES.message;
 
       data: {
@@ -87,11 +93,15 @@ declare global {
 
     interface Progress {
       clientId: string;
+      language: string;
+      quizId: number;
       type: typeof MESSAGE_TYPES.progress;
 
       data: {
         answer: object;
+        current: number;
         page: string;
+        total: number;
       };
     }
   }

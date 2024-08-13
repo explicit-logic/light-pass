@@ -1,4 +1,6 @@
 import { memo, useCallback, useState } from 'react';
+
+// Components
 import ConnectModal from './components/ConnectModal';
 import MessageModal from './components/MessageModal';
 
@@ -6,7 +8,7 @@ function ConnectBar() {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
 
-  const openConnectModal = useCallback(() => {
+  const openConnectModal = useCallback(async () => {
     setConnectModalOpen(true);
   }, []);
 

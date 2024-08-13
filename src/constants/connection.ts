@@ -15,5 +15,6 @@ export const CLIENT_EVENTS = Object.freeze({
 export const SERVER_EVENTS = Object.freeze({
   CLOSE: 'SERVER:CLOSE',
   ERROR: 'SERVER:ERROR',
+  LOADING: 'SERVER:LOADING',
   OPEN: 'SERVER:OPEN',
 } as const);

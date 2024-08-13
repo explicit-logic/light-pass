@@ -2,11 +2,18 @@ import type { Locale } from '@/models/Locale';
 
 import { Dialog, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
 import { QRCodeSVG } from 'qrcode.react';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 
+import QrIcon from '@/components/atoms/QrIcon';
 // Components
 import ClipBoardField from '@/components/molecules/ClipboardField';
+
+// Hooks
+import { useConnection } from '@/hooks/useConnection';
+
+// Lib
+import { connect } from '@/lib/peer/connect';
 
 type Props = {
   close: () => void;
@@ -15,8 +22,14 @@ type Props = {
 
 function ConnectModal({ isOpen, close }: Props) {
   const { locale } = useLoaderData() as { locale: Locale };
+  const { loading, online } = useConnection();
+  const [peerId, setPeerId] = useState<string>();
 
-  const peerId = 1;
+  useEffect(() => {
+    if (!isOpen) return;
+
+    connect().then((peer) => setPeerId(peer.id));
+  }, [isOpen]);
   const connectionUrl = `${locale.url}?r=${peerId}`;
 
   return (
@@ -55,11 +68,25 @@ function ConnectModal({ isOpen, close }: Props) {
             </DialogTitle>
             <div className="p-4 space-y-6">
               <div className="flex flex-col items-center justify-center">
-                <div className="p-3 bg-white rounded-md">
-                  <QRCodeSVG size={150} value={connectionUrl} />
-                </div>
+                {online ? (
+                  <div className="p-3 bg-white rounded-md">
+                    <QRCodeSVG size={150} value={connectionUrl} />
+                  </div>
+                ) : (
+                  <div
+                    className={`${
+                      loading ? 'animate-pulse' : ''
+                    } flex justify-center items-center rounded-md h-[174px] w-[174px] bg-gray-200 dark:bg-gray-400`}
+                  >
+                    <QrIcon className="w-40 h-40 dark:text-gray-600" />
+                  </div>
+                )}
               </div>
-              <ClipBoardField value={connectionUrl} />
+              {online ? (
+                <ClipBoardField value={connectionUrl} />
+              ) : (
+                <div className={`${loading ? 'animate-pulse' : ''} h-[42px] w-full bg-gray-200 rounded-md dark:bg-gray-500`} />
+              )}
             </div>
           </DialogPanel>
         </div>

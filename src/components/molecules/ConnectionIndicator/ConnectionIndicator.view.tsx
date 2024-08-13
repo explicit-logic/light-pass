@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
 
 import QrIcon from '@/components/atoms/QrIcon';
 
@@ -16,18 +15,15 @@ const showIcon = (online: boolean) => {
   return <QrIcon className="w-6 h-6 me-1" />;
 };
 
-function JoinButtonView(props: { language: string; online?: boolean; quizId: number }) {
-  const { language, online = false, quizId } = props;
+function ConnectionIndicatorView(props: { online?: boolean }) {
+  const { online = false } = props;
+  const title = online ? 'Online' : '';
 
   return (
-    <Link
-      to={`/quizzes/${quizId}/locales/${language}/join`}
-      className="flex items-center justify-center rounded-lg dark:hover:bg-gray-700 hover:bg-gray-200 px-2 py-1 text-gray-800 dark:text-white"
-    >
+    <div className="flex items-center justify-center rounded-lg px-2 py-1 text-gray-800 dark:text-white" title={title}>
       {showIcon(online)}
-      <span>Join</span>
-    </Link>
+    </div>
   );
 }
 
-export default memo(JoinButtonView);
+export default memo(ConnectionIndicatorView);

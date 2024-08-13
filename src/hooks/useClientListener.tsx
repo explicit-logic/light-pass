@@ -4,17 +4,20 @@ import { useCallback, useEffect } from 'react';
 import { CLIENT_EVENTS, STATES as CONNECTION_STATES } from '@/constants/connection';
 import { TYPES as MESSAGE_TYPES } from '@/constants/message';
 
-import { sendNotification } from '@/helpers/sendNotification';
-// Lib
-import { eventEmitter } from '@/lib/eventEmitter';
-
 // Helpers
 import { platformToText } from '@/helpers/platformToText';
+import { sendNotification } from '@/helpers/sendNotification';
 
 // Hooks
 import { useResponderStore } from '@/hooks/useResponderStore';
 
-export function useClientListener({ quizId }: ConnectionOpenParams) {
+// Lib
+import { eventEmitter } from '@/lib/eventEmitter';
+
+// Models
+import type { Responder } from '@/models/Responder';
+
+export function useClientListener() {
   const addResponder = useResponderStore.use.addResponder();
   const complete = useResponderStore.use.complete();
   const doProgress = useResponderStore.use.doProgress();
@@ -28,7 +31,7 @@ export function useClientListener({ quizId }: ConnectionOpenParams) {
         const { locale, platform, timeZone, userAgent } = message.data as Messages.Connect['data'];
         addResponder({
           clientId,
-          quizId,
+          quizId: 0,
           locale,
           platform,
           timeZone,
@@ -68,18 +71,18 @@ export function useClientListener({ quizId }: ConnectionOpenParams) {
         complete(clientId);
       }
     },
-    [addResponder, complete, doProgress, identify, respondersTree, quizId],
+    [addResponder, complete, doProgress, identify, respondersTree],
   );
 
   const onError = useCallback(
-    (clientId: ResponderInterface['clientId']) => {
+    (clientId: Responder['clientId']) => {
       setConnectionState(clientId, CONNECTION_STATES.ERROR);
     },
     [setConnectionState],
   );
 
   const onClose = useCallback(
-    (clientId: ResponderInterface['clientId']) => {
+    (clientId: Responder['clientId']) => {
       setConnectionState(clientId, CONNECTION_STATES.OFFLINE);
     },
     [setConnectionState],
