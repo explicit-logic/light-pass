@@ -9,7 +9,7 @@ import { toast } from '@/lib/toaster';
 
 import type { Quiz } from '@/models/Quiz';
 
-import { create as createConfiguration } from '@/api/configuration';
+import { createFromQuiz as createConfiguration } from '@/api/configuration';
 import { removeAll as removeAllLocales, upsert as upsertLocale } from '@/api/locales';
 import { create as createMessages } from '@/api/messages';
 import { create as createQuiz, remove as removeQuiz, updateRepo } from '@/api/quizzes';

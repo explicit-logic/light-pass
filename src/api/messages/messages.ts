@@ -71,6 +71,15 @@ async function getMessagesDir(quizId: Quiz['id']) {
   return dir;
 }
 
+export async function remove(quizId: Quiz['id'], language: Locale['language']) {
+  const dir = await getMessagesDir(quizId);
+  const filePath = await path.join(dir, `${language}.json`);
+  const fileExists = await fs.exists(filePath);
+  if (fileExists) {
+    await fs.removeFile(filePath);
+  }
+}
+
 function parse(content: string) {
   try {
     return JSON.parse(content);

@@ -2,7 +2,9 @@ import { toast } from '@/lib/toaster';
 import slugify from '@sindresorhus/slugify';
 import { memo, useCallback, useState } from 'react';
 
+import { clear as clearBuilder } from '@/api/builder';
 import { save } from '@/api/configuration';
+import { create as createMessages, remove as removeMessages } from '@/api/messages';
 
 import type { Locale } from '@/models/Locale';
 import type { Quiz } from '@/models/Quiz';
@@ -77,6 +79,14 @@ function QuizEditForm() {
           ? target.timeLimit.type.concat(target.timeLimit.duration.toString())
           : undefined;
 
+      if (mainLocale?.language !== target.language) {
+        if (mainLocale?.language) {
+          await clearBuilder(quiz.id, mainLocale.language);
+          await removeMessages(quiz.id, mainLocale.language);
+        }
+        await createMessages(quiz, target.language);
+      }
+
       await updateQuiz(quizId, { name: target.name, description: target.description ?? '', language: target.language });
 
       await save(quizId, {
@@ -93,6 +103,7 @@ function QuizEditForm() {
 
       toast.success('Quiz updated');
     } catch (error) {
+      console.error(error);
       const message = (error as Error)?.message ?? error;
       toast.error(message);
     }

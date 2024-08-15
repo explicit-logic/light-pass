@@ -6,16 +6,19 @@ import { QuizConfiguration } from '@/models/QuizConfiguration';
 
 const FILE_NAME = 'quiz.json';
 
-export async function create(quiz: Pick<Quiz, 'id' | 'repo'>) {
+export async function create(quizId: Quiz['id'], configuration: Partial<QuizConfiguration>) {
   const defaultConfig = await readDefault();
-  const dir = await getDataDir(quiz.id);
+  const dir = await getDataDir(quizId);
   const filePath = await path.join(dir, FILE_NAME);
 
   await fs.createDir(dir, { recursive: true });
-  const data = merge(defaultConfig, { quizId: quiz.id, basePath: quiz.repo });
-
+  const data = merge(defaultConfig, configuration);
   const text = QuizConfiguration.toText(data);
   await fs.writeTextFile(filePath, text);
+}
+
+export async function createFromQuiz(quiz: Pick<Quiz, 'id' | 'repo'>) {
+  await create(quiz.id, { quizId: quiz.id, basePath: quiz.repo });
 }
 
 export async function read(quizId: Quiz['id']) {
@@ -45,12 +48,15 @@ export async function save(quizId: Quiz['id'], configuration: Partial<QuizConfig
   const dir = await getDataDir(quizId);
   await fs.createDir(dir, { recursive: true });
   const filePath = await path.join(dir, FILE_NAME);
-
   const source = await read(quizId);
-  const data = merge(source, configuration);
 
-  const text = QuizConfiguration.toText(data);
-  await fs.writeTextFile(filePath, text);
+  if (!source) {
+    await create(quizId, configuration);
+  } else {
+    const data = merge(source, configuration);
+    const text = QuizConfiguration.toText(data);
+    await fs.writeTextFile(filePath, text);
+  }
 }
 
 export async function updateBasePath(quizId: Quiz['id'], basePath: QuizConfiguration['basePath']) {

@@ -198,15 +198,17 @@ fn check_completion(db: &Connection, quiz_id: i64) -> Result<bool, rusqlite::Err
 }
 
 fn check_is_main(db: &Connection, quiz_id: i64, language: &str) -> Result<bool, rusqlite::Error> {
-  db.query_row(
-      "SELECT main FROM locales WHERE quiz_id = :quiz_id AND language = :language",
-      named_params! { ":quiz_id": quiz_id, ":language": language },
-      |row| {
-        let main: bool = row.get("main")?;
+  let query = db.query_row(
+    "SELECT main FROM locales WHERE quiz_id = :quiz_id AND language = :language",
+    named_params! { ":quiz_id": quiz_id, ":language": language },
+    |row| Ok(row.get("main")),
+  );
 
-        Ok(main)
-      },
-  )
+  match query {
+    Ok(x) => x,
+    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(false),
+    Err(err) => Err(err),
+  }
 }
 
 fn update_state(db: &Connection, quiz_id: i64, language: &str, state: u8, checked: bool) -> Result<(), rusqlite::Error> {
