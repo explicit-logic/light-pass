@@ -202,10 +202,14 @@ jQuery(($) => {
     newPageTemplate.parentElement.insertBefore(newPage, newPageTemplate);
   }
 
+  $(document.getElementById("cancel-btn")).click(async function () {
+    if (unlisten) unlisten();
+    await API.window.WebviewWindow.getByLabel('builder').close();
+  });
 
   $(document.getElementById("save-btn")).click(async function () {
     if (unlisten) unlisten();
-    onClose();
+    await onClose();
     await API.window.WebviewWindow.getByLabel('builder').close();
   });
 
