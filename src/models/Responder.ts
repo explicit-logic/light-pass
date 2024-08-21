@@ -11,7 +11,7 @@ export class Responder {
 
   readonly platform: PlatformType;
   readonly progress: number;
-  readonly timeZone: string;
+  readonly timezone: string;
   readonly userAgent: string;
 
   readonly email: string;
@@ -21,8 +21,8 @@ export class Responder {
 
   readonly mark: number = 0;
 
-  readonly startAt: number;
-  readonly finishAt: number;
+  readonly startedAt: number;
+  readonly finishedAt: number;
 
   readonly context?: {
     slugs: string[];
@@ -30,9 +30,5 @@ export class Responder {
 
   constructor(data: Partial<Responder>) {
     Object.assign(this, data);
-  }
-
-  get state(): ConnectionStateType {
-    return 0;
   }
 }

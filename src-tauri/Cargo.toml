@@ -16,7 +16,7 @@ keyring = "2"
 thiserror = "1.0"
 refinery = { version = "0.8", features = ["rusqlite"] }
 reqwest = { version = "0.12.4", features = ["json"] }
-rusqlite = { version = "0.31.0", features = ["bundled"] }
+rusqlite = { version = "0.31.0", features = ["bundled", "serde_json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri = { version = "1", features = [ "protocol-asset", "updater", "fs-all", "path-all", "dialog-all", "window-close", "os-all", "window-unmaximize", "clipboard-all", "window-maximize", "notification-all", "shell-open"] }

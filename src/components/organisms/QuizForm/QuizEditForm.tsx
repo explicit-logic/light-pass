@@ -57,8 +57,8 @@ function QuizEditForm() {
       order: configuration?.order ?? DEFAULT_ORDER,
       description: quiz.description,
       timeLimit: {
-        type: configuration.timeLimitType,
-        duration: configuration.timeLimitDuration ?? 0,
+        type: configuration?.timeLimitType,
+        duration: configuration?.timeLimitDuration ?? 0,
       },
     },
     resolver: yupResolver(editSchema),
@@ -115,6 +115,7 @@ function QuizEditForm() {
       navigate('/quizzes', { replace: true });
       toast('Quiz removed');
     } catch (error) {
+      console.error(error);
       const message = (error as Error)?.message ?? error;
       toast.error(message);
     }

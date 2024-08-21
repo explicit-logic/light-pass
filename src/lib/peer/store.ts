@@ -1,7 +1,9 @@
+import type { StateType } from '@/constants/connection';
 import type { DataConnection, Peer } from 'peerjs';
 
-const connectionMap = new Map<DataConnection['peer'], DataConnection>();
 const clientConnectionMap = new Map<Client['id'], DataConnection['peer']>();
+const clientStateMap = new Map<Client['id'], StateType>();
+const connectionMap = new Map<DataConnection['peer'], DataConnection>();
 
 let _server: Peer | undefined;
 
@@ -9,7 +11,9 @@ export function attachConnection(clientId: Client['id'], connectionId: DataConne
   clientConnectionMap.set(clientId, connectionId);
 }
 
-export function clearConnectionMap() {
+export function clear() {
+  clientConnectionMap.clear();
+  clientStateMap.clear();
   connectionMap.clear();
 }
 
@@ -60,4 +64,10 @@ export function setConnection(connection: DataConnection) {
 
 export function setServer(server: Peer | undefined) {
   _server = server;
+}
+
+export function updateClientState(clientId: Client['id'], state: StateType): Record<Client['id'], StateType> {
+  clientStateMap.set(clientId, state);
+
+  return Object.fromEntries(clientStateMap.entries());
 }

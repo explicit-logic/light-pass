@@ -1,18 +1,20 @@
 import { eventEmitter } from '@/lib/eventEmitter';
 import { useEffect } from 'react';
 
-import { SERVER_EVENTS } from '@/constants/connection';
+import { SERVER_EVENTS, type StateType } from '@/constants/connection';
 
 type Props = {
   onClose: () => void;
+  onConnection: (clientState: Record<string, StateType>) => void;
   onError: () => void;
   onLoading: () => void;
   onOpen: () => void;
 };
 
-export function useServerListener({ onClose, onError, onLoading, onOpen }: Props) {
+export function useServerListener({ onClose, onConnection, onError, onLoading, onOpen }: Props) {
   useEffect(() => {
     const handlers = {
+      [SERVER_EVENTS.CONNECTION]: onConnection,
       [SERVER_EVENTS.LOADING]: onLoading,
       [SERVER_EVENTS.OPEN]: onOpen,
       [SERVER_EVENTS.CLOSE]: onClose,
@@ -28,5 +30,5 @@ export function useServerListener({ onClose, onError, onLoading, onOpen }: Props
         eventEmitter.off(eventName, handler);
       }
     };
-  }, [onClose, onError, onLoading, onOpen]);
+  }, [onConnection, onClose, onError, onLoading, onOpen]);
 }

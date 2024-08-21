@@ -6,3 +6,5 @@ export const TYPES = Object.freeze({
   message: 'message',
   progress: 'progress',
 } as const);
+
+export type MessageType = (typeof TYPES)[keyof typeof TYPES];

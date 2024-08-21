@@ -5,7 +5,7 @@ import { detectPlatform } from '@/helpers/detectPlatform';
 import { getLocaleLang } from '@/helpers/getLocaleLang';
 
 // Constants
-import { CLIENT_EVENTS, SERVER_EVENTS } from '@/constants/connection';
+import { CLIENT_EVENTS, SERVER_EVENTS, STATES } from '@/constants/connection';
 import { TYPES } from '@/constants/message';
 
 // Lib
@@ -14,7 +14,7 @@ import { eventEmitter } from '@/lib/eventEmitter';
 // Store
 import {
   attachConnection,
-  clearConnectionMap,
+  clear,
   deleteConnection,
   // detachConnection,
   getClientIdByConnection,
@@ -23,6 +23,7 @@ import {
   hasConnection,
   setConnection,
   setServer,
+  updateClientState,
 } from './store';
 
 const TIMEOUT = 60_000;
@@ -62,13 +63,14 @@ export async function connect() {
 }
 
 function resetAll() {
-  clearConnectionMap();
+  clear();
   setServer(undefined);
+  eventEmitter.emit(SERVER_EVENTS.CONNECTION, {});
 }
 
 async function establishConnection(params: { connection: DataConnection; server: Peer }) {
   const { connection } = params;
-  const locale = await getLocaleLang();
+  const language = await getLocaleLang();
 
   setConnection(connection);
 
@@ -82,6 +84,7 @@ async function establishConnection(params: { connection: DataConnection; server:
       const clientId = getClientIdByConnection(connection);
       reset();
       if (clientId) {
+        eventEmitter.emit(SERVER_EVENTS.CONNECTION, updateClientState(clientId, STATES.OFFLINE));
         eventEmitter.emit(CLIENT_EVENTS.CLOSE, clientId);
       }
     })
@@ -89,6 +92,7 @@ async function establishConnection(params: { connection: DataConnection; server:
       const clientId = getClientIdByConnection(connection);
       reset();
       if (clientId) {
+        eventEmitter.emit(SERVER_EVENTS.CONNECTION, updateClientState(clientId, STATES.ERROR));
         eventEmitter.emit(CLIENT_EVENTS.ERROR, clientId, error);
       }
     })
@@ -108,11 +112,10 @@ async function establishConnection(params: { connection: DataConnection; server:
             deleteConnection(prevConnection.peer);
           }
         }
-
         attachConnection(clientId, connection.peer);
+        await connection.send(getInit({ clientId, language }) as Messages.Init);
 
-        await connection.send(getInit({ clientId, locale }) as Messages.Init);
-
+        eventEmitter.emit(SERVER_EVENTS.CONNECTION, updateClientState(clientId, STATES.ONLINE));
         eventEmitter.emit(CLIENT_EVENTS.MESSAGE, clientId, message);
 
         return;
@@ -147,16 +150,16 @@ function ensureClientId(connection: DataConnection, message: Messages.Connect): 
   Client: close, error
 */
 
-export function getInit({ clientId, locale }: { clientId: Client['id']; locale: string }): Messages.Init {
+export function getInit({ clientId, language }: { clientId: Client['id']; language: string }): Messages.Init {
   return {
     type: TYPES.init,
     data: {
       userAgent: navigator.userAgent,
       clientId,
-      locale,
+      language,
       platform: detectPlatform(),
       theme: 'dark',
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
   };
 }

@@ -28,13 +28,13 @@ export function useClientListener() {
   const onMessage = useCallback(
     (clientId: Client['id'], message: Message) => {
       if (message.type === MESSAGE_TYPES.connect) {
-        const { locale, platform, timeZone, userAgent } = message.data as Messages.Connect['data'];
+        const { language, platform, timezone, userAgent } = message.data as Messages.Connect['data'];
         addResponder({
           clientId,
           quizId: 0,
-          locale,
+          language,
           platform,
-          timeZone,
+          timezone,
           state: CONNECTION_STATES.ONLINE,
           userAgent,
           connectedAt: new Date(),

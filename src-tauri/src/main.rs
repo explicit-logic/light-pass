@@ -58,9 +58,10 @@ fn main() {
             locale_update_state,
             locale_update_url,
 
-            responder_create,
+            responder_connect,
             responder_create_manually,
             responder_delete_one,
+            responder_identify,
             responder_many,
             responder_one,
             responder_update_progress,

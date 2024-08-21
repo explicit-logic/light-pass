@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS deployment_process (
 
   UNIQUE(quiz_id, stage, "order") ON CONFLICT REPLACE,
 
-  FOREIGN KEY (quiz_id) REFERENCES quizzes (id)
+  FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS locales (
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS locales (
 
   UNIQUE(quiz_id, "language") ON CONFLICT REPLACE,
 
-  FOREIGN KEY (quiz_id) REFERENCES quizzes (id)
+  FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS responders (
@@ -57,18 +57,18 @@ CREATE TABLE IF NOT EXISTS responders (
   client_id TEXT NOT NULL,
 
   email TEXT NOT NULL,
-  "name" TEXT,
-  "theme" TEXT,
-  "group" TEXT DEFAULT '',
+  "name" TEXT NOT NULL DEFAULT '',
+  "theme" TEXT NOT NULL DEFAULT '',
+  "group" TEXT NOT NULL DEFAULT '',
 
-  "context" TEXT NOT NULL,
+  "context" TEXT NOT NULL DEFAULT '{}',
 
   completed BOOLEAN NOT NULL CHECK (completed IN (0, 1)) DEFAULT 0,
   identified BOOLEAN NOT NULL CHECK (identified IN (0, 1)) DEFAULT 0,
   verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,
 
   "language" CHAR(2) NOT NULL,
-  platform TEXT NOT NULL,
+  platform TEXT NOT NULL DEFAULT '{}',
   progress INTEGER NOT NULL,
   timezone TEXT NOT NULL,
   user_agent TEXT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS responders (
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL,
 
-  UNIQUE(quiz_id, email) ON CONFLICT REPLACE,
+  UNIQUE(quiz_id, client_id) ON CONFLICT REPLACE,
 
-  FOREIGN KEY (quiz_id) REFERENCES quizzes (id)
+  FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE
 );

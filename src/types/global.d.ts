@@ -42,11 +42,10 @@ declare global {
 
       data: {
         clientId?: string;
-        locale: string;
         pathname: string;
         platform: PlatformType;
         theme: ThemeModeType;
-        timeZone: string;
+        timezone: string;
         userAgent: string;
       };
     }
@@ -60,7 +59,7 @@ declare global {
       data: {
         email: string;
         group?: string;
-        name?: string;
+        name: string;
         context: {
           slugs: string[];
         };
@@ -73,10 +72,10 @@ declare global {
       data: {
         userAgent: string;
         clientId: string;
-        locale: string;
+        language: string;
         platform: PlatformType;
         theme: ThemeModeType;
-        timeZone: string;
+        timezone: string;
       };
     }
 
@@ -119,7 +118,7 @@ declare global {
     language: string;
     platform: PlatformType;
     progress: number;
-    timeZone: string;
+    timezone: string;
 
     state: ConnectionStateType; // virtual
 

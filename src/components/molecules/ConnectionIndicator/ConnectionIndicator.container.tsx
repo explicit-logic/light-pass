@@ -7,7 +7,7 @@ import { useConnection } from '@/hooks/useConnection';
 function ConnectionIndicatorContainer() {
   const connection = useConnection();
 
-  return <ConnectionIndicatorView online={connection.online} />;
+  return <ConnectionIndicatorView activeCount={connection.activeCount} online={connection.online} />;
 }
 
 export default ConnectionIndicatorContainer;

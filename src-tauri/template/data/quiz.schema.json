@@ -2,6 +2,9 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "quizId": {
+      "type": "number"
+    },
     "basePath": {
       "type": "string"
     },
@@ -14,9 +17,13 @@
     },
     "order": {
       "enum": ["asc", "desc", "random"]
+    },
+    "timeLimit": {
+      "type": "string"
     }
   },
   "required": [
-    "basePath"
+    "basePath",
+    "quizId"
   ]
 }

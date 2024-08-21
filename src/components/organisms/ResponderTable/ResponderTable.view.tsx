@@ -11,10 +11,14 @@ import StatusCell from './components/StatusCell';
 
 import RemovalModal from '@/components/molecules/RemovalModal';
 
+// Constants
+import type { StateType } from '@/constants/connection';
+
 // Models
 import type { Responder } from '@/models/Responder';
 
 type Props = {
+  clientState: Record<string, StateType>;
   closeRemoveModal: () => void;
   onRemove: () => void;
   openRemoveModal: (responder: Responder) => void;
@@ -23,7 +27,7 @@ type Props = {
 };
 
 function ResponderTableView(props: Props) {
-  const { closeRemoveModal, onRemove, openRemoveModal, responders, responderToRemove } = props;
+  const { clientState, closeRemoveModal, onRemove, openRemoveModal, responders, responderToRemove } = props;
 
   const removalMessage = `Are you sure you want to delete ${responderToRemove?.name || responderToRemove?.email || 'Unknown'}?`;
 
@@ -37,12 +41,16 @@ function ResponderTableView(props: Props) {
       {
         id: 'progress',
         header: 'Progress',
-        cell: ProgressCell,
+        cell: ({ row }) => {
+          return <ProgressCell clientState={clientState} row={row} />;
+        },
       },
       {
         id: 'duration',
         header: 'Time',
-        cell: DurationCell,
+        cell: ({ row }) => {
+          return <DurationCell clientState={clientState} row={row} />;
+        },
       },
       // {
       //   id: 'status',
@@ -62,7 +70,7 @@ function ResponderTableView(props: Props) {
         },
       },
     ];
-  }, [openRemoveModal]);
+  }, [clientState, openRemoveModal]);
 
   const table = useReactTable({
     data: responders,

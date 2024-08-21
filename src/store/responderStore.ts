@@ -14,7 +14,10 @@ type IdentityParam = {
 export interface ResponderState {
   responders: Record<ResponderInterface['clientId'], ResponderInterface>;
   addResponder: (
-    responder: Pick<ResponderInterface, 'clientId' | 'quizId' | 'locale' | 'platform' | 'timeZone' | 'state' | 'userAgent' | 'connectedAt'>,
+    responder: Pick<
+      ResponderInterface,
+      'clientId' | 'quizId' | 'language' | 'platform' | 'timezone' | 'state' | 'userAgent' | 'connectedAt'
+    >,
   ) => void;
   complete: (clientId: ResponderInterface['clientId']) => void;
   doProgress: (clientId: ResponderInterface['clientId'], page: string) => void;

@@ -15,14 +15,18 @@ import type { Responder } from '@/models/Responder';
 
 // Hooks
 // import { useResponderStore } from '@/hooks/useResponderStore';
+import { useConnection } from '@/hooks/useConnection';
+import { useRevalidateOnMessage } from '@/hooks/useRevalidateOnMessage';
 
 function ResponderTableContainer() {
   const { responders } = useLoaderData() as { responders: Responder[] };
   // const responders = useResponderStore.use.responders();
+  const { clientState } = useConnection();
 
   const [responderToRemove, setResponderToRemove] = useState<Responder>();
-
   const revalidator = useRevalidator();
+
+  useRevalidateOnMessage();
 
   const openRemoveModal = useCallback((responder: Responder) => setResponderToRemove(responder), []);
 
@@ -46,6 +50,7 @@ function ResponderTableContainer() {
 
   return (
     <ResponderTableView
+      clientState={clientState}
       closeRemoveModal={closeRemoveModal}
       onRemove={onRemove}
       openRemoveModal={openRemoveModal}

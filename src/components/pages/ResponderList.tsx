@@ -1,10 +1,12 @@
+import { toast } from '@/lib/toaster';
+
 import { read } from '@/api/configuration';
 import { getOne as getOneLocale } from '@/api/locales';
 import { getOne as getOneQuiz } from '@/api/quizzes';
-import { getMany as getManyResponders } from '@/api/responders';
+import { getMany as getManyResponders, identify } from '@/api/responders';
 import type { LanguageType } from '@/constants/languages';
 import type { Quiz } from '@/models/Quiz';
-import { type LoaderFunction, useLoaderData, useParams } from 'react-router-dom';
+import { type LoaderFunction, useLoaderData, useParams, useRouteError } from 'react-router-dom';
 
 // Components
 import HeaderLocale from '@/components/atoms/HeaderLocale';
@@ -16,14 +18,19 @@ import ResponderTable from '@/components/organisms/ResponderTable';
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { quizId, language } = params as unknown as { quizId: string; language: LanguageType };
+  const filters: { q?: string } = {};
+
   const url = new URL(request.url);
   const q = url.searchParams.get('q') ?? undefined;
+  if (q) {
+    filters.q = q;
+  }
 
   const [configuration, quiz, locale, responders] = await Promise.all([
     read(Number(quizId)),
     getOneQuiz(Number(quizId)),
     getOneLocale(Number(quizId), language),
-    getManyResponders(Number(quizId), { q }),
+    getManyResponders(Number(quizId), filters),
   ]);
 
   return { configuration, quiz, locale, responders };
@@ -57,4 +64,14 @@ export function Component() {
       </main>
     </>
   );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  console.error(error);
+  const message = (error as Error)?.message ?? error;
+  toast.error(message);
+
+  return null;
 }

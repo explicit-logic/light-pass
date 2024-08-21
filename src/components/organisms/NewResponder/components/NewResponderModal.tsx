@@ -74,7 +74,6 @@ function NewResponderModal({ isOpen, close }: Props) {
       const message = (error as Error)?.message ?? error;
       toast.error(message);
     }
-    console.log(data);
   });
 
   return (

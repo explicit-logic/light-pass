@@ -1,11 +1,15 @@
 use rusqlite::{named_params, Connection};
 use serde::Serialize;
+use serde_json::{self as json, Value as JsonValue};
 
 use crate::error::CommandResult;
 use crate::state::ServiceAccess;
 use tauri::AppHandle;
 
 use crate::utils::time;
+
+// 10 minutes
+const CONNECTION_EXPIRATION: u32 = 10 * 60 * 1000;
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -18,14 +22,14 @@ pub struct Responder {
     name: String,
     theme: String,
     group: String,
-    context: String,
+    context: JsonValue,
 
     completed: bool,
     identified: bool,
     verified: bool,
 
     language: String,
-    platform: String,
+    platform: JsonValue,
     progress: i64,
     timezone: String,
     user_agent: String,
@@ -120,56 +124,48 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
 }
 
 #[tauri::command]
-pub async fn responder_create(
+pub async fn responder_connect(
     app_handle: AppHandle,
 
     quiz_id: i64,
     client_id: String,
-
-    email: String,
-    name: String,
-    theme: String,
-    group: String,
-    context: String,
-
     language: String,
-    platform: String,
-    progress: i64,
-    timezone: String,
-    user_agent: String,
 
-    connected_at: i64,
-    started_at: i64,
+    platform: JsonValue,
+    user_agent: String,
+    timezone: String,
+    theme: String
 ) -> CommandResult<Responder> {
     let mut responder = Responder {
         id: 0,
         quiz_id,
         client_id,
-        email: email.to_lowercase(),
-        name,
+        email: "".to_string(),
+        name: "".to_string(),
         theme,
-        group,
-        context,
+        group: "".to_string(),
+        context: JsonValue::Object(json::Map::new()),
         completed: false,
         identified: false,
         verified: false,
 
         language,
         platform,
-        progress,
+        progress: 0,
         timezone,
         user_agent,
 
         mark: 0,
 
-        connected_at,
+        connected_at: time::now(),
         finished_at: 0,
-        started_at,
+        started_at: 0,
 
         updated_at: time::now(),
         created_at: time::now(),
     };
 
+    app_handle.db(|db| delete_unidentified(db))?;
     app_handle.db(|db| create(db, &mut responder))?;
 
     Ok(responder)
@@ -194,13 +190,13 @@ pub async fn responder_create_manually(
         name,
         theme: String::new(),
         group,
-        context: String::new(),
+        context: JsonValue::Object(json::Map::new()),
         completed: false,
         identified: true,
         verified: false,
 
         language,
-        platform: String::new(),
+        platform: JsonValue::Object(json::Map::new()),
         progress: 0,
         timezone: String::new(),
         user_agent: String::new(),
@@ -222,7 +218,8 @@ pub async fn responder_create_manually(
 
 fn update_progress(
   db: &Connection,
-  id: i64,
+  quiz_id: i64,
+  client_id: String,
   progress: i64
 ) -> Result<(), rusqlite::Error> {
   let mut statement =
@@ -231,12 +228,13 @@ fn update_progress(
       SET
         progress = :progress,
         updated_at = :updated_at
-      WHERE id = :id
+      WHERE quiz_id = :quiz_id AND client_id = :client_id
     ")?;
   statement.execute(named_params! {
-      ":id": id,
-      ":progress": progress,
-      ":updated_at": time::now(),
+    ":quiz_id": quiz_id,
+    ":client_id": client_id,
+    ":progress": progress,
+    ":updated_at": time::now(),
   })?;
 
   Ok(())
@@ -245,17 +243,70 @@ fn update_progress(
 #[tauri::command]
 pub async fn responder_update_progress(
   app_handle: AppHandle,
-  id: i64,
+  quiz_id: i64,
+  client_id: String,
   progress: i64
 ) -> CommandResult<()> {
-  app_handle.db(|db| update_progress(db, id, progress))?;
+  app_handle.db(|db| update_progress(db, quiz_id, client_id, progress))?;
+
+  Ok(())
+}
+
+fn identify(
+  db: &Connection,
+  quiz_id: i64,
+  client_id: String,
+  email: String,
+  name: Option<String>,
+  group: Option<String>,
+  context: Option<JsonValue>
+) -> Result<(), rusqlite::Error> {
+  let mut statement =
+    db.prepare("
+      UPDATE responders
+      SET
+        context = :context,
+        email = :email,
+        name = :name,
+        \"group\" = :group,
+        identified = 1,
+        started_at = :started_at,
+        updated_at = :updated_at
+      WHERE quiz_id = :quiz_id AND client_id = :client_id
+    ")?;
+  statement.execute(named_params! {
+    ":quiz_id": quiz_id,
+    ":client_id": client_id,
+    ":context": context.unwrap_or_default(),
+    ":email": email,
+    ":name": name.unwrap_or_default(),
+    ":group": group.unwrap_or_default(),
+    ":started_at": time::now(),
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn responder_identify(
+  app_handle: AppHandle,
+  quiz_id: i64,
+  client_id: String,
+  email: String,
+  name: Option<String>,
+  group: Option<String>,
+  context: Option<JsonValue>
+) -> CommandResult<()> {
+  app_handle.db(|db| identify(db, quiz_id, client_id, email, name, group, context))?;
 
   Ok(())
 }
 
 fn complete(
   db: &Connection,
-  id: i64,
+  quiz_id: i64,
+  client_id: String
 ) -> Result<(), rusqlite::Error> {
   let mut statement =
     db.prepare("
@@ -264,10 +315,11 @@ fn complete(
         completed = 1,
         finished_at = :finished_at,
         updated_at = :updated_at
-      WHERE id = :id
+      WHERE quiz_id = :quiz_id AND client_id = :client_id
     ")?;
   statement.execute(named_params! {
-      ":id": id,
+      ":quiz_id": quiz_id,
+      ":client_id": client_id,
       ":finished_at": time::now(),
       ":updated_at": time::now(),
   })?;
@@ -278,9 +330,19 @@ fn complete(
 #[tauri::command]
 pub async fn responder_complete(
   app_handle: AppHandle,
-  id: i64,
+  quiz_id: i64,
+  client_id: String
 ) -> CommandResult<()> {
-  app_handle.db(|db| complete(db, id))?;
+  app_handle.db(|db| complete(db, quiz_id, client_id))?;
+
+  Ok(())
+}
+
+fn delete_unidentified(db: &Connection) -> Result<(), rusqlite::Error> {
+  let expired_at = time::now() - (CONNECTION_EXPIRATION as i64);
+
+  let mut statement = db.prepare("DELETE FROM responders WHERE NOT identified AND connected_at < :expired_at")?;
+  statement.execute(named_params! { ":expired_at": expired_at })?;
 
   Ok(())
 }
@@ -304,7 +366,7 @@ fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responde
   let mut filter_components: Vec<String> = Vec::new();
   filter_components.push("quiz_id = :quiz_id".to_owned());
 
-  let term = q.as_deref().unwrap_or_default();
+  let term = q.unwrap_or_default();
   if !term.is_empty() {
     filter_components.push(format!("(name LIKE '%{0}%' OR email LIKE '{0}%')", term.replace(" ", "%")));
   }
@@ -318,6 +380,8 @@ fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responde
   let mut items = Vec::new();
 
   while let Some(row) = rows.next()? {
+    let context = serde_json::from_str(row.get::<_, String>("context")?.as_str()).unwrap_or_default();
+    let platform = serde_json::from_str(row.get::<_, String>("platform")?.as_str()).unwrap_or_default();
     let responder = Responder {
       id: row.get("id")?,
       quiz_id: row.get("quiz_id")?,
@@ -326,13 +390,13 @@ fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responde
       name: row.get("name")?,
       theme: row.get("theme")?,
       group: row.get("group")?,
-      context: row.get("context")?,
+      context,
       completed: row.get("completed")?,
       identified: row.get("identified")?,
       verified: row.get("verified")?,
 
       language: row.get("language")?,
-      platform: row.get("platform")?,
+      platform,
       progress: row.get("progress")?,
       timezone: row.get("timezone")?,
       user_agent: row.get("user_agent")?,
@@ -355,9 +419,9 @@ fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responde
 
 #[tauri::command]
 pub async fn responder_many(app_handle: AppHandle, quiz_id: i64, q: Option<String>) -> CommandResult<Vec<Responder>> {
-    let result = app_handle.db(|db| many(db, quiz_id, q))?;
+  let result = app_handle.db(|db| many(db, quiz_id, q))?;
 
-    Ok(result)
+  Ok(result)
 }
 
 fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
@@ -365,6 +429,8 @@ fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
     "SELECT * FROM responders WHERE id = :id",
     named_params! { ":id": id },
     |row| {
+      let context = serde_json::from_str(row.get::<_, String>("context")?.as_str()).unwrap_or_default();
+      let platform = serde_json::from_str(row.get::<_, String>("platform")?.as_str()).unwrap_or_default();
         Ok(Responder {
           id: row.get("id")?,
           quiz_id: row.get("quiz_id")?,
@@ -373,13 +439,13 @@ fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
           name: row.get("name")?,
           theme: row.get("theme")?,
           group: row.get("group")?,
-          context: row.get("context")?,
+          context,
           completed: row.get("completed")?,
           identified: row.get("identified")?,
           verified: row.get("verified")?,
 
           language: row.get("language")?,
-          platform: row.get("platform")?,
+          platform,
           progress: row.get("progress")?,
           timezone: row.get("timezone")?,
           user_agent: row.get("user_agent")?,
