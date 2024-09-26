@@ -1,4 +1,3 @@
-use std::fmt;
 use serde::{ser::Serializer, Serialize};
 use anyhow;
 
@@ -7,6 +6,11 @@ use anyhow;
 pub enum CommandError {
   #[error(transparent)]
   RusqliteError(#[from] rusqlite::Error),
+  #[error("{0}")]
+  API(String),
+  #[error("UnknownError: {message}")]
+  #[allow(dead_code)]
+  UnknownError { message: String },
 }
 
 // we must manually implement serde::Serialize
@@ -15,7 +19,7 @@ impl Serialize for CommandError {
   where
       S: Serializer,
   {
-      serializer.serialize_str(self.to_string().as_ref())
+    serializer.serialize_str(self.to_string().as_ref())
   }
 }
 

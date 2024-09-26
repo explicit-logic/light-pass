@@ -1,3 +1,4 @@
+pub mod answer;
 pub mod deployment_process;
 pub mod quiz;
 pub mod locale;

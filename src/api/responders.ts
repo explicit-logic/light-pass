@@ -38,5 +38,7 @@ export async function remove(responder: Pick<Responder, 'id' | 'quizId'>) {
 }
 
 export async function updateProgress(data: Pick<Responder, 'quizId' | 'clientId' | 'progress'>) {
-  await invoke('responder_update_progress', data);
+  const responder = (await invoke('responder_update_progress', data)) as Responder;
+
+  return new Responder(responder);
 }

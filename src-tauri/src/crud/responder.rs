@@ -44,6 +44,47 @@ pub struct Responder {
     created_at: i64,
 }
 
+fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Responder, rusqlite::Error> {
+  let context = serde_json::from_str(row.get::<_, String>("context")?.as_str()).unwrap_or_default();
+  let platform = serde_json::from_str(row.get::<_, String>("platform")?.as_str()).unwrap_or_default();
+  Ok(Responder {
+    id: row.get("id")?,
+    quiz_id: row.get("quiz_id")?,
+    client_id: row.get("client_id")?,
+    email: row.get("email")?,
+    name: row.get("name")?,
+    theme: row.get("theme")?,
+    group: row.get("group")?,
+    context,
+    completed: row.get("completed")?,
+    identified: row.get("identified")?,
+    verified: row.get("verified")?,
+
+    language: row.get("language")?,
+    platform,
+    progress: row.get("progress")?,
+    timezone: row.get("timezone")?,
+    user_agent: row.get("user_agent")?,
+
+    mark: row.get("mark")?,
+
+    connected_at: row.get("connected_at")?,
+    finished_at: row.get("finished_at")?,
+    started_at: row.get("started_at")?,
+
+    updated_at: row.get("updated_at")?,
+    created_at: row.get("created_at")?,
+  })
+}
+
+pub fn one_by_client_id(db: &Connection, quiz_id: i64, client_id: String) -> Result<Responder, rusqlite::Error> {
+  db.query_row(
+    "SELECT * FROM responders WHERE quiz_id = :quiz_id AND client_id = :client_id",
+    named_params! { ":quiz_id": quiz_id, ":client_id": client_id },
+    hydrate_row
+  )
+}
+
 fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Error> {
   let mut statement = db.prepare(
     "
@@ -221,7 +262,7 @@ fn update_progress(
   quiz_id: i64,
   client_id: String,
   progress: i64
-) -> Result<(), rusqlite::Error> {
+) -> Result<Responder, rusqlite::Error> {
   let mut statement =
     db.prepare("
       UPDATE responders
@@ -236,8 +277,9 @@ fn update_progress(
     ":progress": progress,
     ":updated_at": time::now(),
   })?;
+  let responder = one_by_client_id(db, quiz_id, client_id)?;
 
-  Ok(())
+  Ok(responder)
 }
 
 #[tauri::command]
@@ -246,10 +288,10 @@ pub async fn responder_update_progress(
   quiz_id: i64,
   client_id: String,
   progress: i64
-) -> CommandResult<()> {
-  app_handle.db(|db| update_progress(db, quiz_id, client_id, progress))?;
+) -> CommandResult<Responder> {
+  let responder = app_handle.db(|db| update_progress(db, quiz_id, client_id, progress))?;
 
-  Ok(())
+  Ok(responder)
 }
 
 fn identify(
@@ -380,37 +422,7 @@ fn many(db: &Connection, quiz_id: i64, q: Option<String>) -> Result<Vec<Responde
   let mut items = Vec::new();
 
   while let Some(row) = rows.next()? {
-    let context = serde_json::from_str(row.get::<_, String>("context")?.as_str()).unwrap_or_default();
-    let platform = serde_json::from_str(row.get::<_, String>("platform")?.as_str()).unwrap_or_default();
-    let responder = Responder {
-      id: row.get("id")?,
-      quiz_id: row.get("quiz_id")?,
-      client_id: row.get("client_id")?,
-      email: row.get("email")?,
-      name: row.get("name")?,
-      theme: row.get("theme")?,
-      group: row.get("group")?,
-      context,
-      completed: row.get("completed")?,
-      identified: row.get("identified")?,
-      verified: row.get("verified")?,
-
-      language: row.get("language")?,
-      platform,
-      progress: row.get("progress")?,
-      timezone: row.get("timezone")?,
-      user_agent: row.get("user_agent")?,
-
-      mark: row.get("mark")?,
-
-      connected_at: row.get("connected_at")?,
-      finished_at: row.get("finished_at")?,
-      started_at: row.get("started_at")?,
-
-      updated_at: row.get("updated_at")?,
-      created_at: row.get("created_at")?,
-    };
-
+    let responder = hydrate_row(row)?;
     items.push(responder);
   }
 
@@ -428,38 +440,7 @@ fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
   db.query_row(
     "SELECT * FROM responders WHERE id = :id",
     named_params! { ":id": id },
-    |row| {
-      let context = serde_json::from_str(row.get::<_, String>("context")?.as_str()).unwrap_or_default();
-      let platform = serde_json::from_str(row.get::<_, String>("platform")?.as_str()).unwrap_or_default();
-        Ok(Responder {
-          id: row.get("id")?,
-          quiz_id: row.get("quiz_id")?,
-          client_id: row.get("client_id")?,
-          email: row.get("email")?,
-          name: row.get("name")?,
-          theme: row.get("theme")?,
-          group: row.get("group")?,
-          context,
-          completed: row.get("completed")?,
-          identified: row.get("identified")?,
-          verified: row.get("verified")?,
-
-          language: row.get("language")?,
-          platform,
-          progress: row.get("progress")?,
-          timezone: row.get("timezone")?,
-          user_agent: row.get("user_agent")?,
-
-          mark: row.get("mark")?,
-
-          connected_at: row.get("connected_at")?,
-          finished_at: row.get("finished_at")?,
-          started_at: row.get("started_at")?,
-
-          updated_at: row.get("updated_at")?,
-          created_at: row.get("created_at")?,
-        })
-    },
+    hydrate_row
   )
 }
 

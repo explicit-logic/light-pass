@@ -14,6 +14,7 @@ mod utils;
 use state::AppState;
 use tauri::{Manager, State};
 
+use crud::answer::*;
 use crud::deployment_process::*;
 use crud::locale::*;
 use crud::responder::*;
@@ -29,6 +30,11 @@ fn main() {
             builder::builder_save_page,
 
             editor::open_editor,
+
+            answer_verify,
+            answer_one,
+            answer_many,
+            answer_save,
 
             deployment_process_update_indicator,
             deployment_process_upsert,
