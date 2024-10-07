@@ -16,7 +16,7 @@ function Header(props: Props) {
   const goBack = useCallback(() => navigate(-1), [navigate]);
 
   return (
-    <header className="sticky top-0 w-full border-b-2 border-gray-100 dark:border-gray-800">
+    <header className="sticky z-10 top-0 w-full border-b-2 border-gray-100 dark:border-gray-800">
       <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-[3.5rem]">
         <div className="flex items-center h-full">
           <div className="flex flex-1 justify-start items-center gap-0.5">

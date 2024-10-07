@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { Row } from '@tanstack/react-table';
 
@@ -15,11 +16,14 @@ function ActionCell(props: Props) {
   const { original } = row;
   const { id } = original;
 
+  const navigate = useNavigate();
+
   const onRemove = useCallback(() => remove(original), [original, remove]);
+  const onVerify = useCallback(() => navigate(`/responders/${id}/verify`), [id, navigate]);
 
   return (
     <div className="flex justify-end gap-2 text-right pr-2">
-      <button type="button" className="group">
+      <button type="button" className="group" onClick={onVerify}>
         <svg
           className="w-4 h-4 text-gray-800 dark:text-white"
           aria-hidden="true"

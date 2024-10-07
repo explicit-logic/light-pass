@@ -86,6 +86,10 @@ const router = createBrowserRouter([
         path: 'quizzes/:quizId/locales/:language/responders',
         lazy: () => import('@/components/pages/ResponderList'),
       },
+      {
+        path: 'responders/:responderId/verify',
+        lazy: () => import('@/components/pages/ResponderVerify'),
+      },
     ],
   },
 ]);
