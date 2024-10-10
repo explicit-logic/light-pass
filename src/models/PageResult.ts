@@ -1,14 +1,16 @@
-export class Answer {
+export class PageResult {
   id: number;
   responderId: number;
   page: string;
 
-  answer: object;
+  score: number;
+  threshold: number;
+  verified: boolean;
 
   createdAt: number;
   updatedAt: number;
 
-  constructor(data: Partial<Answer>) {
+  constructor(data: Partial<PageResult>) {
     Object.assign(this, data);
   }
 }

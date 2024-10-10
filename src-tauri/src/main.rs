@@ -18,8 +18,9 @@ use crud::answer::*;
 use crud::correction::*;
 use crud::deployment_process::*;
 use crud::locale::*;
-use crud::responder::*;
+use crud::page_result::*;
 use crud::quiz::*;
+use crud::responder::*;
 
 fn main() {
     tauri::Builder::default()
@@ -32,7 +33,6 @@ fn main() {
 
             editor::open_editor,
 
-            answer_verify,
             answer_one,
             answer_many,
             answer_save,
@@ -67,6 +67,9 @@ fn main() {
             locale_update_question_counter,
             locale_update_state,
             locale_update_url,
+
+            page_result_many,
+            page_result_save,
 
             responder_connect,
             responder_create_manually,
