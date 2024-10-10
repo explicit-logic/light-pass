@@ -20,6 +20,6 @@ export async function save(data: Pick<Answer, 'responderId' | 'page' | 'answer'>
   return new Answer(answer);
 }
 
-export async function verify(data: Pick<Answer, 'responderId' | 'page' | 'correction' | 'score' | 'threshold'>) {
+export async function verify(data: Pick<Answer, 'responderId' | 'page' | 'score' | 'threshold'>) {
   await invoke('answer_verify', data);
 }

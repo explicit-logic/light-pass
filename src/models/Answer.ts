@@ -4,7 +4,6 @@ export class Answer {
   page: string;
 
   answer: object;
-  correction: object;
 
   score: number;
   threshold: number;

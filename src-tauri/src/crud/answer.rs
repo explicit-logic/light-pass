@@ -15,7 +15,6 @@ pub struct Answer {
   page: String,
 
   answer: JsonValue,
-  correction: JsonValue,
 
   score: i64,
   threshold: i64,
@@ -28,14 +27,12 @@ pub struct Answer {
 
 fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Answer, rusqlite::Error> {
   let answer = serde_json::from_str(row.get::<_, String>("answer")?.as_str()).unwrap_or_default();
-  let correction = serde_json::from_str(row.get::<_, String>("correction")?.as_str()).unwrap_or_default();
 
   Ok(Answer {
     id: row.get("id")?,
     responder_id: row.get("responder_id")?,
     page: row.get("page")?,
     answer,
-    correction,
     score: row.get("score")?,
     threshold: row.get("threshold")?,
     verified: row.get("verified")?,
@@ -100,7 +97,6 @@ pub async fn answer_save(
     responder_id,
     page: page.to_owned(),
     answer,
-    correction: JsonValue::Object(json::Map::new()),
 
     score: 0,
     threshold: 0,
@@ -120,14 +116,12 @@ fn verify(
   db: &Connection,
   responder_id: i64,
   page: String,
-  correction: JsonValue,
   score: i64,
   threshold: i64,
 ) -> Result<(), rusqlite::Error> {
   let mut statement = db.prepare("
     UPDATE answers
     SET
-      correction = :correction,
       score = :score,
       threshold = :threshold,
       verified = 1,
@@ -137,7 +131,6 @@ fn verify(
   statement.execute(named_params! {
     ":responder_id": responder_id,
     ":page": page,
-    ":correction": correction,
     ":score": score,
     ":threshold": threshold,
     ":updated_at": time::now()
@@ -152,12 +145,11 @@ pub async fn answer_verify(
 
   responder_id: i64,
   page: String,
-  correction: JsonValue,
   score: i64,
   threshold: i64,
 ) -> CommandResult<()> {
 
-  app_handle.db(|db| verify(db, responder_id, page, correction, score, threshold))?;
+  app_handle.db(|db| verify(db, responder_id, page, score, threshold))?;
 
   Ok(())
 }

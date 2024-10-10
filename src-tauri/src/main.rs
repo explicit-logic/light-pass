@@ -15,6 +15,7 @@ use state::AppState;
 use tauri::{Manager, State};
 
 use crud::answer::*;
+use crud::correction::*;
 use crud::deployment_process::*;
 use crud::locale::*;
 use crud::responder::*;
@@ -35,6 +36,9 @@ fn main() {
             answer_one,
             answer_many,
             answer_save,
+
+            correction_save,
+            correction_many_on_page,
 
             deployment_process_update_indicator,
             deployment_process_upsert,

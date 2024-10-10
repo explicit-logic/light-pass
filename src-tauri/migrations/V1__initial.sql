@@ -93,7 +93,6 @@ CREATE TABLE IF NOT EXISTS answers (
   "page" TEXT NOT NULL DEFAULT '',
 
   answer TEXT NOT NULL DEFAULT '{}',
-  correction TEXT NOT NULL DEFAULT '{}',
 
   score INTEGER NOT NULL CHECK (score >= 0) DEFAULT 0,
   threshold INTEGER NOT NULL CHECK (threshold >= 0) DEFAULT 0,
@@ -104,5 +103,23 @@ CREATE TABLE IF NOT EXISTS answers (
   created_at INTEGER NOT NULL,
 
   UNIQUE(responder_id, "page") ON CONFLICT REPLACE,
+  FOREIGN KEY (responder_id) REFERENCES responders (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS corrections (
+  id INTEGER PRIMARY KEY NOT NULL,
+  responder_id INTEGER NOT NULL,
+  "page" TEXT NOT NULL DEFAULT '',
+  question TEXT NOT NULL DEFAULT '',
+
+  mark INTEGER NOT NULL CHECK (mark >= 0) DEFAULT 0,
+  note TEXT NOT NULL DEFAULT '',
+
+  verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,
+
+  updated_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+
+  UNIQUE(responder_id, "page", question) ON CONFLICT REPLACE,
   FOREIGN KEY (responder_id) REFERENCES responders (id) ON DELETE CASCADE
 );
