@@ -1,3 +1,5 @@
+import type { Correction } from '@/models/Correction';
+
 import { memo } from 'react';
 import { useLoaderData } from 'react-router-dom';
 
@@ -5,16 +7,33 @@ import { useLoaderData } from 'react-router-dom';
 import AssessmentBar from './components/AssessmentBar';
 import QuestionBlock from './components/QuestionBlock';
 
-function ResponderVerifyMain() {
-  const { pageData } = useLoaderData() as { pageData: PageConfig };
+// Constants
+import { QUESTION_TYPES } from '@/constants/block';
+
+type Props = {
+  currentSlug: string | null;
+};
+
+function ResponderVerifyMain({ currentSlug }: Props) {
+  const { correctionsMap, pageData } = useLoaderData() as {
+    correctionsMap: Record<Correction['question'], Correction>;
+    pageData: PageConfig;
+  };
   const { formData } = pageData;
 
   return (
     <main className="w-full py-3 px-2 space-y-6">
-      {formData.map((block, idx) => (
-        <QuestionBlock key={idx} block={block} />
-      ))}
-
+      {formData.map(
+        (block, idx) =>
+          block.type in QUESTION_TYPES && (
+            <QuestionBlock
+              key={(block as QuestionBlock).name}
+              block={block as QuestionBlock}
+              correction={correctionsMap[(block as QuestionBlock).name]}
+              currentSlug={currentSlug}
+            />
+          ),
+      )}
       <div className="flex flex-row justify-between">
         <div className="space-y-2">
           <label className="text-base leading-6 text-gray-500 dark:text-white">What is the largest city in the world?</label>
@@ -22,9 +41,7 @@ function ResponderVerifyMain() {
             <p className="italic text-sm font-medium text-green-500 underline underline-offset-8">Tokyo</p>
           </div>
         </div>
-        <div>
-          <AssessmentBar />
-        </div>
+        <div>{/* <AssessmentBar /> */}</div>
       </div>
       <div className="space-y-2">
         <label className="text-base leading-6 text-gray-500 dark:text-white">Who is the richest man in the world?</label>

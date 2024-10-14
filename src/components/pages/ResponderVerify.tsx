@@ -1,7 +1,9 @@
+import { getManyOnPage as getManyCorrections } from '@/api/corrections';
 import { getMany as getManyPageResults, save } from '@/api/pageResult';
 import { getPageData, getSlugs } from '@/api/pages';
 import { getOne as getOneQuiz } from '@/api/quizzes';
 import { getOne as getOneResponder } from '@/api/responders';
+import type { Correction } from '@/models/Correction';
 import type { PageResult } from '@/models/PageResult';
 import type { Quiz } from '@/models/Quiz';
 import { useCallback, useEffect } from 'react';
@@ -21,12 +23,18 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   const currentSlug = url.searchParams.get('slug') ?? undefined;
 
   const responder = await getOneResponder(Number(responderId));
-  const [quiz, slugs, pageResults, pageData] = await Promise.all([
+  const [quiz, slugs, corrections, pageResults, pageData] = await Promise.all([
     getOneQuiz(responder.quizId),
     getSlugs(responder.quizId, responder.language),
+    getManyCorrections(responder.id, currentSlug),
     getManyPageResults(responder.id),
     getPageData(responder.quizId, responder.language, currentSlug),
   ]);
+
+  const correctionsMap = corrections.reduce<Record<Correction['question'], Correction>>((acc, curr) => {
+    acc[curr.question] = curr;
+    return acc;
+  }, {});
 
   const pageResultsMap = pageResults.reduce<Record<PageResult['page'], PageResult>>((acc, curr) => {
     acc[curr.page] = curr;
@@ -34,6 +42,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   }, {});
 
   return {
+    correctionsMap,
     pageData,
     pageResultsMap,
     quiz,
@@ -76,7 +85,7 @@ export function Component() {
 
         <div className="flex flex-col sm:flex-row h-screen">
           <ResponderVerifySidebar changePage={changePage} currentSlug={currentSlug} />
-          <ResponderVerifyMain />
+          <ResponderVerifyMain currentSlug={currentSlug} />
         </div>
 
         <ResponderVerifyFooter />

@@ -113,3 +113,72 @@ pub async fn correction_many_on_page(app_handle: AppHandle, responder_id: i64, p
 
   Ok(result)
 }
+
+fn insert_mark(db: &Connection, responder_id: i64, page: String, question: String, mark: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    INSERT OR REPLACE INTO corrections (
+      responder_id, \"page\", question, mark, verified, updated_at, created_at
+    )
+    VALUES (:responder_id, :page, :question, :mark, true, :updated_at, :created_at)
+  ")?;
+  statement.execute(named_params! {
+    ":responder_id": responder_id,
+    ":page": page,
+    ":question": question,
+    ":mark": mark,
+
+    ":updated_at": time::now(),
+    ":created_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+fn update_mark(db: &Connection, responder_id: i64, page: String, question: String, mark: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    UPDATE corrections
+    SET mark = :mark, verified = true, updated_at = :updated_at
+    WHERE responder_id = :responder_id AND \"page\" = :page AND question = :question
+  ")?;
+  statement.execute(named_params! {
+    ":responder_id": responder_id,
+    ":page": page,
+    ":question": question,
+    ":mark": mark,
+
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+fn exists_row(db: &Connection, responder_id: i64, page: String, question: String) -> Result<bool, rusqlite::Error> {
+  let mut statement =
+  db.prepare("SELECT 1 FROM corrections WHERE responder_id = :responder_id AND \"page\" = :page AND question = :question")?;
+  let exists = statement.exists(named_params! {
+    ":responder_id": responder_id,
+    ":page": page,
+    ":question": question,
+  })?;
+
+  Ok(exists)
+}
+
+#[tauri::command]
+pub async fn correction_save_mark(app_handle: AppHandle, responder_id: i64, page: String, question: String, mark: i64) -> CommandResult<()> {
+  let exists = app_handle.db(|db| exists_row(
+    db, responder_id, page.to_owned(), question.to_owned(),
+  ))?;
+
+  if exists {
+    app_handle.db(|db| update_mark(
+      db, responder_id, page.to_owned(), question.to_owned(), mark
+    ))?;
+  } else {
+    app_handle.db(|db| insert_mark(
+      db, responder_id, page.to_owned(), question.to_owned(), mark
+    ))?;
+  }
+
+  Ok(())
+}

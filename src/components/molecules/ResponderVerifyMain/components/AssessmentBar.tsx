@@ -1,25 +1,62 @@
+import type { Correction } from '@/models/Correction';
+import type { Responder } from '@/models/Responder';
+
+import { memo, useCallback } from 'react';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
+
+// API
+import { saveMark } from '@/api/corrections';
+
+// Constants
 import { MARKS, type MARK_TYPE } from '@/constants/marks';
-import { memo, useCallback, useState } from 'react';
+
+// Lib
+import { toast } from '@/lib/toaster';
 
 type Props = {
-  mark?: MARK_TYPE;
+  block: QuestionBlock;
+  correction?: Correction;
+  currentSlug: string | null;
 };
 
-function AssessmentBar({ mark }: Props) {
-  const [currentMark, setCurrentMark] = useState(mark);
-  const onClick = useCallback((newMark: MARK_TYPE) => () => setCurrentMark(newMark), []);
+function AssessmentBar({ block, correction, currentSlug }: Props) {
+  const { responder } = useLoaderData() as { responder: Responder };
+  const { mark } = correction ?? {};
+  const revalidator = useRevalidator();
+  const evaluate = useCallback(
+    (newMark: MARK_TYPE) => async () => {
+      if (!currentSlug) return;
+
+      try {
+        await saveMark({
+          responderId: responder.id,
+          page: currentSlug,
+          question: block.name,
+          mark: newMark,
+        });
+        revalidator.revalidate();
+
+        toast('Answer is verified', { duration: 1 });
+      } catch (error) {
+        const message = (error as Error)?.message ?? error;
+        toast.error(message);
+      }
+    },
+    [block.name, currentSlug, responder.id, revalidator],
+  );
 
   return (
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button
         type="button"
         className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
-          currentMark !== MARKS.WRONG ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
+          mark !== MARKS.WRONG ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
         } text-gray-900 bg-white border-r border-gray-200 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-blue-500`}
-        onClick={onClick(MARKS.WRONG)}
+        disabled={mark === MARKS.WRONG}
+        onClick={evaluate(MARKS.WRONG)}
       >
         <svg
-          className={`w-5 h-5 ${currentMark === MARKS.WRONG ? 'text-red-500' : 'text-gray-800 dark:text-gray-200'}`}
+          className={`w-5 h-5 ${mark === MARKS.WRONG ? 'text-red-500' : 'text-gray-800 dark:text-gray-200'}`}
           aria-hidden="true"
           stroke="currentColor"
           fill="currentColor"
@@ -33,12 +70,13 @@ function AssessmentBar({ mark }: Props) {
       <button
         type="button"
         className={`inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 bg-white focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 ${
-          currentMark !== MARKS.HALF ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
+          mark !== MARKS.HALF ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
         } dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-blue-500`}
-        onClick={onClick(MARKS.HALF)}
+        disabled={mark === MARKS.HALF}
+        onClick={evaluate(MARKS.HALF)}
       >
         <svg
-          className={`w-5 h-5 ${currentMark === MARKS.HALF ? 'text-yellow-300' : 'text-gray-800 dark:text-gray-200'}`}
+          className={`w-5 h-5 ${mark === MARKS.HALF ? 'text-yellow-300' : 'text-gray-800 dark:text-gray-200'}`}
           aria-hidden="true"
           stroke="currentColor"
           fill="currentColor"
@@ -52,12 +90,13 @@ function AssessmentBar({ mark }: Props) {
       <button
         type="button"
         className={`inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 bg-white border-l border-gray-200 rounded-e-lg ${
-          currentMark !== MARKS.RIGHT ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
+          mark !== MARKS.RIGHT ? 'hover:bg-gray-400 dark:hover:bg-gray-700' : ''
         } focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-blue-500`}
-        onClick={onClick(MARKS.RIGHT)}
+        disabled={mark === MARKS.RIGHT}
+        onClick={evaluate(MARKS.RIGHT)}
       >
         <svg
-          className={`w-5 h-5 ${currentMark === MARKS.RIGHT ? 'text-green-500' : 'text-gray-800 dark:text-gray-200'}`}
+          className={`w-5 h-5 ${mark === MARKS.RIGHT ? 'text-green-500' : 'text-gray-800 dark:text-gray-200'}`}
           aria-hidden="true"
           stroke="currentColor"
           fill="currentColor"

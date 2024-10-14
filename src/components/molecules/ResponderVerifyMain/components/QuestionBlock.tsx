@@ -1,14 +1,18 @@
+import type { Correction } from '@/models/Correction';
+
 import { memo } from 'react';
 import AssessmentBar from './AssessmentBar';
 
 // Hooks
-import { useBlockRender } from '../hooks/useBlockRender';
+import { useQuestionBlock } from '../hooks/useQuestionBlock';
 
 type Props = {
-  block: Block;
+  block: QuestionBlock;
+  currentSlug: string | null;
+  correction?: Correction;
 };
-function QuestionBlock({ block }: Props) {
-  const component = useBlockRender({ block });
+function QuestionBlock({ correction, currentSlug, block }: Props) {
+  const component = useQuestionBlock({ block, correction });
 
   if (!component) return;
 
@@ -16,7 +20,7 @@ function QuestionBlock({ block }: Props) {
     <div className="flex flex-row justify-between">
       {component}
       <div>
-        <AssessmentBar />
+        <AssessmentBar block={block} correction={correction} currentSlug={currentSlug} />
       </div>
     </div>
   );

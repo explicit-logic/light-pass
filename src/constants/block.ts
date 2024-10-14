@@ -6,8 +6,8 @@ export const TYPES = Object.freeze({
   RADIO_GROUP: 'radio-group',
 });
 
-export const INTERACTIVE_TYPES: Partial<{ [key in (typeof TYPES)[keyof typeof TYPES]]: boolean }> = Object.freeze({
+export const QUESTION_TYPES = Object.freeze({
   [TYPES.CHECKBOX_GROUP]: true,
   [TYPES.INPUT]: true,
   [TYPES.RADIO_GROUP]: true,
-});
+} as const);

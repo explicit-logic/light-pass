@@ -37,8 +37,9 @@ fn main() {
             answer_many,
             answer_save,
 
-            correction_save,
             correction_many_on_page,
+            correction_save,
+            correction_save_mark,
 
             deployment_process_update_indicator,
             deployment_process_upsert,

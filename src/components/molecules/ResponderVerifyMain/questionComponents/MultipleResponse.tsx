@@ -1,15 +1,29 @@
+import type { Correction } from '@/models/Correction';
+
 import { memo } from 'react';
+
+// Constants
+import { MARKS } from '@/constants/marks';
 
 type Props = {
   block: Blocks.CheckboxGroup;
+  correction?: Correction;
 };
 
-function MultipleResponse({ block }: Props) {
+function MultipleResponse({ block, correction }: Props) {
   const { values } = block;
+  const { mark } = correction ?? {};
+  const noMark = mark === undefined || mark === null;
 
   return (
     <div className="space-y-2">
-      <label className="text-base leading-6 text-gray-500 dark:text-white">{block.label}</label>
+      <label
+        className={`text-base leading-6 ${mark === MARKS.WRONG && 'text-red-500'} ${mark === MARKS.HALF && 'text-yellow-300'} ${
+          mark === MARKS.RIGHT && 'text-green-500'
+        } ${noMark && 'text-gray-500 dark:text-white'}`}
+      >
+        {block.label}
+      </label>
       <div className="space-y-2">
         {values.map((option, idx) => (
           <div key={idx} className="flex items-center">

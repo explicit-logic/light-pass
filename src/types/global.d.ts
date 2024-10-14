@@ -139,7 +139,7 @@ declare global {
   }
 
   type Block = Blocks.Header | Blocks.Input | Blocks.CheckboxGroup | Blocks.Image | Blocks.RadioGroup;
-  type InteractionBlock = Blocks.CheckboxGroup | Blocks.RadioGroup;
+  type QuestionBlock = Blocks.CheckboxGroup | Blocks.Input | Blocks.RadioGroup;
 
   type BlocksList = Block[];
 
@@ -168,6 +168,7 @@ declare global {
     interface Input {
       type: typeof BLOCK_TYPES.INPUT;
       label: string;
+      name: string;
       value: string;
     }
 

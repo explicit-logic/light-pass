@@ -1,10 +1,12 @@
+import type { MARK_TYPE } from '@/constants/marks';
+
 export class Correction {
   id: number;
   responderId: number;
   page: string;
   question: string;
 
-  mark: number;
+  mark: MARK_TYPE;
   note: string;
 
   verified: boolean;
