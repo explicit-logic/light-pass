@@ -106,16 +106,22 @@ pub async fn answer_many(app_handle: AppHandle, responder_id: i64) -> CommandRes
   Ok(result)
 }
 
-fn one(db: &Connection, responder_id: i64, page: &str) -> Result<Answer, rusqlite::Error> {
-  db.query_row(
+fn one(db: &Connection, responder_id: i64, page: &str) -> Result<Option<Answer>, rusqlite::Error> {
+  let query = db.query_row(
     "SELECT * FROM answers WHERE responder_id = :responder_id AND \"page\" = :page",
     named_params! { ":responder_id": responder_id, ":page": page },
     hydrate_row,
-  )
+  );
+
+  match query {
+    Ok(x) => Ok(Some(x)),
+    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+    Err(err) => Err(err),
+  }
 }
 
 #[tauri::command]
-pub async fn answer_one(app_handle: AppHandle, responder_id: i64, page: &str) -> CommandResult<Answer> {
-  let locale = app_handle.db(|db| one(db, responder_id, page))?;
-  Ok(locale)
+pub async fn answer_one(app_handle: AppHandle, responder_id: i64, page: &str) -> CommandResult<Option<Answer>> {
+  let answer = app_handle.db(|db| one(db, responder_id, page))?;
+  Ok(answer)
 }

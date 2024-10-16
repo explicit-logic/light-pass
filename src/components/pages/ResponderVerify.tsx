@@ -1,5 +1,6 @@
+import { getOne as getOneAnswer } from '@/api/answers';
 import { getManyOnPage as getManyCorrections } from '@/api/corrections';
-import { getMany as getManyPageResults, save } from '@/api/pageResult';
+import { getMany as getManyPageResults } from '@/api/pageResult';
 import { getPageData, getSlugs } from '@/api/pages';
 import { getOne as getOneQuiz } from '@/api/quizzes';
 import { getOne as getOneResponder } from '@/api/responders';
@@ -23,7 +24,8 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   const currentSlug = url.searchParams.get('slug') ?? undefined;
 
   const responder = await getOneResponder(Number(responderId));
-  const [quiz, slugs, corrections, pageResults, pageData] = await Promise.all([
+  const [answer, quiz, slugs, corrections, pageResults, pageData] = await Promise.all([
+    getOneAnswer(responder.id, currentSlug),
     getOneQuiz(responder.quizId),
     getSlugs(responder.quizId, responder.language),
     getManyCorrections(responder.id, currentSlug),
@@ -42,6 +44,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   }, {});
 
   return {
+    answer,
     correctionsMap,
     pageData,
     pageResultsMap,

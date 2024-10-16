@@ -6,14 +6,16 @@ import { memo } from 'react';
 import { MARKS } from '@/constants/marks';
 
 type Props = {
+  answer?: string[];
   block: Blocks.RadioGroup;
   correction?: Correction;
 };
 
-function MultipleChoice({ block, correction }: Props) {
+function MultipleChoice({ answer, block, correction }: Props) {
   const { values } = block;
   const { mark } = correction ?? {};
   const noMark = mark === undefined || mark === null;
+  const [answerValue] = answer ?? [];
 
   return (
     <div className="space-y-2">
@@ -25,20 +27,30 @@ function MultipleChoice({ block, correction }: Props) {
         {block.label}
       </label>
       <div className="space-y-2">
-        {values.map((option, idx) => (
-          <div key={idx} className="flex items-center">
-            <input
-              defaultChecked={false}
-              disabled
-              type="radio"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600"
-            />
-            <label className={`ms-2 text-sm font-medium ${option.selected ? 'text-green-500' : 'text-gray-900 dark:text-gray-300'}`}>
-              {option.label}
-            </label>
-          </div>
-        ))}
+        {values.map((option, idx) => {
+          const checked = answerValue === option.value;
+          const right = checked && option.selected;
+
+          return (
+            <div key={idx} className="flex items-center">
+              <input
+                defaultChecked={checked}
+                disabled
+                type="radio"
+                className={`w-4 h-4 ${
+                  right ? 'text-green-600' : 'text-gray-700'
+                } bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600`}
+              />
+              <label
+                className={`ms-2 text-sm font-medium ${
+                  option.selected ? 'text-green-500' : checked ? 'text-red-600' : 'text-gray-900 dark:text-gray-300'
+                } ${checked && 'underline italic'}`}
+              >
+                {option.label}
+              </label>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -8,8 +8,10 @@ export async function getMany(responderId: Answer['responderId']) {
   return items.map((item) => new Answer(item));
 }
 
-export async function getOne(responderId: Answer['responderId'], page: Answer['page']) {
+export async function getOne(responderId: Answer['responderId'], page?: Answer['page']) {
+  if (!page) return;
   const item = (await invoke('answer_one', { responderId, page })) as Answer;
+  if (!item) return undefined;
 
   return new Answer(item);
 }

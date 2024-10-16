@@ -7,12 +7,13 @@ import AssessmentBar from './AssessmentBar';
 import { useQuestionBlock } from '../hooks/useQuestionBlock';
 
 type Props = {
+  answer?: string[];
   block: QuestionBlock;
   currentSlug: string | null;
   correction?: Correction;
 };
-function QuestionBlock({ correction, currentSlug, block }: Props) {
-  const component = useQuestionBlock({ block, correction });
+function QuestionBlock({ answer, block, correction, currentSlug }: Props) {
+  const component = useQuestionBlock({ answer, block, correction });
 
   if (!component) return;
 

@@ -9,23 +9,24 @@ import ShortAnswer from '../questionComponents/ShortAnswer';
 import { TYPES } from '@/constants/block';
 
 export type Props = {
+  answer?: string[];
   block: QuestionBlock;
   correction?: Correction;
 };
 
 export function useQuestionBlock(props: Props) {
-  const { block, correction } = props;
+  const { answer, block, correction } = props;
 
   if (block.type === TYPES.INPUT) {
     return <ShortAnswer block={block} />;
   }
 
   if (block.type === TYPES.RADIO_GROUP) {
-    return <MultipleChoice block={block} correction={correction} />;
+    return <MultipleChoice answer={answer} block={block} correction={correction} />;
   }
 
   if (block.type === TYPES.CHECKBOX_GROUP) {
-    return <MultipleResponse block={block} correction={correction} />;
+    return <MultipleResponse answer={answer} block={block} correction={correction} />;
   }
 
   return null;

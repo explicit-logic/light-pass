@@ -3,7 +3,7 @@ export class Answer {
   responderId: number;
   page: string;
 
-  answer: object;
+  answer: Record<string, string | string[]>;
 
   createdAt: number;
   updatedAt: number;
