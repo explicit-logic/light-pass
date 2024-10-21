@@ -7,9 +7,12 @@ use crate::state::ServiceAccess;
 use tauri::AppHandle;
 
 use crate::utils::time;
+use crate::crud::page_result;
 
 // 10 minutes
 const CONNECTION_EXPIRATION: u32 = 10 * 60 * 1000;
+
+const MARK_RIGHT: u8 = 2;
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -34,7 +37,8 @@ pub struct Responder {
     timezone: String,
     user_agent: String,
 
-    mark: i64,
+    final_mark: i64,
+    points: i64,
 
     connected_at: i64,
     finished_at: i64,
@@ -66,7 +70,8 @@ fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Responder, rusqlite::Error> {
     timezone: row.get("timezone")?,
     user_agent: row.get("user_agent")?,
 
-    mark: row.get("mark")?,
+    final_mark: row.get("final_mark")?,
+    points: row.get("points")?,
 
     connected_at: row.get("connected_at")?,
     finished_at: row.get("finished_at")?,
@@ -100,7 +105,8 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
         identified,
         verified,
         language,
-        mark,
+        final_mark,
+        points,
         platform,
         progress,
         timezone,
@@ -123,7 +129,8 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
         :identified,
         :verified,
         :language,
-        :mark,
+        :final_mark,
+        :points,
         :platform,
         :progress,
         :timezone,
@@ -148,7 +155,8 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
     ":identified": responder.identified,
     ":verified": responder.verified,
     ":language": responder.language,
-    ":mark": responder.mark,
+    ":final_mark": responder.final_mark,
+    ":points": responder.points,
     ":platform": responder.platform,
     ":progress": responder.progress,
     ":timezone": responder.timezone,
@@ -196,7 +204,8 @@ pub async fn responder_connect(
         timezone,
         user_agent,
 
-        mark: 0,
+        final_mark: 0,
+        points: 0,
 
         connected_at: time::now(),
         finished_at: 0,
@@ -242,7 +251,8 @@ pub async fn responder_create_manually(
         timezone: String::new(),
         user_agent: String::new(),
 
-        mark: 0,
+        final_mark: 0,
+        points: 0,
 
         connected_at: 0,
         finished_at: 0,
@@ -448,4 +458,79 @@ fn one(db: &Connection, id: i64) -> Result<Responder, rusqlite::Error> {
 pub async fn responder_one(app_handle: AppHandle, id: i64) -> CommandResult<Responder> {
     let responder = app_handle.db(|db| one(db, id))?;
     Ok(responder)
+}
+
+pub fn save_points(db: &Connection, id: i64, points: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    UPDATE responders
+    SET points = :points, updated_at = :updated_at
+    WHERE id = :id
+  ")?;
+  statement.execute(named_params! {
+    ":id": id,
+    ":points": points,
+
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+pub fn save_final_mark(db: &Connection, id: i64, final_mark: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    UPDATE responders
+    SET final_mark = :final_mark, updated_at = :updated_at
+    WHERE id = :id
+  ")?;
+  statement.execute(named_params! {
+    ":id": id,
+    ":final_mark": final_mark,
+
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn responder_save_final_mark(app_handle: AppHandle, id: i64, final_mark: i64) -> CommandResult<()> {
+  app_handle.db(|db| save_final_mark(db, id, final_mark))?;
+
+  Ok(())
+}
+
+pub fn reset_results(db: &Connection, id: i64) -> Result<(), rusqlite::Error> {
+  let mut statement1 = db.prepare("DELETE FROM page_results WHERE responder_id = :responder_id")?;
+  statement1.execute(named_params! { ":responder_id": id })?;
+
+  let mut statement2 = db.prepare("DELETE FROM corrections WHERE responder_id = :responder_id")?;
+  statement2.execute(named_params! { ":responder_id": id })?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn responder_reset_results(app_handle: AppHandle, id: i64) -> CommandResult<()> {
+  app_handle.db(|db| reset_results(db, id))?;
+
+  Ok(())
+}
+
+pub fn auto_evaluate(db: &Connection, id: i64) -> Result<i64, rusqlite::Error> {
+  let points_sum = page_result::get_points_sum(db, id)?;
+  let questions_sum = page_result::get_questions_sum(db, id)?;
+  let points_max = questions_sum * MARK_RIGHT as i64;
+  let final_mark: i64 = (((points_sum as f64 / points_max as f64) * 100f64)).round() as i64;
+
+  save_points(db, id, points_sum)?;
+  save_final_mark(db, id, final_mark)?;
+
+  Ok(final_mark)
+}
+
+#[tauri::command]
+pub async fn responder_auto_evaluate(app_handle: AppHandle, id: i64) -> CommandResult<i64> {
+  let final_mark = app_handle.db(|db| auto_evaluate(db, id))?;
+
+  Ok(final_mark)
 }

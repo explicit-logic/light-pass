@@ -3,7 +3,7 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 
 import type { Responder } from '@/models/Responder';
 
-function ResponderVerifyHeader() {
+function Header() {
   const { responder } = useLoaderData() as { responder: Responder };
   const navigate = useNavigate();
   const goBack = useCallback(
@@ -40,4 +40,4 @@ function ResponderVerifyHeader() {
   );
 }
 
-export default memo(ResponderVerifyHeader);
+export default memo(Header);

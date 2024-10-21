@@ -11,7 +11,7 @@ function MarkCell(props: Props) {
   const { row } = props;
   const { original } = row;
 
-  const text = original.completed ? original.mark : '–';
+  const text = original.completed ? original.finalMark : '–';
 
   return <span>{text}</span>;
 }

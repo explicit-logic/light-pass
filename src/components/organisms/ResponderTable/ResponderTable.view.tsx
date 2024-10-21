@@ -58,7 +58,7 @@ function ResponderTableView(props: Props) {
       //   cell: StatusCell,
       // },
       {
-        id: 'mark',
+        id: 'finalMark',
         header: 'Mark',
         cell: MarkCell,
       },

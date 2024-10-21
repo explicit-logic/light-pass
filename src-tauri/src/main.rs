@@ -37,9 +37,10 @@ fn main() {
             answer_many,
             answer_save,
 
+            correction_evaluate,
             correction_many_on_page,
             correction_save,
-            correction_save_mark,
+            correction_save_points,
 
             deployment_process_update_indicator,
             deployment_process_upsert,
@@ -69,9 +70,12 @@ fn main() {
             locale_update_state,
             locale_update_url,
 
+            page_result_auto_evaluate,
             page_result_many,
             page_result_save,
+            page_result_save_question_count,
 
+            responder_auto_evaluate,
             responder_connect,
             responder_create_manually,
             responder_delete_one,
@@ -80,6 +84,8 @@ fn main() {
             responder_one,
             responder_update_progress,
             responder_complete,
+            responder_reset_results,
+            responder_save_final_mark,
 
             github::init_device_oauth,
             github::check_auth_status,

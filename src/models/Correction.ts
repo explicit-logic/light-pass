@@ -6,7 +6,7 @@ export class Correction {
   page: string;
   question: string;
 
-  mark: MARK_TYPE;
+  points: MARK_TYPE;
   note: string;
 
   verified: boolean;

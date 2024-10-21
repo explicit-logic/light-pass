@@ -5,25 +5,19 @@ import { memo } from 'react';
 import { useLoaderData } from 'react-router-dom';
 
 // Components
-import QuestionBlock from './components/QuestionBlock';
+import QuestionBlock from './QuestionBlock';
 
 // Constants
 import { QUESTION_TYPES } from '@/constants/block';
 
-const retrieveAnswer = (question: string, entity?: Answer) => {
-  const answer = entity?.answer?.[question];
-  if (Array.isArray(answer)) return answer;
-
-  if (typeof answer === 'string') return [answer];
-
-  return [];
-};
+// Helpers
+import { retrieveAnswer } from '@/helpers/retrieveAnswer';
 
 type Props = {
   currentSlug: string | null;
 };
 
-function ResponderVerifyMain({ currentSlug }: Props) {
+function Main({ currentSlug }: Props) {
   const { answer, correctionsMap, pageData } = useLoaderData() as {
     answer: Answer;
     correctionsMap: Record<Correction['question'], Correction>;
@@ -38,7 +32,7 @@ function ResponderVerifyMain({ currentSlug }: Props) {
           block.type in QUESTION_TYPES && (
             <QuestionBlock
               key={(block as QuestionBlock).name}
-              answer={retrieveAnswer((block as QuestionBlock).name, answer)}
+              answer={retrieveAnswer(answer, (block as QuestionBlock).name)}
               block={block as QuestionBlock}
               correction={correctionsMap[(block as QuestionBlock).name]}
               currentSlug={currentSlug}
@@ -49,4 +43,4 @@ function ResponderVerifyMain({ currentSlug }: Props) {
   );
 }
 
-export default memo(ResponderVerifyMain);
+export default memo(Main);

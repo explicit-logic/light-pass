@@ -20,9 +20,7 @@ function QuestionBlock({ answer, block, correction, currentSlug }: Props) {
   return (
     <div className="flex flex-row justify-between">
       {component}
-      <div>
-        <AssessmentBar block={block} correction={correction} currentSlug={currentSlug} />
-      </div>
+      <AssessmentBar block={block} correction={correction} currentSlug={currentSlug} />
     </div>
   );
 }

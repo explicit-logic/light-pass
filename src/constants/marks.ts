@@ -1,3 +1,5 @@
+export const MAX_MARK = 100;
+
 export const MARKS = Object.freeze({
   WRONG: 0,
   HALF: 1,

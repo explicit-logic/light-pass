@@ -30,7 +30,7 @@ const getDurationText = (responder: Responder) => {
   return '--:--';
 };
 
-function ResponderVerifyDetails() {
+function Details() {
   const { responder, slugs } = useLoaderData() as { responder: Responder; slugs: string[] };
   const timeText = getTimeText(responder);
   const durationText = getDurationText(responder);
@@ -60,4 +60,4 @@ function ResponderVerifyDetails() {
   );
 }
 
-export default memo(ResponderVerifyDetails);
+export default memo(Details);

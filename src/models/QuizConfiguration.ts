@@ -28,10 +28,8 @@ export class QuizConfiguration {
 
   public static toText(data: Partial<QuizConfiguration>) {
     return JSON.stringify({
+      ...data,
       basePath: data.basePath ? `/${data.basePath}` : '',
-      fields: data.fields,
-      order: data.order,
-      timeLimit: data.timeLimit,
     });
   }
 

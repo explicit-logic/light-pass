@@ -19,7 +19,8 @@ export class Responder {
   readonly theme: ThemeModeType;
   readonly group?: string;
 
-  readonly mark: number = 0;
+  readonly finalMark: number = 0;
+  readonly points: number = 0;
 
   readonly startedAt: number;
   readonly finishedAt: number;

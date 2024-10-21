@@ -98,7 +98,7 @@ declare global {
       type: typeof MESSAGE_TYPES.progress;
 
       data: {
-        answer: object;
+        answer: Record<string, string | string[]>;
         current: number;
         page: string;
         total: number;

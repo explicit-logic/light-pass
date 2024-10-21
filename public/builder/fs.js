@@ -135,6 +135,19 @@
         }
       }
 
+      if (item.values) {
+        const newValues = [];
+
+        for (const option of item.values) {
+          newValues.push({
+            ...option,
+            value: (newValues.length + 1).toString(),
+          });
+        }
+
+        item.values = newValues;
+      }
+
       if (item.type === 'image') {
         if (!item.src || !fileNames.includes(item.src)) continue;
         srcMap[item.src] = true;

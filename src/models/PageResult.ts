@@ -3,8 +3,8 @@ export class PageResult {
   responderId: number;
   page: string;
 
-  score: number;
-  threshold: number;
+  points: number;
+  questionCount: number;
   verified: boolean;
 
   createdAt: number;

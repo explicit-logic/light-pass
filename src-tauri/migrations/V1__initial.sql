@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS responders (
   timezone TEXT NOT NULL,
   user_agent TEXT NOT NULL,
 
-  mark INTEGER NOT NULL CHECK (mark >= 0) DEFAULT 0,
+  points INTEGER NOT NULL CHECK (points >= 0) DEFAULT 0,
+  final_mark INTEGER NOT NULL CHECK (final_mark >= 0) DEFAULT 0,
 
   connected_at INTEGER NOT NULL,
   finished_at INTEGER NOT NULL,
@@ -106,8 +107,8 @@ CREATE TABLE IF NOT EXISTS page_results (
   responder_id INTEGER NOT NULL,
   "page" TEXT NOT NULL DEFAULT '',
 
-  score INTEGER NOT NULL CHECK (score >= 0) DEFAULT 0,
-  threshold INTEGER NOT NULL CHECK (threshold >= 0) DEFAULT 0,
+  points INTEGER NOT NULL CHECK (points >= 0) DEFAULT 0,
+  question_count INTEGER NOT NULL CHECK (question_count >= 0) DEFAULT 0,
   verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,
 
   updated_at INTEGER NOT NULL,
@@ -123,7 +124,7 @@ CREATE TABLE IF NOT EXISTS corrections (
   "page" TEXT NOT NULL DEFAULT '',
   question TEXT NOT NULL DEFAULT '',
 
-  mark INTEGER NOT NULL CHECK (mark >= 0) DEFAULT 0,
+  points INTEGER NOT NULL CHECK (points >= 0) DEFAULT 0,
   note TEXT NOT NULL DEFAULT '',
 
   verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,

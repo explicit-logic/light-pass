@@ -52,7 +52,7 @@ export type Question = {
 export type Result = {
   headline: string;
   caption: string;
-  score: string;
+  points: string;
   download: Download;
 };
 

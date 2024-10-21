@@ -7,15 +7,23 @@ import { getOne as getOneResponder } from '@/api/responders';
 import type { Correction } from '@/models/Correction';
 import type { PageResult } from '@/models/PageResult';
 import type { Quiz } from '@/models/Quiz';
+import type { Responder } from '@/models/Responder';
 import { useCallback, useEffect } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { type LoaderFunction, useLoaderData, useSearchParams } from 'react-router-dom';
+import type { FinalMarkForm } from './types/FinalMarkForm.types';
 
+// Components
+import HeaderLocale from '@/components/atoms/HeaderLocale';
 import Header from '@/components/molecules/Header';
-import ResponderVerifyDetails from '@/components/molecules/ResponderVerifyDetails';
-import ResponderVerifyFooter from '@/components/molecules/ResponderVerifyFooter';
-import ResponderVerifyHeader from '@/components/molecules/ResponderVerifyHeader';
-import ResponderVerifyMain from '@/components/molecules/ResponderVerifyMain';
-import ResponderVerifySidebar from '@/components/molecules/ResponderVerifySidebar';
+import Details from './components/Details';
+import Footer from './components/Footer';
+import ResponderVerifyHeader from './components/Header';
+import Main from './components/Main';
+import Sidebar from './components/Sidebar';
+
+// Utils
+import { generatePages } from './utils/generatePages';
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const { responderId } = params as unknown as { responderId: string };
@@ -43,11 +51,19 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     return acc;
   }, {});
 
+  const pages = generatePages({
+    currentSlug,
+    finalMark: responder.finalMark,
+    pageResultsMap,
+    slugs,
+  });
+
   return {
     answer,
     correctionsMap,
     pageData,
     pageResultsMap,
+    pages,
     quiz,
     responder,
     slugs,
@@ -55,15 +71,26 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 };
 
 export function Component() {
-  const { pageResultsMap, quiz, slugs } = useLoaderData() as {
+  const { pageResultsMap, responder, quiz, slugs } = useLoaderData() as {
     quiz: Quiz;
     pageResultsMap: Record<PageResult['page'], PageResult>;
+    responder: Responder;
     slugs: string[];
   };
   const [searchParams, setSearchParams] = useSearchParams();
   const currentSlug = searchParams.get('slug');
   const goToPage = useCallback((slug: string) => setSearchParams({ slug }), [setSearchParams]);
   const changePage = useCallback((slug: string) => () => goToPage(slug), [goToPage]);
+
+  const methods = useForm<FinalMarkForm>({
+    defaultValues: {
+      finalMark: responder.finalMark,
+    },
+  });
+
+  const { handleSubmit } = methods;
+
+  const onSubmit = handleSubmit(async (data: FinalMarkForm) => {});
 
   useEffect(() => {
     if (currentSlug) return;
@@ -81,18 +108,20 @@ export function Component() {
 
   return (
     <>
-      <Header title={quiz.name} />
-      <div className="mx-auto pb-20">
-        <ResponderVerifyHeader />
-        <ResponderVerifyDetails />
+      <Header right={<HeaderLocale>{responder.language}</HeaderLocale>} title={quiz.name} />
+      <FormProvider {...methods}>
+        <form className="mx-auto pb-20" onSubmit={onSubmit}>
+          <ResponderVerifyHeader />
+          <Details />
 
-        <div className="flex flex-col sm:flex-row h-screen">
-          <ResponderVerifySidebar changePage={changePage} currentSlug={currentSlug} />
-          <ResponderVerifyMain currentSlug={currentSlug} />
-        </div>
+          <div className="flex flex-col sm:flex-row h-screen">
+            <Sidebar changePage={changePage} />
+            <Main currentSlug={currentSlug} />
+          </div>
 
-        <ResponderVerifyFooter />
-      </div>
+          <Footer />
+        </form>
+      </FormProvider>
     </>
   );
 }
