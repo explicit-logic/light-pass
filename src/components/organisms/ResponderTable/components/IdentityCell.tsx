@@ -1,5 +1,7 @@
 import type { Row } from '@tanstack/react-table';
 
+import { Link } from 'react-router-dom';
+
 // Helpers
 import { platformToText } from '@/helpers/platformToText';
 
@@ -13,7 +15,7 @@ type Props = {
 function IdentityCell(props: Props) {
   const { row } = props;
   const { original } = row;
-  const { email, identified, name, platform, connectedAt, userAgent } = original;
+  const { id, email, identified, name, platform, connectedAt, userAgent } = original;
 
   if (!identified) {
     const platformText = platformToText(platform);
@@ -39,7 +41,9 @@ function IdentityCell(props: Props) {
     <div className="flex items-center text-gray-900 whitespace-nowrap dark:text-white">
       {/* <img className="w-10 h-10 rounded-full" src={`https://source.unsplash.com/40x40/?portrait&${original.id}`} alt="Jese" /> */}
       <div className="ps-3">
-        <div className="text-base font-semibold">{name}</div>
+        <Link to={`/responders/${id}/verify`} className="text-base font-semibold hover:text-blue-500">
+          {name}
+        </Link>
         <div className="font-normal text-gray-500">{email}</div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { memo } from 'react';
 // Components
 import FinalMark from './FinalMark';
 import RefreshButton from './RefreshButton';
+import SubmitButton from './SubmitButton';
 
 function Footer() {
   return (
@@ -11,12 +12,7 @@ function Footer() {
         <FinalMark />
         <div className="flex flex-row w-full sm:w-60">
           <RefreshButton />
-          <button
-            type="button"
-            className="w-full py-3 text-base font-medium text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-          >
-            Evaluate
-          </button>
+          <SubmitButton />
         </div>
       </div>
     </div>

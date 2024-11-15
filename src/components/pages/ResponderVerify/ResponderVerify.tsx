@@ -3,14 +3,16 @@ import { getManyOnPage as getManyCorrections } from '@/api/corrections';
 import { getMany as getManyPageResults } from '@/api/pageResult';
 import { getPageData, getSlugs } from '@/api/pages';
 import { getOne as getOneQuiz } from '@/api/quizzes';
-import { getOne as getOneResponder } from '@/api/responders';
+import { getOne as getOneResponder, unlock, verify } from '@/api/responders';
 import type { Correction } from '@/models/Correction';
 import type { PageResult } from '@/models/PageResult';
 import type { Quiz } from '@/models/Quiz';
 import type { Responder } from '@/models/Responder';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { type LoaderFunction, useLoaderData, useSearchParams } from 'react-router-dom';
+import { type LoaderFunction, useLoaderData, useRevalidator, useSearchParams } from 'react-router-dom';
+import * as yup from 'yup';
 import type { FinalMarkForm } from './types/FinalMarkForm.types';
 
 // Components
@@ -22,8 +24,18 @@ import ResponderVerifyHeader from './components/Header';
 import Main from './components/Main';
 import Sidebar from './components/Sidebar';
 
+// Constants
+import { MAX_MARK, MIN_MARK } from '@/constants/marks';
+
+import { toast } from '@/lib/toaster';
 // Utils
 import { generatePages } from './utils/generatePages';
+
+const schema = yup
+  .object({
+    finalMark: yup.number().min(MIN_MARK).max(MAX_MARK).required(),
+  })
+  .required();
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   const { responderId } = params as unknown as { responderId: string };
@@ -52,8 +64,8 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   }, {});
 
   const pages = generatePages({
+    autoMark: responder.autoMark,
     currentSlug,
-    finalMark: responder.finalMark,
     pageResultsMap,
     slugs,
   });
@@ -81,16 +93,32 @@ export function Component() {
   const currentSlug = searchParams.get('slug');
   const goToPage = useCallback((slug: string) => setSearchParams({ slug }), [setSearchParams]);
   const changePage = useCallback((slug: string) => () => goToPage(slug), [goToPage]);
+  const revalidator = useRevalidator();
 
   const methods = useForm<FinalMarkForm>({
     defaultValues: {
       finalMark: responder.finalMark,
     },
+    resolver: yupResolver(schema),
   });
 
   const { handleSubmit } = methods;
 
-  const onSubmit = handleSubmit(async (data: FinalMarkForm) => {});
+  const onSubmit = handleSubmit(async ({ finalMark }: FinalMarkForm) => {
+    try {
+      if (responder.verified) {
+        await unlock(responder.id);
+        toast('Responder unlocked');
+      } else {
+        await verify(responder.id, finalMark);
+        toast.success('Responder verified');
+      }
+      revalidator.revalidate();
+    } catch (error) {
+      const message = (error as Error)?.message ?? error;
+      toast.error(message);
+    }
+  });
 
   useEffect(() => {
     if (currentSlug) return;

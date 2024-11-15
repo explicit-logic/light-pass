@@ -1,12 +1,13 @@
 use rusqlite::{named_params, Connection};
 use serde::Serialize;
 use tauri::AppHandle;
-use crate::error::CommandResult;
+use crate::error::{CommandError, CommandResult};
 use crate::state::ServiceAccess;
 
 use crate::utils::time;
 
 use crate::crud::correction;
+use crate::crud::responder;
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -49,57 +50,6 @@ pub fn check_verified(db: &Connection, responder_id: i64, page: String) -> Resul
     Err(rusqlite::Error::QueryReturnedNoRows) => Ok(false),
     Err(err) => Err(err),
   }
-}
-
-fn save(db: &Connection, page_result: &mut PageResult) -> Result<(), rusqlite::Error> {
-  let mut statement = db.prepare("
-    INSERT OR REPLACE INTO page_results (
-      responder_id, \"page\", points, question_count, verified, updated_at, created_at
-    )
-    VALUES (:responder_id, :page, :points, :question_count, :verified, :updated_at, :created_at)
-  ")?;
-  statement.execute(named_params! {
-    ":responder_id": page_result.responder_id,
-    ":page": page_result.page,
-    ":points": page_result.points,
-    ":question_count": page_result.question_count,
-    ":verified": page_result.verified,
-
-    ":updated_at": page_result.updated_at,
-    ":created_at": page_result.created_at
-  })?;
-
-  page_result.id = db.last_insert_rowid();
-
-  Ok(())
-}
-
-#[tauri::command]
-pub async fn page_result_save(
-    app_handle: AppHandle,
-
-    responder_id: i64,
-    page: String,
-    points: i64,
-    question_count: i64,
-    verified: bool,
-) -> CommandResult<PageResult> {
-  let mut page_result = PageResult {
-    id: 0,
-    responder_id,
-    page,
-
-    points,
-    question_count,
-    verified,
-
-    updated_at: time::now(),
-    created_at: time::now(),
-  };
-
-  app_handle.db(|db| save(db, &mut page_result))?;
-
-  Ok(page_result)
 }
 
 fn many(db: &Connection, responder_id: i64) -> Result<Vec<PageResult>, rusqlite::Error> {
@@ -260,62 +210,11 @@ pub fn auto_evaluate(db: &Connection, responder_id: i64, page: String, question_
 
 #[tauri::command]
 pub async fn page_result_auto_evaluate(app_handle: AppHandle, responder_id: i64, page: String, question_count: i64) -> CommandResult<()> {
-  app_handle.db(|db| auto_evaluate(db, responder_id, page, question_count))?;
-
-  Ok(())
-}
-
-fn insert_question_count(db: &Connection, responder_id: i64, page: String, question_count: i64) -> Result<(), rusqlite::Error> {
-  let mut statement = db.prepare("
-    INSERT OR REPLACE INTO page_results (
-      responder_id, \"page\", question_count, updated_at, created_at
-    )
-    VALUES (:responder_id, :page, :question_count, :updated_at, :created_at)
-  ")?;
-  statement.execute(named_params! {
-    ":responder_id": responder_id,
-    ":page": page,
-    ":question_count": question_count,
-
-    ":updated_at": time::now(),
-    ":created_at": time::now(),
-  })?;
-
-  Ok(())
-}
-
-fn update_question_count(db: &Connection, responder_id: i64, page: String, question_count: i64) -> Result<(), rusqlite::Error> {
-  let mut statement = db.prepare("
-    UPDATE page_results
-    SET question_count = :question_count, updated_at = :updated_at
-    WHERE responder_id = :responder_id AND \"page\" = :page 
-  ")?;
-  statement.execute(named_params! {
-    ":responder_id": responder_id,
-    ":page": page,
-    ":question_count": question_count,
-
-    ":updated_at": time::now(),
-  })?;
-
-  Ok(())
-}
-
-#[tauri::command]
-pub async fn page_result_save_question_count(app_handle: AppHandle, responder_id: i64, page: String, question_count: i64) -> CommandResult<()> {
-  let exists = app_handle.db(|db| exists_row(
-    db, responder_id, page.to_owned()
-  ))?;
-
-  if exists {
-    app_handle.db(|db| update_question_count(
-      db, responder_id, page.to_owned(), question_count
-    ))?;
-  } else {
-    app_handle.db(|db| insert_question_count(
-      db, responder_id, page.to_owned(), question_count
-    ))?;
+  let verified = app_handle.db(|db| responder::check_verified(db, responder_id))?;
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
   }
+  app_handle.db(|db| auto_evaluate(db, responder_id, page, question_count))?;
 
   Ok(())
 }

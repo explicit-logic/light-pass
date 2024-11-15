@@ -43,14 +43,18 @@ export async function updateProgress(data: Pick<Responder, 'quizId' | 'clientId'
   return new Responder(responder);
 }
 
-export async function saveFinalMark(id: Responder['id'], finalMark: number) {
-  await invoke('responder_save_final_mark', { id, finalMark });
-}
-
 export async function resetResults(id: Responder['id']) {
   await invoke('responder_reset_results', { id });
 }
 
 export async function autoEvaluate(id: Responder['id']) {
   return (await invoke('responder_auto_evaluate', { id })) as number;
+}
+
+export async function unlock(id: Responder['id']) {
+  await invoke('responder_unlock', { id });
+}
+
+export async function verify(id: Responder['id'], finalMark: number) {
+  await invoke('responder_verify', { id, finalMark });
 }

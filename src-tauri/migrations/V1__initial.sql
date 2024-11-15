@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS responders (
   user_agent TEXT NOT NULL,
 
   points INTEGER NOT NULL CHECK (points >= 0) DEFAULT 0,
+
+  auto_mark INTEGER NOT NULL CHECK (auto_mark >= 0) DEFAULT 0,
   final_mark INTEGER NOT NULL CHECK (final_mark >= 0) DEFAULT 0,
 
   connected_at INTEGER NOT NULL,

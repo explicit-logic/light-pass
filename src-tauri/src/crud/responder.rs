@@ -2,7 +2,7 @@ use rusqlite::{named_params, Connection};
 use serde::Serialize;
 use serde_json::{self as json, Value as JsonValue};
 
-use crate::error::CommandResult;
+use crate::error::{CommandError, CommandResult};
 use crate::state::ServiceAccess;
 use tauri::AppHandle;
 
@@ -37,6 +37,7 @@ pub struct Responder {
     timezone: String,
     user_agent: String,
 
+    auto_mark: i64,
     final_mark: i64,
     points: i64,
 
@@ -70,6 +71,7 @@ fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Responder, rusqlite::Error> {
     timezone: row.get("timezone")?,
     user_agent: row.get("user_agent")?,
 
+    auto_mark: row.get("auto_mark")?,
     final_mark: row.get("final_mark")?,
     points: row.get("points")?,
 
@@ -88,6 +90,20 @@ pub fn one_by_client_id(db: &Connection, quiz_id: i64, client_id: String) -> Res
     named_params! { ":quiz_id": quiz_id, ":client_id": client_id },
     hydrate_row
   )
+}
+
+pub fn check_verified(db: &Connection, id: i64) -> Result<bool, rusqlite::Error> {
+  let query = db.query_row(
+    "SELECT verified FROM responders WHERE id = :id",
+    named_params! { ":id": id },
+    |row| Ok(row.get("verified")),
+  );
+
+  match query {
+    Ok(x) => x,
+    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(false),
+    Err(err) => Err(err),
+  }
 }
 
 fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Error> {
@@ -174,51 +190,52 @@ fn create(db: &Connection, responder: &mut Responder) -> Result<(), rusqlite::Er
 
 #[tauri::command]
 pub async fn responder_connect(
-    app_handle: AppHandle,
+  app_handle: AppHandle,
 
-    quiz_id: i64,
-    client_id: String,
-    language: String,
+  quiz_id: i64,
+  client_id: String,
+  language: String,
 
-    platform: JsonValue,
-    user_agent: String,
-    timezone: String,
-    theme: String
+  platform: JsonValue,
+  user_agent: String,
+  timezone: String,
+  theme: String
 ) -> CommandResult<Responder> {
-    let mut responder = Responder {
-        id: 0,
-        quiz_id,
-        client_id,
-        email: "".to_string(),
-        name: "".to_string(),
-        theme,
-        group: "".to_string(),
-        context: JsonValue::Object(json::Map::new()),
-        completed: false,
-        identified: false,
-        verified: false,
+  let mut responder = Responder {
+    id: 0,
+    quiz_id,
+    client_id,
+    email: "".to_string(),
+    name: "".to_string(),
+    theme,
+    group: "".to_string(),
+    context: JsonValue::Object(json::Map::new()),
+    completed: false,
+    identified: false,
+    verified: false,
 
-        language,
-        platform,
-        progress: 0,
-        timezone,
-        user_agent,
+    language,
+    platform,
+    progress: 0,
+    timezone,
+    user_agent,
 
-        final_mark: 0,
-        points: 0,
+    auto_mark: 0,
+    final_mark: 0,
+    points: 0,
 
-        connected_at: time::now(),
-        finished_at: 0,
-        started_at: 0,
+    connected_at: time::now(),
+    finished_at: 0,
+    started_at: 0,
 
-        updated_at: time::now(),
-        created_at: time::now(),
-    };
+    updated_at: time::now(),
+    created_at: time::now(),
+  };
 
-    app_handle.db(|db| delete_unidentified(db))?;
-    app_handle.db(|db| create(db, &mut responder))?;
+  app_handle.db(|db| delete_unidentified(db))?;
+  app_handle.db(|db| create(db, &mut responder))?;
 
-    Ok(responder)
+  Ok(responder)
 }
 
 #[tauri::command]
@@ -232,35 +249,36 @@ pub async fn responder_create_manually(
     name: String,
     group: String,
 ) -> CommandResult<Responder> {
-    let mut responder = Responder {
-        id: 0,
-        quiz_id,
-        client_id: String::new(),
-        email: email.to_lowercase(),
-        name,
-        theme: String::new(),
-        group,
-        context: JsonValue::Object(json::Map::new()),
-        completed: false,
-        identified: true,
-        verified: false,
+  let mut responder = Responder {
+    id: 0,
+    quiz_id,
+    client_id: String::new(),
+    email: email.to_lowercase(),
+    name,
+    theme: String::new(),
+    group,
+    context: JsonValue::Object(json::Map::new()),
+    completed: false,
+    identified: true,
+    verified: false,
 
-        language,
-        platform: JsonValue::Object(json::Map::new()),
-        progress: 0,
-        timezone: String::new(),
-        user_agent: String::new(),
+    language,
+    platform: JsonValue::Object(json::Map::new()),
+    progress: 0,
+    timezone: String::new(),
+    user_agent: String::new(),
 
-        final_mark: 0,
-        points: 0,
+    auto_mark: 0,
+    final_mark: 0,
+    points: 0,
 
-        connected_at: 0,
-        finished_at: 0,
-        started_at: 0,
+    connected_at: 0,
+    finished_at: 0,
+    started_at: 0,
 
-        updated_at: time::now(),
-        created_at: time::now(),
-    };
+    updated_at: time::now(),
+    created_at: time::now(),
+  };
 
     app_handle.db(|db| create(db, &mut responder))?;
 
@@ -476,10 +494,26 @@ pub fn save_points(db: &Connection, id: i64, points: i64) -> Result<(), rusqlite
   Ok(())
 }
 
-pub fn save_final_mark(db: &Connection, id: i64, final_mark: i64) -> Result<(), rusqlite::Error> {
+pub fn save_auto_mark(db: &Connection, id: i64, auto_mark: i64) -> Result<(), rusqlite::Error> {
   let mut statement = db.prepare("
     UPDATE responders
-    SET final_mark = :final_mark, updated_at = :updated_at
+    SET auto_mark = :auto_mark, final_mark = :auto_mark, updated_at = :updated_at
+    WHERE id = :id
+  ")?;
+  statement.execute(named_params! {
+    ":id": id,
+    ":auto_mark": auto_mark,
+
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
+fn verify(db: &Connection, id: i64, final_mark: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    UPDATE responders
+    SET final_mark = :final_mark, verified = true, updated_at = :updated_at
     WHERE id = :id
   ")?;
   statement.execute(named_params! {
@@ -492,9 +526,35 @@ pub fn save_final_mark(db: &Connection, id: i64, final_mark: i64) -> Result<(), 
   Ok(())
 }
 
+fn unlock(db: &Connection, id: i64) -> Result<(), rusqlite::Error> {
+  let mut statement = db.prepare("
+    UPDATE responders
+    SET verified = false, updated_at = :updated_at
+    WHERE id = :id
+  ")?;
+  statement.execute(named_params! {
+    ":id": id,
+    ":updated_at": time::now(),
+  })?;
+
+  Ok(())
+}
+
 #[tauri::command]
-pub async fn responder_save_final_mark(app_handle: AppHandle, id: i64, final_mark: i64) -> CommandResult<()> {
-  app_handle.db(|db| save_final_mark(db, id, final_mark))?;
+pub async fn responder_verify(app_handle: AppHandle, id: i64, final_mark: i64) -> CommandResult<()> {
+  let verified = app_handle.db(|db| check_verified(db, id))?;
+
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
+  }
+  app_handle.db(|db| verify(db, id, final_mark))?;
+
+  Ok(())
+}
+
+#[tauri::command]
+pub async fn responder_unlock(app_handle: AppHandle, id: i64) -> CommandResult<()> {
+  app_handle.db(|db| unlock(db, id))?;
 
   Ok(())
 }
@@ -511,6 +571,10 @@ pub fn reset_results(db: &Connection, id: i64) -> Result<(), rusqlite::Error> {
 
 #[tauri::command]
 pub async fn responder_reset_results(app_handle: AppHandle, id: i64) -> CommandResult<()> {
+  let verified = app_handle.db(|db| check_verified(db, id))?;
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
+  }
   app_handle.db(|db| reset_results(db, id))?;
 
   Ok(())
@@ -520,17 +584,22 @@ pub fn auto_evaluate(db: &Connection, id: i64) -> Result<i64, rusqlite::Error> {
   let points_sum = page_result::get_points_sum(db, id)?;
   let questions_sum = page_result::get_questions_sum(db, id)?;
   let points_max = questions_sum * MARK_RIGHT as i64;
-  let final_mark: i64 = (((points_sum as f64 / points_max as f64) * 100f64)).round() as i64;
+  let auto_mark: i64 = (((points_sum as f64 / points_max as f64) * 100f64)).round() as i64;
 
   save_points(db, id, points_sum)?;
-  save_final_mark(db, id, final_mark)?;
+  save_auto_mark(db, id, auto_mark)?;
 
-  Ok(final_mark)
+  Ok(auto_mark)
 }
 
 #[tauri::command]
 pub async fn responder_auto_evaluate(app_handle: AppHandle, id: i64) -> CommandResult<i64> {
-  let final_mark = app_handle.db(|db| auto_evaluate(db, id))?;
+  let verified = app_handle.db(|db| check_verified(db, id))?;
 
-  Ok(final_mark)
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
+  }
+  let auto_mark = app_handle.db(|db| auto_evaluate(db, id))?;
+
+  Ok(auto_mark)
 }

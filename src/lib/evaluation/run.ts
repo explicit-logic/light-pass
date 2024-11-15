@@ -3,7 +3,7 @@ import type { Responder } from '@/models/Responder';
 // API
 import { getOne as getOneAnswer } from '@/api/answers';
 import { savePoints } from '@/api/corrections';
-import { autoEvaluate as autoEvaluatePageResult, saveQuestionCount } from '@/api/pageResult';
+import { autoEvaluate as autoEvaluatePageResult } from '@/api/pageResult';
 import { getPageData, getSlugs } from '@/api/pages';
 import { autoEvaluate as autoEvaluateResponder, getOne as getOneResponder, resetResults } from '@/api/responders';
 
@@ -12,14 +12,16 @@ import { QUESTION_TYPES } from '@/constants/block';
 import { TYPES } from '@/constants/block';
 import { MARKS } from '@/constants/marks';
 
-// Helpers
 import { retrieveAnswer } from '@/helpers/retrieveAnswer';
+// Helpers
+import { generateMockAnswers } from './generateMockAnswers';
 
 export async function run(responderId: Responder['id']) {
   const responder = await getOneResponder(responderId);
   const slugs = await getSlugs(responder.quizId, responder.language);
 
   await resetResults(responder.id);
+  await generateMockAnswers(responder.id);
 
   for (const slug of slugs) {
     await evaluatePage(responder, slug);
@@ -55,7 +57,6 @@ async function processQuestion(responder: Responder, block: QuestionBlock, page:
     page,
     question: block.name,
     points,
-    verified: false,
   });
 }
 

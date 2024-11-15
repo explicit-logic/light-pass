@@ -6,8 +6,8 @@ export class Responder {
 
   readonly completed: boolean;
   readonly connectedAt: number;
-  readonly identified = false;
-  readonly verified = false;
+  readonly identified: boolean = false;
+  readonly verified: boolean = false;
 
   readonly platform: PlatformType;
   readonly progress: number;
@@ -19,6 +19,7 @@ export class Responder {
   readonly theme: ThemeModeType;
   readonly group?: string;
 
+  readonly autoMark: number = 0;
   readonly finalMark: number = 0;
   readonly points: number = 0;
 

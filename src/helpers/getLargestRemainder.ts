@@ -1,4 +1,7 @@
 export function getLargestRemainder(values: number[], desiredSum: number) {
+  const len = values.length;
+  if (!len) return [];
+
   let sum = 0;
   let valueParts = values.map((value: number, index: number) => {
     // Get rounded down integer values.
@@ -16,12 +19,18 @@ export function getLargestRemainder(values: number[], desiredSum: number) {
     valueParts = valueParts.sort((x) => x.decimal);
 
     const diff = desiredSum - sum;
+    let progress = 0;
     let i = 0;
 
     // Distribute the difference.
-    while (i < diff) {
+    while (progress < diff) {
       valueParts[i].integer++;
+      progress++;
       i++;
+
+      if (i >= len) {
+        i = 0;
+      }
     }
   }
 

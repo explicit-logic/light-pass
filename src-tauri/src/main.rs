@@ -39,7 +39,6 @@ fn main() {
 
             correction_evaluate,
             correction_many_on_page,
-            correction_save,
             correction_save_points,
 
             deployment_process_update_indicator,
@@ -72,8 +71,6 @@ fn main() {
 
             page_result_auto_evaluate,
             page_result_many,
-            page_result_save,
-            page_result_save_question_count,
 
             responder_auto_evaluate,
             responder_connect,
@@ -85,7 +82,8 @@ fn main() {
             responder_update_progress,
             responder_complete,
             responder_reset_results,
-            responder_save_final_mark,
+            responder_unlock,
+            responder_verify,
 
             github::init_device_oauth,
             github::check_auth_status,

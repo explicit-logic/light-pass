@@ -1,7 +1,7 @@
 use rusqlite::{named_params, Connection};
 use serde::Serialize;
 
-use crate::error::CommandResult;
+use crate::error::{CommandError, CommandResult};
 use crate::state::ServiceAccess;
 use tauri::AppHandle;
 
@@ -40,60 +40,6 @@ fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Correction, rusqlite::Error> {
     updated_at: row.get("updated_at")?,
     created_at: row.get("created_at")?,
   })
-}
-
-fn save(db: &Connection, correction: &mut Correction) -> Result<(), rusqlite::Error> {
-  let mut statement = db.prepare("
-    INSERT OR REPLACE INTO corrections (
-      responder_id, \"page\", question, points, note, verified, updated_at, created_at
-    )
-    VALUES (:responder_id, :page, :question, :points, :note, :verified, :updated_at, :created_at)
-  ")?;
-  statement.execute(named_params! {
-    ":responder_id": correction.responder_id,
-    ":page": correction.page,
-    ":question": correction.question,
-    ":points": correction.points,
-    ":note": correction.note,
-    ":verified": correction.verified,
-    ":updated_at": correction.updated_at,
-    ":created_at": correction.created_at
-  })?;
-
-  correction.id = db.last_insert_rowid();
-
-  Ok(())
-}
-
-#[tauri::command]
-pub async fn correction_save(
-  app_handle: AppHandle,
-
-  responder_id: i64,
-  page: String,
-  question: String,
-  points: i64,
-  note: String,
-  verified: bool,
-) -> CommandResult<Correction> {
-  let mut correction = Correction {
-    id: 0,
-    responder_id,
-    page,
-    question,
-
-    points,
-    note,
-
-    verified,
-
-    updated_at: time::now(),
-    created_at: time::now(),
-  };
-
-  app_handle.db(|db| save(db, &mut correction))?;
-
-  Ok(correction)
 }
 
 fn many_on_page(db: &Connection, responder_id: i64, page: String) -> Result<Vec<Correction>, rusqlite::Error> {
@@ -188,9 +134,13 @@ fn save_points(db: &Connection, responder_id: i64, page: String, question: Strin
 }
 
 #[tauri::command]
-pub async fn correction_save_points(app_handle: AppHandle, responder_id: i64, page: String, question: String, points: i64, verified: bool) -> CommandResult<()> {
+pub async fn correction_save_points(app_handle: AppHandle, responder_id: i64, page: String, question: String, points: i64) -> CommandResult<()> {
+  let verified = app_handle.db(|db| responder::check_verified(db, responder_id))?;
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
+  }
   app_handle.db(|db| save_points(
-    db, responder_id, page.to_owned(), question.to_owned(), points, verified
+    db, responder_id, page.to_owned(), question.to_owned(), points, false
   ))?;
 
   Ok(())
@@ -208,18 +158,22 @@ fn evaluate(db: &Connection, responder_id: i64, page: String, question: String, 
   let verified_count = get_verified_count(db, responder_id, page.to_owned())?;
   let verified = question_count > 0 && question_count == verified_count;
   page_result::update_verified(db, responder_id, page.to_owned(), verified)?;
-  let final_mark = responder::auto_evaluate(db, responder_id)?;
+  let auto_mark = responder::auto_evaluate(db, responder_id)?;
 
-  Ok(final_mark)
+  Ok(auto_mark)
 }
 
 #[tauri::command]
 pub async fn correction_evaluate(app_handle: AppHandle, responder_id: i64, page: String, question: String, points: i64) -> CommandResult<i64> {
-  let final_mark = app_handle.db(|db| evaluate(
+  let verified = app_handle.db(|db| responder::check_verified(db, responder_id))?;
+  if verified {
+    return Err(CommandError::API(format!("Responder verified!")));
+  }
+  let auto_mark = app_handle.db(|db| evaluate(
     db, responder_id, page.to_owned(), question.to_owned(), points,
   ))?;
 
-  Ok(final_mark)
+  Ok(auto_mark)
 }
 
 pub fn get_points_sum(db: &Connection, responder_id: i64, page: String) -> Result<i64, rusqlite::Error> {

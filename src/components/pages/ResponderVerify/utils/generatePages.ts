@@ -8,18 +8,18 @@ import { MARKS, MAX_MARK } from '@/constants/marks';
 import { getLargestRemainder } from '@/helpers/getLargestRemainder';
 
 type Params = {
+  autoMark: number;
   currentSlug: string | undefined;
-  finalMark: number;
   pageResultsMap: Record<PageResult['page'], PageResult>;
   slugs: string[];
 };
 export function generatePages(params: Params) {
-  const { currentSlug, finalMark, pageResultsMap, slugs } = params;
+  const { currentSlug, autoMark, pageResultsMap, slugs } = params;
   const pages: Page[] = [];
   const assessedMap = getAssessedMap(slugs, pageResultsMap);
   const thresholdsMap = getThresholdsMap(slugs, pageResultsMap);
   const namesMap = getNamesMap(slugs);
-  const marksMap = getMarksMap(slugs, pageResultsMap, finalMark);
+  const marksMap = getMarksMap(slugs, pageResultsMap, autoMark);
 
   for (const slug of slugs) {
     pages.push(
@@ -58,14 +58,14 @@ function getNamesMap(slugs: string[]) {
   return namesMap;
 }
 
-function getMarksMap(slugs: string[], pageResultsMap: Record<PageResult['page'], PageResult>, finalMark: number) {
+function getMarksMap(slugs: string[], pageResultsMap: Record<PageResult['page'], PageResult>, autoMark: number) {
   const marksMap: Record<PageResult['page'], number> = {};
   const assessedPageResults = Object.values(pageResultsMap).filter((pageResult) => checkAssessed(pageResult));
   const questionsSum = assessedPageResults.reduce<number>((acc, { questionCount }) => acc + questionCount, 0);
   const maxPoints = questionsSum * MARKS.RIGHT;
 
   const values = assessedPageResults.map(({ points }) => Math.floor((points / maxPoints) * MAX_MARK));
-  const marks = getLargestRemainder(values, finalMark);
+  const marks = getLargestRemainder(values, autoMark);
 
   let n = 0;
   for (const slug of slugs) {
