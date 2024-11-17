@@ -141,12 +141,10 @@ export function Component() {
         <form className="mx-auto pb-20" onSubmit={onSubmit}>
           <ResponderVerifyHeader />
           <Details />
-
           <div className="flex flex-col sm:flex-row h-screen">
             <Sidebar changePage={changePage} />
             <Main currentSlug={currentSlug} />
           </div>
-
           <Footer />
         </form>
       </FormProvider>
