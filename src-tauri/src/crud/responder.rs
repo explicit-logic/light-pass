@@ -17,36 +17,37 @@ const MARK_RIGHT: u8 = 2;
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Responder {
-    id: i64,
-    quiz_id: i64,
-    client_id: String,
+  id: i64,
+  quiz_id: i64,
+  client_id: String,
 
-    email: String,
-    name: String,
-    theme: String,
-    group: String,
-    context: JsonValue,
+  email: String,
+  name: String,
+  theme: String,
+  group: String,
+  context: JsonValue,
 
-    completed: bool,
-    identified: bool,
-    verified: bool,
+  assessed: bool,
+  completed: bool,
+  identified: bool,
+  verified: bool,
 
-    language: String,
-    platform: JsonValue,
-    progress: i64,
-    timezone: String,
-    user_agent: String,
+  language: String,
+  platform: JsonValue,
+  progress: i64,
+  timezone: String,
+  user_agent: String,
 
-    auto_mark: i64,
-    final_mark: i64,
-    points: i64,
+  auto_mark: i64,
+  final_mark: i64,
+  points: i64,
 
-    connected_at: i64,
-    finished_at: i64,
-    started_at: i64,
+  connected_at: i64,
+  finished_at: i64,
+  started_at: i64,
 
-    updated_at: i64,
-    created_at: i64,
+  updated_at: i64,
+  created_at: i64,
 }
 
 fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Responder, rusqlite::Error> {
@@ -61,6 +62,7 @@ fn hydrate_row(row: &rusqlite::Row<'_>) -> Result<Responder, rusqlite::Error> {
     theme: row.get("theme")?,
     group: row.get("group")?,
     context,
+    assessed: row.get("assessed")?,
     completed: row.get("completed")?,
     identified: row.get("identified")?,
     verified: row.get("verified")?,
@@ -210,6 +212,7 @@ pub async fn responder_connect(
     theme,
     group: "".to_string(),
     context: JsonValue::Object(json::Map::new()),
+    assessed: false,
     completed: false,
     identified: false,
     verified: false,
@@ -258,6 +261,7 @@ pub async fn responder_create_manually(
     theme: String::new(),
     group,
     context: JsonValue::Object(json::Map::new()),
+    assessed: false,
     completed: false,
     identified: true,
     verified: false,
@@ -497,7 +501,7 @@ pub fn save_points(db: &Connection, id: i64, points: i64) -> Result<(), rusqlite
 pub fn save_auto_mark(db: &Connection, id: i64, auto_mark: i64) -> Result<(), rusqlite::Error> {
   let mut statement = db.prepare("
     UPDATE responders
-    SET auto_mark = :auto_mark, final_mark = :auto_mark, updated_at = :updated_at
+    SET assessed = true, auto_mark = :auto_mark, final_mark = :auto_mark, updated_at = :updated_at
     WHERE id = :id
   ")?;
   statement.execute(named_params! {

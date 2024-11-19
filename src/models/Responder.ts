@@ -4,7 +4,8 @@ export class Responder {
   readonly quizId: number;
   readonly language: string;
 
-  readonly completed: boolean;
+  readonly assessed: boolean = false;
+  readonly completed: boolean = false;
   readonly connectedAt: number;
   readonly identified: boolean = false;
   readonly verified: boolean = false;

@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS responders (
 
   "context" TEXT NOT NULL DEFAULT '{}',
 
+  assessed BOOLEAN NOT NULL CHECK (assessed IN (0, 1)) DEFAULT 0,
   completed BOOLEAN NOT NULL CHECK (completed IN (0, 1)) DEFAULT 0,
   identified BOOLEAN NOT NULL CHECK (identified IN (0, 1)) DEFAULT 0,
   verified BOOLEAN NOT NULL CHECK (verified IN (0, 1)) DEFAULT 0,
@@ -85,7 +86,7 @@ CREATE TABLE IF NOT EXISTS responders (
   updated_at INTEGER NOT NULL,
   created_at INTEGER NOT NULL,
 
-  UNIQUE(quiz_id, client_id) ON CONFLICT REPLACE,
+  UNIQUE(quiz_id, email) ON CONFLICT REPLACE,
 
   FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE
 );
