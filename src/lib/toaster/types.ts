@@ -1,4 +1,4 @@
-export type ToastType = 'blank' | 'error' | 'success';
+export type ToastType = 'blank' | 'error' | 'success' | 'loading';
 export type ToastPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 export type Renderable = JSX.Element | string | null;

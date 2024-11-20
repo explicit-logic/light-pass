@@ -7,6 +7,7 @@ import { memo } from 'react';
 // Components
 import ToastBlank from '@/components/molecules/ToastBlank';
 import ToastError from '@/components/molecules/ToastError';
+import ToastLoading from '@/components/molecules/ToastLoading';
 import ToastSuccess from '@/components/molecules/ToastSuccess';
 
 import ToastWrapper from '@/components/molecules/ToastWrapper';
@@ -15,6 +16,7 @@ const toastComponents: { blank: (t: Toast) => ReactElement } & { [key in ToastTy
   blank: (t) => <ToastBlank t={t} />,
   error: (t) => <ToastError t={t} />,
   success: (t) => <ToastSuccess t={t} />,
+  loading: (t) => <ToastLoading t={t} />,
 };
 
 const getToastComponent = (t: Toast) => {

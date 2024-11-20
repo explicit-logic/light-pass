@@ -42,7 +42,7 @@
         "assetScope": ["$APPDATA/builder/**"]
       },
       "shell": {
-        "open": "^((https://)|(http://)|(mailto:)|(vscode://)).+"
+        "open": "^((https://)|(http://)|(mailto:)|(tg://)|(vscode://)).+"
       },
       "window": {
         "maximize": true,

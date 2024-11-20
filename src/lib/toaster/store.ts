@@ -175,6 +175,7 @@ export const defaultTimeouts: {
 } = {
   blank: 4000,
   error: 4000,
+  loading: Number.POSITIVE_INFINITY,
   success: 2000,
 };
 

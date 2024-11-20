@@ -4,6 +4,7 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import type { Responder } from '@/models/Responder';
 
 import DownloadPdfButton from './DownloadPdfButton';
+import SharePdfButton from './SharePdfButton';
 
 function Header() {
   const { responder } = useLoaderData() as { responder: Responder };
@@ -15,7 +16,7 @@ function Header() {
 
   return (
     <div className="sticky z-10 top-14 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 px-3">
-      <div className="flex flex-row space-x-3 justify-between">
+      <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:justify-between">
         <div className="flex flex-row space-x-3">
           <button
             type="button"
@@ -39,8 +40,11 @@ function Header() {
             <p className="mt-1 max-w-2xl text-base leading-6 text-gray-500 dark:text-gray-400">{responder.email}</p>
           </div>
         </div>
-        <div>
-          <DownloadPdfButton />
+        <div className="flex sm:block justify-end">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <DownloadPdfButton />
+            <SharePdfButton />
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import type { Answer } from '@/models/Answer';
 
-export function retrieveAnswer(entity: Answer, question: string) {
+export function retrieveAnswer(entity?: Answer, question?: string) {
+  if (!question) return [];
+
   const answer = entity?.answer?.[question];
   if (Array.isArray(answer)) return answer;
 
