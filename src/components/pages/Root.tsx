@@ -1,3 +1,4 @@
+import NiceModal from '@ebay/nice-modal-react';
 import { Outlet } from 'react-router-dom';
 
 // Components
@@ -10,9 +11,11 @@ function Root() {
   return (
     <>
       <Toaster />
-      <ConnectionProvider>
-        <Outlet />
-      </ConnectionProvider>
+      <NiceModal.Provider>
+        <ConnectionProvider>
+          <Outlet />
+        </ConnectionProvider>
+      </NiceModal.Provider>
     </>
   );
 }

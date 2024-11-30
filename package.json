@@ -12,6 +12,7 @@
   "license": "MIT",
   "contributors": ["Bohdan Andrianov <bogd.an.drianov@gmail.com>"],
   "dependencies": {
+    "@ebay/nice-modal-react": "^1.2.13",
     "@headlessui/react": "^2.0.3",
     "@hookform/resolvers": "^3.3.4",
     "@sindresorhus/slugify": "^2.2.1",
