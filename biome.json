@@ -23,6 +23,9 @@
       },
       "style": {
         "noNonNullAssertion": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
       }
     }
   },

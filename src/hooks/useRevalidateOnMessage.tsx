@@ -18,7 +18,7 @@ export function useRevalidateOnMessage() {
   //   revalidator.revalidate();
   // }, [revalidator]);
 
-  const onMessage = debounce(() => revalidator.revalidate());
+  const onMessage = debounce<() => void>(() => revalidator.revalidate());
 
   useEffect(() => {
     eventEmitter.on(eventName, onMessage);

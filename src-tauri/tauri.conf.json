@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Light Pass",
-    "version": "0.0.13"
+    "version": "0.0.14"
   },
   "tauri": {
     "allowlist": {
@@ -24,9 +24,20 @@
       "fs": {
         "all": true,
         "scope": {
-          "allow": ["$APPDATA/builder/**", "$RESOURCE/**"],
+          "allow": [
+            "$APPDATA/builder/**",
+            "$RESOURCE/**"
+          ],
           "requireLiteralLeadingDot": false
         }
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "http://0.0.0.0:39390/*",
+          "https://localhost/*"
+        ]
       },
       "notification": {
         "all": true
@@ -39,10 +50,19 @@
       },
       "protocol": {
         "asset": true,
-        "assetScope": ["$APPDATA/builder/**"]
+        "assetScope": ["$APPDATA/**/*"]
       },
       "shell": {
-        "open": "^((https://)|(http://)|(mailto:)|(tg://)|(whatsapp://)|(viber://)|(vscode://)).+"
+        "open": "^((https://)|(http://)|(mailto:)|(tg://)|(whatsapp://)|(viber://)|(vscode://)).+",
+        "execute": true,
+        "sidecar": true,
+        "scope": [
+          {
+            "name": "binaries/light-ai/light-ai",
+            "sidecar": true,
+            "args": true
+          }
+        ]
       },
       "window": {
         "maximize": true,
@@ -75,6 +95,9 @@
       "active": true,
       "targets": "all",
       "identifier": "LightPass",
+      "externalBin": [
+        "binaries/light-ai/light-ai"
+      ],
       "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
       "resources": [
         "template/**"

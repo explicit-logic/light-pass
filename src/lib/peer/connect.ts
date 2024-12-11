@@ -3,6 +3,7 @@ import Peer, { type DataConnection } from 'peerjs';
 // Helpers
 import { detectPlatform } from '@/helpers/detectPlatform';
 import { getLocaleLang } from '@/helpers/getLocaleLang';
+import { promiseWithTimeout } from '@/helpers/promiseWithTimeout';
 
 // Constants
 import { CLIENT_EVENTS, SERVER_EVENTS, STATES } from '@/constants/connection';
@@ -162,26 +163,4 @@ export function getInit({ clientId, language }: { clientId: Client['id']; langua
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
   };
-}
-
-function promiseWithTimeout<T = void>(
-  timeout: number,
-  callback: (resolve: (value: T) => void, reject: (reason?: unknown) => void) => void,
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`Promise timed out after ${timeout} ms`));
-    }, timeout);
-
-    callback(
-      (value: T) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
 }

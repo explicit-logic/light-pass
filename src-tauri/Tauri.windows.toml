@@ -1,0 +1,4 @@
+# fix missing dll files for Windows version
+[tauri.bundle.resources]
+"binaries/llama.cpp/llama.dll" = "./"
+"binaries/llama.cpp/ggml.dll" = "./"

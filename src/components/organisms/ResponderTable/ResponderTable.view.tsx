@@ -7,7 +7,6 @@ import DurationCell from './components/DurationCell';
 import IdentityCell from './components/IdentityCell';
 import MarkCell from './components/MarkCell';
 import ProgressCell from './components/ProgressCell';
-import StatusCell from './components/StatusCell';
 
 import RemovalModal from '@/components/molecules/RemovalModal';
 

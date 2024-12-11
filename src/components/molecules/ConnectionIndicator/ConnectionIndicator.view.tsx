@@ -1,5 +1,7 @@
 import { memo } from 'react';
 
+import { STATES, type StateType } from '@/constants/connection';
+
 const showIcon = (online: boolean) => {
   if (online) {
     return (
@@ -13,9 +15,13 @@ const showIcon = (online: boolean) => {
   return <span className="rounded-full h-2 w-2 bg-gray-500" />;
 };
 
-function ConnectionIndicatorView(props: { activeCount: number; online?: boolean }) {
-  const { activeCount, online = false } = props;
+function ConnectionIndicatorView(props: { activeCount: number; online?: boolean; state: StateType }) {
+  const { activeCount, online = false, state } = props;
   const title = online ? 'Online' : '';
+
+  if (state === STATES.OFFLINE) {
+    return null;
+  }
 
   return (
     <div className="flex items-center space-x-1 text-xs justify-center rounded-lg px-2 py-1 text-gray-800 dark:text-white" title={title}>

@@ -1,4 +1,3 @@
-'use client';
 import type { Toast, ToastType } from '@/lib/toaster/types';
 import { useToaster } from '@/lib/toaster/use-toaster';
 import type { ReactElement } from 'react';

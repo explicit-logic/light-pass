@@ -33,6 +33,10 @@ const router = createBrowserRouter([
         lazy: () => import('@/components/pages/QuizCreate'),
       },
       {
+        path: 'quizzes/generate',
+        lazy: () => import('@/components/pages/QuizGenerate/QuizGenerate'),
+      },
+      {
         id: 'quiz-edit',
         path: 'quizzes/:quizId/edit',
         lazy: () => import('@/components/pages/QuizEdit'),
