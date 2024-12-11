@@ -24,9 +24,20 @@
       "fs": {
         "all": true,
         "scope": {
-          "allow": ["$APPDATA/builder/**", "$RESOURCE/**"],
+          "allow": [
+            "$APPDATA/builder/**",
+            "$RESOURCE/**"
+          ],
           "requireLiteralLeadingDot": false
         }
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "http://localhost:8080/*",
+          "https://localhost/*"
+        ]
       },
       "notification": {
         "all": true
@@ -39,10 +50,44 @@
       },
       "protocol": {
         "asset": true,
-        "assetScope": ["$APPDATA/builder/**"]
+        "assetScope": ["$APPDATA/**/*"]
       },
       "shell": {
-        "open": "^((https://)|(http://)|(mailto:)|(tg://)|(whatsapp://)|(viber://)|(vscode://)).+"
+        "open": "^((https://)|(http://)|(mailto:)|(tg://)|(whatsapp://)|(viber://)|(vscode://)).+",
+        "execute": true,
+        "sidecar": true,
+        "scope": [
+          {
+            "name": "binaries/llama.cpp/llama.cpp.server",
+            "sidecar": true,
+            "args": [
+              "-m",
+              {
+                "validator": "\\S+"
+              },
+              "--port",
+              {
+                "validator": "\\S+"
+              },
+              "--host",
+              {
+                "validator": "\\S+"
+              },
+              "-c",
+              {
+                "validator": "\\S+"
+              },
+              "-t",
+              {
+                "validator": "\\S+"
+              },
+              "-ngl",
+              {
+                "validator": "\\S+"
+              }
+            ]
+          }
+        ]
       },
       "window": {
         "maximize": true,
@@ -75,6 +120,9 @@
       "active": true,
       "targets": "all",
       "identifier": "LightPass",
+      "externalBin": [
+        "binaries/llama.cpp/llama.cpp.server"
+      ],
       "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
       "resources": [
         "template/**"
